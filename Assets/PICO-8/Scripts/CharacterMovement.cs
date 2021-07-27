@@ -4,14 +4,28 @@ using UnityEngine;
 
 public class CharacterMovement : MonoBehaviour
 {
+
+
+
     public void Move()
     {
-        //DetectGround();
+        //ResetGroundInfo();
+        DetectGround();
         //ApplyMovement();
         //SnapToGround();
         //LimitLateralVelocity();
         //LimitVerticalVelocity();
         //PreventGroundPenetration();
+    }
+
+    private void ResetGround()
+    {
+
+    }
+
+    private void DetectGround()
+    {
+
     }
 
     private void ApplyMovement(Vector3 desiredVelocity, float maxDesiredSpeed)

@@ -24,9 +24,8 @@ public class CharacterMovement : MonoBehaviour
     private const float RunAccel = 50f;
     private const float RunReduce = 40f;
 
-    private const float JumpHBoost = 7.2f;
+    private const float JumpHBoost = 8f;
     private const float JumpSpeed = 13.5f;
-    private const float JumpTime = 0.2f;
 
     private const float Gravity = 90f;
     private const float HalfGravThreshold = 4f;
@@ -56,8 +55,6 @@ public class CharacterMovement : MonoBehaviour
     private bool _againstWall;
 
     private int _facing = 1;
-    private int _jumpCount;
-    private float _maxFall;
     private Vector2 _speed;
 
     private bool _jump;
@@ -65,12 +62,23 @@ public class CharacterMovement : MonoBehaviour
     private bool _canJumpTimer;
     private bool _isJumping;
     private float _jumpTimer;
+    private float _jumpTime = 0.3f;
     private float _jumpHeldDownTimer;
     private float _jumpToleranceTime = 0.15f;
-    private float _extraJumpTime = 0.5f;
-    private float _extraJumpPower = 13.5f;
+    private float _jumpBoost = 5f;
+    private float _jumpPower = 20f;
+    private float _jumpPower2 = 10f;
     private int _midAirJump;
     private int _midAirJumpCount = 1;
+
+    private bool _dash;
+    private bool _canDash = true;
+    private bool _canDashTimer;
+    private bool _isDashing;
+    private float _dashTimer;
+    private float _dashTime = 0.15f;
+    private float _dashPower = 30f;
+
 
     private float _skinWidth = 0.02f;
     private float _minOffset = 0.0001f;
@@ -113,6 +121,22 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
+    public bool Dash
+    {
+        get
+        {
+            return _dash;
+        }
+        set
+        {
+            if (_dash && value == false)
+            {
+                _canDash = true;
+            }
+            _dash = value;
+        }
+    }
+
     public bool IsJumping
     {
         get
@@ -136,9 +160,11 @@ public class CharacterMovement : MonoBehaviour
         DetectGround(deltaTime);
         ApplyGravity(deltaTime);
         Moving(deltaTime);
-        Jumping(deltaTime);
-        MidAirJumping(deltaTime);
+        Jumping();
+        MidAirJumping();
         UpdateJumpTimer(deltaTime);
+        Dashing();
+        UpdateDashTimer(deltaTime);
         //SnapToGround();
         //LimitLateralVelocity();
         //LimitVerticalVelocity();
@@ -186,10 +212,10 @@ public class CharacterMovement : MonoBehaviour
         {
             _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunAccel * mult * deltaTime);   //Approach the max speed          
         }
-        Console.LogFormat("Move speed X {0:F3}", _speed.x);
+        //Console.LogFormat("Move speed X {0:F3}", _speed.x);
     }
 
-    private void Jumping(float deltaTime)
+    private void Jumping()
     {
         if (!_onGround) return;
         if (!Jump || !_canJump) return;
@@ -198,11 +224,13 @@ public class CharacterMovement : MonoBehaviour
         _canJump = false;
         _isJumping = true;
         _canJumpTimer = true;
+        _speed.x = _jumpBoost * MoveX;
+        Console.Log("Jumping");
         // Apply jump impulse
 
     }
 
-    private void MidAirJumping(float deltaTime)
+    private void MidAirJumping()
     {
         if (_midAirJump > 0 && _onGround)
             _midAirJump = 0;
@@ -221,19 +249,41 @@ public class CharacterMovement : MonoBehaviour
     {
         if (!_canJumpTimer) return;
         // If jump button is held down and extra jump time is not exceeded...
-        if (Jump && _jumpTimer < _extraJumpTime)
+        if (Jump && _jumpTimer < _jumpTime)
         {
-            var jumpProcess = _jumpTimer / _extraJumpTime;
-            var proportionaljumpPower = Mathf.Lerp(_extraJumpPower, 0.0f, jumpProcess);
-            _speed.y = proportionaljumpPower;
-            //movement.ApplyForce(Vector3.up * proportionalJumpPower, ForceMode.Acceleration);
-            _jumpTimer = Mathf.Min(_jumpTimer + deltaTime, _extraJumpTime);
+            var jumpProcess = _jumpTimer / _jumpTime;
+            _speed.y = Mathf.Lerp(_jumpPower, 0.0f, jumpProcess);
+            _jumpTimer = Mathf.Min(_jumpTimer + deltaTime, _jumpTime);
         }
         else
         {
             // Button released or extra jump time ends, reset info
             _jumpTimer = 0.0f;
             _canJumpTimer = false;
+        }
+    }
+
+    private void Dashing()
+    {
+        if (!_dash || !_canDash) return;
+        _canDash = false;
+        _isDashing = true;
+        _canDashTimer = true;
+    }
+
+    private void UpdateDashTimer(float deltaTime)
+    {
+        if (!_canDashTimer) return;
+        if (Dash && _dashTimer < _dashTime)
+        {
+            var dashProcess = _dashTimer / _dashTime;
+            _speed.x = Mathf.Lerp(_dashPower, 0.0f, dashProcess) * _facingg;
+            _dashTimer = Mathf.Min(_dashTimer + deltaTime, _dashTime);
+        }
+        else
+        {
+            _dashTimer = 0.0f;
+            _canDashTimer = false;
         }
     }
 
@@ -341,6 +391,7 @@ public class CharacterMovement : MonoBehaviour
         MoveX = Input.GetAxisRaw("Horizontal");
         MoveY = Input.GetAxisRaw("Vertical");
         Jump = Input.GetKey(KeyCode.J);
+        Dash = Input.GetKey(KeyCode.K);
     }
 
 }

@@ -4,8 +4,13 @@ using UnityEngine;
 
 public class CharacterController : MonoBehaviour
 {
-    [SerializeField] private InputController _input;
-    [SerializeField] private CharacterMovement _movement;
+    [SerializeField]
+    private CharacterMovement _movement;
+
+    private void Awake()
+    {
+        Application.targetFrameRate = 60;
+    }
 
     private void Update()
     {

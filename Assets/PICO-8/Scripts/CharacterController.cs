@@ -4,15 +4,17 @@ using UnityEngine;
 
 public class CharacterController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] private InputController _input;
+    [SerializeField] private CharacterMovement _movement;
+
+    private void Update()
     {
-        
+        _movement.UpdateInput();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void FixedUpdate()
     {
-        
+        _movement.Move(Time.fixedDeltaTime);
     }
+
 }

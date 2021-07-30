@@ -20,81 +20,78 @@ public class CharacterMovement : MonoBehaviour
     private const float MaxRun = 9f;
     private const float MaxFall = -16f;
     private const float FastMaxFall = -24f;
-    private const float FastMaxAccel = 30f;
+    private const float FastMaxAccel = 50f;
     private const float RunAccel = 50f;
     private const float RunReduce = 40f;
-
-    private const float JumpHBoost = 8f;
-    private const float JumpSpeed = 13.5f;
 
     private const float Gravity = 90f;
     private const float HalfGravThreshold = 4f;
 
     private const float AirMult = 0.65f;
 
-    private const float DashSpeed = 25.6f;
-    private const float EndDashSpeed = 12.8f;
-    private const float EndDashUpMult = 0.75f;
-    private const float DashTime = 0.15f;
-    private const float DashCooldown = 0.2f;
-    private const float DashRefillCooldown = 0.1f;
-    private const int DashHJumpThruNudge = 6;
-    private const int DashCornerCorrection = 4;
-    private const int DashVFloorSnapDist = 3;
-    private const float DashAttackTime = 0.3f;
-
     private const float ClimbSpeed = 4.8f;
     private const float ClimbSlipSpeed = -3.6f;
     private const float ClimbAccel = Gravity + 50f;
     private const float ClimbGrabYMult = 0.2f;
+
+    #region Jump
+    private const float JumpBoost = 5f;
+    private const float JumpPower = 15f;
+    private const float JumpPower2 = 10f;
+    private const float JumpTime = 0.2f;
+    private const float JumpKeyTime = 0.15f;
+
+    #endregion
+
+    #region Dash   
+    private const float DashPower = 30f;
+    private const float DashTime = 0.15f;
+    private const float DashCooldownTime = 0.2f;
+    private const float DashRefillCooldown = 0.1f;
+    #endregion
+
+    private const float SkinWidth = 0.02f;
+    private const float MinOffset = 0.0001f;
+    private const float VerticalRaysCount = 5;
+    private const float HorizontalRaysCount = 5;
     #endregion
 
     #region Vars
 
     private bool _onGround;
+    private bool _hitCeiling;
     private bool _againstWall;
 
-    private int _facing = 1;
+    private Vector2 _facing = Vector2.right;
     private Vector2 _speed;
 
+    #region Jump
     private bool _jump;
-    private bool _canJump = true;
-    private bool _canJumpTimer;
     private bool _isJumping;
+    private bool _canJump = true;
+    private bool _canJumpTimer = false;
     private float _jumpTimer;
-    private float _jumpTime = 0.3f;
     private float _jumpHeldDownTimer;
-    private float _jumpToleranceTime = 0.15f;
-    private float _jumpBoost = 5f;
-    private float _jumpPower = 20f;
-    private float _jumpPower2 = 10f;
     private int _midAirJump;
-    private int _midAirJumpCount = 1;
+    private int _midAirJumpCount = 0;   // 0 or 1
+    #endregion
 
+    #region Dash
     private bool _dash;
-    private bool _canDash = true;
-    private bool _canDashTimer;
     private bool _isDashing;
+    private bool _canDash = true;
+    private bool _canDashTimer = false;
     private float _dashTimer;
-    private float _dashTime = 0.15f;
-    private float _dashPower = 30f;
+    private float _dashCooldownTimer;
+    #endregion
 
-
-    private float _skinWidth = 0.02f;
-    private float _minOffset = 0.0001f;
-    [SerializeField] private float _verticalRaysCount;
-    [SerializeField] private float _horizontalRaysCount;
-    [SerializeField] private float _verticalRaysInterval;
-    [SerializeField] private float _horizontalRaysInterval;
-
-
+    private float _verticalRaysInterval;
+    private float _horizontalRaysInterval;
 
     private RayOrigin _rayOrigin;
-
     [SerializeField] private LayerMask _groundMask;
     [SerializeField] private Rigidbody2D _rigidbody;
     [SerializeField] private BoxCollider2D _boxCollider;
-    [SerializeField] private RaycastHit2D _raycastHit;
     #endregion
 
     public float MoveX { get; set; }
@@ -121,6 +118,23 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
+    public bool IsJumping
+    {
+        get
+        {
+            if (_isJumping && _speed.y < MinOffset)
+            {
+                _isJumping = false;
+            }
+            return _isJumping;
+        }
+    }
+
+    public bool IsFalling
+    {
+        get { return !_onGround && _speed.y < MinOffset; }
+    }
+
     public bool Dash
     {
         get
@@ -132,26 +146,14 @@ public class CharacterMovement : MonoBehaviour
             if (_dash && value == false)
             {
                 _canDash = true;
+                _dashCooldownTimer = 0.0f;
             }
             _dash = value;
-        }
-    }
-
-    public bool IsJumping
-    {
-        get
-        {
-            if (_isJumping && _speed.y < _minOffset)
+            if (_dash)
             {
-                _isJumping = false;
+                _dashCooldownTimer += Time.deltaTime;
             }
-            return _isJumping;
         }
-    }
-
-    public bool IsFalling
-    {
-        get { return !_onGround && _speed.y < _minOffset; }
     }
 
     public void Move(float deltaTime)
@@ -159,6 +161,7 @@ public class CharacterMovement : MonoBehaviour
         ComputeRayOrigin();
         DetectGround(deltaTime);
         ApplyGravity(deltaTime);
+        Facing();
         Moving(deltaTime);
         Jumping();
         MidAirJumping();
@@ -172,15 +175,20 @@ public class CharacterMovement : MonoBehaviour
         CorrectionAndMove(deltaTime);
     }
 
+    public void Facing()
+    {
+        _facing = new Vector2(MoveX, MoveY);
+    }
+
     private void DetectGround(float deltaTime)
     {
         _onGround = false;
         var origin = _rayOrigin.bottomLeft;
         var direction = Vector2.down;
-        var distance = Mathf.Abs(_speed.y * deltaTime) + _skinWidth;
-        for (int i = 0; i < _horizontalRaysCount; i++)
+        var distance = Mathf.Abs(_speed.y * deltaTime) + SkinWidth;
+        for (int i = 0; i < HorizontalRaysCount; i++)
         {
-            var rayOrigin = new Vector2(origin.x + _horizontalRaysInterval * i, origin.y - _skinWidth);
+            var rayOrigin = new Vector2(origin.x + _horizontalRaysInterval * i, origin.y - SkinWidth);
             var raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
             Console.DrawRay(rayOrigin, direction * distance, Color.red);
             if (raycastHit /*&& raycastHit.distance < 0.001f + _skinWidth*/)
@@ -196,7 +204,7 @@ public class CharacterMovement : MonoBehaviour
         {
             float max = MaxFall;
             float mult = Mathf.Abs(_speed.y) < HalfGravThreshold && Jump ? 0.5f : 1.0f;
-            _speed.y = Mathf.MoveTowards(_speed.y, max, Gravity * mult * deltaTime);
+            _speed.y = Mathf.MoveTowards(_speed.y, max, FastMaxAccel * mult * deltaTime);
             Console.LogFormat("ApplyGravity after speed Y {0:F3}", _speed.y);
         }
     }
@@ -220,11 +228,11 @@ public class CharacterMovement : MonoBehaviour
         if (!_onGround) return;
         if (!Jump || !_canJump) return;
         // Is jump button pressed within jump tolerance?
-        if (_jumpHeldDownTimer > _jumpToleranceTime) return;
+        if (_jumpHeldDownTimer > JumpKeyTime) return;
         _canJump = false;
         _isJumping = true;
         _canJumpTimer = true;
-        _speed.x = _jumpBoost * MoveX;
+        _speed.x = JumpBoost * MoveX;
         Console.Log("Jumping");
         // Apply jump impulse
 
@@ -249,11 +257,11 @@ public class CharacterMovement : MonoBehaviour
     {
         if (!_canJumpTimer) return;
         // If jump button is held down and extra jump time is not exceeded...
-        if (Jump && _jumpTimer < _jumpTime)
+        if (Jump && _jumpTimer < JumpTime)
         {
-            var jumpProcess = _jumpTimer / _jumpTime;
-            _speed.y = Mathf.Lerp(_jumpPower, 0.0f, jumpProcess);
-            _jumpTimer = Mathf.Min(_jumpTimer + deltaTime, _jumpTime);
+            var jumpProcess = _jumpTimer / JumpTime;
+            _speed.y = JumpPower; /*Mathf.Lerp(JumpPower, 0.0f, jumpProcess);*/
+            _jumpTimer = Mathf.Min(_jumpTimer + deltaTime, JumpTime);
         }
         else
         {
@@ -274,11 +282,11 @@ public class CharacterMovement : MonoBehaviour
     private void UpdateDashTimer(float deltaTime)
     {
         if (!_canDashTimer) return;
-        if (Dash && _dashTimer < _dashTime)
+        if (Dash && _dashTimer < DashTime)
         {
-            var dashProcess = _dashTimer / _dashTime;
-            _speed.x = Mathf.Lerp(_dashPower, 0.0f, dashProcess) * _facingg;
-            _dashTimer = Mathf.Min(_dashTimer + deltaTime, _dashTime);
+            var dashProcess = _dashTimer / DashTime;
+            _speed = Mathf.Lerp(DashPower, 0.0f, dashProcess) * _facing;
+            _dashTimer = Mathf.Min(_dashTimer + deltaTime, DashTime);
         }
         else
         {
@@ -307,8 +315,8 @@ public class CharacterMovement : MonoBehaviour
         var isGoingUp = deltaMovement.y > 0;
         var origin = isGoingUp ? _rayOrigin.topLeft : _rayOrigin.bottomLeft;
         var direction = isGoingUp ? Vector2.up : Vector2.down;
-        var distance = Mathf.Abs(deltaMovement.y) + _skinWidth;
-        for (int i = 0; i < _horizontalRaysCount; i++)
+        var distance = Mathf.Abs(deltaMovement.y) + SkinWidth;
+        for (int i = 0; i < HorizontalRaysCount; i++)
         {
             var rayOrigin = new Vector2(origin.x + _horizontalRaysInterval * i, origin.y);
             var _raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
@@ -318,14 +326,14 @@ public class CharacterMovement : MonoBehaviour
                 if (isGoingUp)
                 {
                     //_onGround = false;
-                    deltaMovement.y = _raycastHit.distance - _skinWidth;   // 上方
+                    deltaMovement.y = _raycastHit.distance - SkinWidth;   // 上方
                 }
                 else
                 {
                     //_onGround = true;
-                    deltaMovement.y = _skinWidth - _raycastHit.distance;   // 下方
+                    deltaMovement.y = SkinWidth - _raycastHit.distance;   // 下方
                 }
-                if (Mathf.Abs(deltaMovement.y) < _minOffset) return;
+                if (Mathf.Abs(deltaMovement.y) < MinOffset) return;
             }
         }
     }
@@ -336,8 +344,8 @@ public class CharacterMovement : MonoBehaviour
         var isGoingRight = deltaMovement.x > 0;
         var origin = isGoingRight ? _rayOrigin.bottomRight : _rayOrigin.bottomLeft;
         var direction = isGoingRight ? Vector2.right : Vector2.left;
-        var distance = Mathf.Abs(deltaMovement.x) + _skinWidth;
-        for (int i = 0; i < _verticalRaysCount; i++)
+        var distance = Mathf.Abs(deltaMovement.x) + SkinWidth;
+        for (int i = 0; i < VerticalRaysCount; i++)
         {
             var rayOrigin = new Vector2(origin.x, origin.y + _verticalRaysInterval * i);
             var _raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
@@ -347,14 +355,14 @@ public class CharacterMovement : MonoBehaviour
                 if (isGoingRight)
                 {
                     _againstWall = true;
-                    deltaMovement.x = _raycastHit.distance - _skinWidth;   // 右方
+                    deltaMovement.x = _raycastHit.distance - SkinWidth;   // 右方
                 }
                 else
                 {
                     _againstWall = true;
-                    deltaMovement.x = _skinWidth - _raycastHit.distance;   // 左方
+                    deltaMovement.x = SkinWidth - _raycastHit.distance;   // 左方
                 }
-                if (Mathf.Abs(deltaMovement.x) < _minOffset) break;
+                if (Mathf.Abs(deltaMovement.x) < MinOffset) break;
             }
         }
     }
@@ -367,7 +375,7 @@ public class CharacterMovement : MonoBehaviour
     private void ComputeRayOrigin()
     {
         var bounds = _boxCollider.bounds;
-        bounds.Expand(-_skinWidth * 2f);
+        bounds.Expand(-SkinWidth * 2f);
         _rayOrigin.topLeft = new Vector2(bounds.min.x, bounds.max.y);
         _rayOrigin.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
         _rayOrigin.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
@@ -375,15 +383,8 @@ public class CharacterMovement : MonoBehaviour
 
     private void ComputeRaysInterval()
     {
-        _horizontalRaysInterval = (_rayOrigin.bottomRight.x - _rayOrigin.bottomLeft.x) / (_horizontalRaysCount - 1);
-        _verticalRaysInterval = (_rayOrigin.topLeft.y - _rayOrigin.bottomLeft.y) / (_verticalRaysCount - 1);
-    }
-
-    [ContextMenu("Rays Interval")]
-    private void ComputerSomthing()
-    {
-        ComputeRayOrigin();
-        ComputeRaysInterval();
+        _horizontalRaysInterval = (_rayOrigin.bottomRight.x - _rayOrigin.bottomLeft.x) / (HorizontalRaysCount - 1);
+        _verticalRaysInterval = (_rayOrigin.topLeft.y - _rayOrigin.bottomLeft.y) / (VerticalRaysCount - 1);
     }
 
     public void UpdateInput()
@@ -394,4 +395,9 @@ public class CharacterMovement : MonoBehaviour
         Dash = Input.GetKey(KeyCode.K);
     }
 
+    private void Awake()
+    {
+        ComputeRayOrigin();
+        ComputeRaysInterval();
+    }
 }

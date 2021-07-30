@@ -386,10 +386,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34ddee103e663d24e9a5053d69e48809, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _verticalRaysCount: 5
-  _horizontalRaysCount: 5
-  _verticalRaysInterval: 0.24000001
-  _horizontalRaysInterval: 0.24000001
   _groundMask:
     serializedVersion: 2
     m_Bits: 256
@@ -2680,7 +2676,7 @@ Tilemap:
       m_ObjectToInstantiate: {fileID: 0}
       m_TileFlags: 1
       m_ColliderType: 1
-  - first: {x: -16, y: -5, z: 0}
+  - first: {x: -28, y: -5, z: 0}
     second:
       m_TileIndex: 42
       m_TileSpriteIndex: 39
@@ -2752,7 +2748,7 @@ Tilemap:
       m_ObjectToInstantiate: {fileID: 0}
       m_TileFlags: 1
       m_ColliderType: 1
-  - first: {x: -16, y: -4, z: 0}
+  - first: {x: -28, y: -4, z: 0}
     second:
       m_TileIndex: 42
       m_TileSpriteIndex: 39
@@ -2806,7 +2802,7 @@ Tilemap:
       m_ObjectToInstantiate: {fileID: 0}
       m_TileFlags: 1
       m_ColliderType: 1
-  - first: {x: -16, y: -3, z: 0}
+  - first: {x: -28, y: -3, z: 0}
     second:
       m_TileIndex: 41
       m_TileSpriteIndex: 38
@@ -2932,7 +2928,7 @@ Tilemap:
       m_ObjectToInstantiate: {fileID: 0}
       m_TileFlags: 1
       m_ColliderType: 1
-  - first: {x: -15, y: 0, z: 0}
+  - first: {x: -27, y: 0, z: 0}
     second:
       m_TileIndex: 11
       m_TileSpriteIndex: 11
@@ -2941,19 +2937,10 @@ Tilemap:
       m_ObjectToInstantiate: {fileID: 0}
       m_TileFlags: 1
       m_ColliderType: 1
-  - first: {x: -14, y: 0, z: 0}
+  - first: {x: -26, y: 0, z: 0}
     second:
       m_TileIndex: 12
       m_TileSpriteIndex: 12
-      m_TileMatrixIndex: 0
-      m_TileColorIndex: 0
-      m_ObjectToInstantiate: {fileID: 0}
-      m_TileFlags: 1
-      m_ColliderType: 1
-  - first: {x: -13, y: 0, z: 0}
-    second:
-      m_TileIndex: 17
-      m_TileSpriteIndex: 40
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_ObjectToInstantiate: {fileID: 0}
@@ -2981,6 +2968,15 @@ Tilemap:
     second:
       m_TileIndex: 6
       m_TileSpriteIndex: 6
+      m_TileMatrixIndex: 0
+      m_TileColorIndex: 0
+      m_ObjectToInstantiate: {fileID: 0}
+      m_TileFlags: 1
+      m_ColliderType: 1
+  - first: {x: -33, y: 1, z: 0}
+    second:
+      m_TileIndex: 10
+      m_TileSpriteIndex: 10
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_ObjectToInstantiate: {fileID: 0}
@@ -3467,7 +3463,7 @@ Tilemap:
     m_Data: {fileID: 11400000, guid: 84e8c2ee7ecb2834ab5600fe23e9a981, type: 2}
   - m_RefCount: 2
     m_Data: {fileID: 11400000, guid: a0c4039a44fbb9a40bf307677ec9f6d0, type: 2}
-  - m_RefCount: 2
+  - m_RefCount: 3
     m_Data: {fileID: 11400000, guid: 784467ad96e98044383d6560d720266d, type: 2}
   - m_RefCount: 3
     m_Data: {fileID: 11400000, guid: 5a6cbeaf53d05a549a119795cdfffed0, type: 2}
@@ -3481,7 +3477,7 @@ Tilemap:
     m_Data: {fileID: 11400000, guid: 86b68aa6088942f409e89ede0dcd09f5, type: 2}
   - m_RefCount: 5
     m_Data: {fileID: 11400000, guid: 344cda6882c9a5e468dbd95581a4398a, type: 2}
-  - m_RefCount: 2
+  - m_RefCount: 1
     m_Data: {fileID: 11400000, guid: fbb9c8dff2969304186fbbd81ccd2e44, type: 2}
   - m_RefCount: 1
     m_Data: {fileID: 11400000, guid: a54a67bf8705cac41903b1d36d132510, type: 2}
@@ -3554,7 +3550,7 @@ Tilemap:
     m_Data: {fileID: 21300476, guid: 8bcbc88e56597164f8a12a06d2b2e444, type: 3}
   - m_RefCount: 2
     m_Data: {fileID: 21300450, guid: 8bcbc88e56597164f8a12a06d2b2e444, type: 3}
-  - m_RefCount: 2
+  - m_RefCount: 3
     m_Data: {fileID: 21300452, guid: 8bcbc88e56597164f8a12a06d2b2e444, type: 3}
   - m_RefCount: 3
     m_Data: {fileID: 21300426, guid: 8bcbc88e56597164f8a12a06d2b2e444, type: 3}
@@ -3614,7 +3610,7 @@ Tilemap:
     m_Data: {fileID: 21300400, guid: 8bcbc88e56597164f8a12a06d2b2e444, type: 3}
   - m_RefCount: 2
     m_Data: {fileID: 21300432, guid: 8bcbc88e56597164f8a12a06d2b2e444, type: 3}
-  - m_RefCount: 2
+  - m_RefCount: 1
     m_Data: {fileID: 21300430, guid: 8bcbc88e56597164f8a12a06d2b2e444, type: 3}
   - m_RefCount: 1
     m_Data: {fileID: 21300558, guid: 8bcbc88e56597164f8a12a06d2b2e444, type: 3}

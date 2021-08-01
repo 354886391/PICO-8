@@ -15,11 +15,12 @@ public class CharacterController : MonoBehaviour
     private void Update()
     {
         _movement.UpdateInput();
+        _movement.Move(Time.deltaTime);
     }
 
     private void FixedUpdate()
     {
-        _movement.Move(Time.fixedDeltaTime);
+
     }
 
 }

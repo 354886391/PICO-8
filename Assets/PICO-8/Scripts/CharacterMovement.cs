@@ -20,7 +20,7 @@ public class CharacterMovement : MonoBehaviour
     private const float MaxRun = 9f;
     private const float MaxFall = -16f;
     private const float FastMaxFall = -24f;
-    private const float FastMaxAccel = 50f;
+    private const float FastMaxAccel = 30f;
     private const float RunAccel = 50f;
     private const float RunReduce = 40f;
 
@@ -35,8 +35,8 @@ public class CharacterMovement : MonoBehaviour
     private const float ClimbGrabYMult = 0.2f;
 
     #region Jump
-    private const float JumpBoost = 5f;
-    private const float JumpPower = 15f;
+    private const float JumpBoost = 4f;
+    private const float JumpPower = 10.5f;
     private const float JumpPower2 = 10f;
     private const float JumpTime = 0.2f;
     private const float JumpKeyTime = 0.15f;
@@ -61,6 +61,8 @@ public class CharacterMovement : MonoBehaviour
     private bool _onGround;
     private bool _hitCeiling;
     private bool _againstWall;
+
+    private float _maxFall;
 
     private Vector2 _facing = Vector2.right;
     private Vector2 _speed;
@@ -190,7 +192,7 @@ public class CharacterMovement : MonoBehaviour
         {
             var rayOrigin = new Vector2(origin.x + _horizontalRaysInterval * i, origin.y - SkinWidth);
             var raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
-            Console.DrawRay(rayOrigin, direction * distance, Color.red);
+            Console.DrawRay(rayOrigin, direction * distance, Color.green);
             if (raycastHit /*&& raycastHit.distance < 0.001f + _skinWidth*/)
             {
                 _onGround = true; break;
@@ -200,18 +202,25 @@ public class CharacterMovement : MonoBehaviour
 
     private void ApplyGravity(float deltaTime)
     {
+        float mf = MaxFall;
+        _maxFall = Mathf.MoveTowards(_maxFall, mf, FastMaxAccel * deltaTime);
         if (!_onGround)
         {
-            float max = MaxFall;
-            float mult = Mathf.Abs(_speed.y) < HalfGravThreshold && Jump ? 0.5f : 1.0f;
-            _speed.y = Mathf.MoveTowards(_speed.y, max, FastMaxAccel * mult * deltaTime);
-            Console.LogFormat("ApplyGravity after speed Y {0:F3}", _speed.y);
+            float max = _maxFall;
+            float mult = Mathf.Abs(_speed.y) < HalfGravThreshold && IsJumping ? 0.5f : 1.0f;
+            _speed.y = Mathf.MoveTowards(_speed.y, max, Gravity * mult * deltaTime);
+            //Console.LogFormat("ApplyGravity after speed Y {0:F3}", _speed.y);
         }
     }
 
+
+    /// <summary>
+    /// 参考 Celeste 机制研究(https://www.cnblogs.com/tmzbot/p/12318561.html) 调整游戏数值
+    /// </summary>
+    /// <param name="deltaTime"></param>
     private void Moving(float deltaTime)
     {
-        float mult = _onGround ? 1.0f : AirMult;
+        float mult = _onGround ? 1.0f : 1f;
         if (Mathf.Abs(_speed.x) >= MaxRun && Mathf.Sign(_speed.x) == MoveX)
         {
             _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunReduce * mult * deltaTime);  //Reduce back from beyond the max speed
@@ -233,6 +242,7 @@ public class CharacterMovement : MonoBehaviour
         _isJumping = true;
         _canJumpTimer = true;
         _speed.x = JumpBoost * MoveX;
+        _speed.y = JumpPower;
         Console.Log("Jumping");
         // Apply jump impulse
 
@@ -259,9 +269,12 @@ public class CharacterMovement : MonoBehaviour
         // If jump button is held down and extra jump time is not exceeded...
         if (Jump && _jumpTimer < JumpTime)
         {
-            var jumpProcess = _jumpTimer / JumpTime;
-            _speed.y = JumpPower; /*Mathf.Lerp(JumpPower, 0.0f, jumpProcess);*/
+            //var jumpProcess = _jumpTimer / JumpTime;
+            _speed.y = JumpPower;
+            //_speed.y = Mathf.Lerp(JumpPower, 0.0f, jumpProcess);
+            //_speed.y = Mathf.Min(_speed.y, JumpPower);
             _jumpTimer = Mathf.Min(_jumpTimer + deltaTime, JumpTime);
+            Console.Log("Jumping Timer");
         }
         else
         {
@@ -310,9 +323,38 @@ public class CharacterMovement : MonoBehaviour
         MoveToPosition(deltaMovement);
     }
 
+    private void FixedHorizontally(ref Vector2 deltaMovement)
+    {
+        _againstWall = false;
+        var isGoingRight = deltaMovement.x > MinOffset;
+        var origin = isGoingRight ? _rayOrigin.bottomRight : _rayOrigin.bottomLeft;
+        var direction = isGoingRight ? Vector2.right : Vector2.left;
+        var distance = Mathf.Abs(deltaMovement.x) + SkinWidth;
+        for (int i = 0; i < VerticalRaysCount; i++)
+        {
+            var rayOrigin = new Vector2(origin.x, origin.y + _verticalRaysInterval * i);
+            var _raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
+            Console.DrawRay(rayOrigin, direction * distance, Color.blue);
+            if (_raycastHit)
+            {
+                if (isGoingRight)
+                {
+                    _againstWall = true;
+                    deltaMovement.x = _raycastHit.distance - SkinWidth;   // 右方
+                }
+                else
+                {
+                    _againstWall = true;
+                    deltaMovement.x = SkinWidth - _raycastHit.distance;   // 左方
+                }
+                //if (Mathf.Abs(deltaMovement.x) < MinOffset) break;
+            }
+        }
+    }
+
     private void FixedVertically(ref Vector2 deltaMovement)
     {
-        var isGoingUp = deltaMovement.y > 0;
+        var isGoingUp = deltaMovement.y > MinOffset;
         var origin = isGoingUp ? _rayOrigin.topLeft : _rayOrigin.bottomLeft;
         var direction = isGoingUp ? Vector2.up : Vector2.down;
         var distance = Mathf.Abs(deltaMovement.y) + SkinWidth;
@@ -334,35 +376,6 @@ public class CharacterMovement : MonoBehaviour
                     deltaMovement.y = SkinWidth - _raycastHit.distance;   // 下方
                 }
                 if (Mathf.Abs(deltaMovement.y) < MinOffset) return;
-            }
-        }
-    }
-
-    private void FixedHorizontally(ref Vector2 deltaMovement)
-    {
-        _againstWall = false;
-        var isGoingRight = deltaMovement.x > 0;
-        var origin = isGoingRight ? _rayOrigin.bottomRight : _rayOrigin.bottomLeft;
-        var direction = isGoingRight ? Vector2.right : Vector2.left;
-        var distance = Mathf.Abs(deltaMovement.x) + SkinWidth;
-        for (int i = 0; i < VerticalRaysCount; i++)
-        {
-            var rayOrigin = new Vector2(origin.x, origin.y + _verticalRaysInterval * i);
-            var _raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
-            Console.DrawRay(rayOrigin, direction * distance, Color.blue);
-            if (_raycastHit)
-            {
-                if (isGoingRight)
-                {
-                    _againstWall = true;
-                    deltaMovement.x = _raycastHit.distance - SkinWidth;   // 右方
-                }
-                else
-                {
-                    _againstWall = true;
-                    deltaMovement.x = SkinWidth - _raycastHit.distance;   // 左方
-                }
-                if (Mathf.Abs(deltaMovement.x) < MinOffset) break;
             }
         }
     }

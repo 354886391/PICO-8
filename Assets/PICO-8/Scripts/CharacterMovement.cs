@@ -21,8 +21,8 @@ public class CharacterMovement : MonoBehaviour
     public float MaxFall = -16f;
     public float FastMaxFall = -24f;
     public float FastMaxAccel = 30f;
-    public float RunAccel = 75f;
-    public float RunReduce = 30f;
+    public float RunAccel = 100f;
+    public float RunReduce = 40f;
 
     public float Gravity = 90f;
     public float HalfGravThreshold = 4f;
@@ -201,14 +201,12 @@ public class CharacterMovement : MonoBehaviour
 
     private void ApplyGravity(float deltaTime)
     {
-        float mf = MaxFall;
-        _maxFall = Mathf.MoveTowards(_maxFall, mf, FastMaxAccel * deltaTime);
+        _maxFall = Mathf.MoveTowards(_maxFall, MaxFall, FastMaxAccel * deltaTime);
         if (!_onGround)
         {
-            float max = _maxFall;
             float mult = Mathf.Abs(_speed.y) < HalfGravThreshold && IsJumping ? 0.5f : 1.0f;
-            _speed.y = Mathf.MoveTowards(_speed.y, max, Gravity * mult * deltaTime);
-            //Console.LogFormat("ApplyGravity after speed Y {0:F3}", _speed.y);
+            _speed.y = Mathf.MoveTowards(_speed.y, _maxFall, Gravity * mult * deltaTime);
+            if (Mathf.Abs(_speed.y) > MinOffset) Console.LogFormat("ApplyGravity after speed Y {0:F3}", _speed.y);
         }
     }
 
@@ -222,12 +220,12 @@ public class CharacterMovement : MonoBehaviour
         if (Mathf.Abs(_speed.x) > MaxRun && Mathf.Sign(_speed.x) == MoveX)
         {
             _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunReduce * mult * deltaTime);  //Reduce back from beyond the max speed
-            Console.LogFormat("Move speed X Reduce {0:F3}", _speed.x);
+            if (_speed.x != 0) Console.LogFormat("Move speed X Reduce {0:F3}", _speed.x);
         }
         else
         {
             _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunAccel * mult * deltaTime);   //Approach the max speed
-            Console.LogFormat("Move speed X Approach {0:F3}", _speed.x);
+            if (_speed.x != 0) Console.LogFormat("Move speed X Approach {0:F3}", _speed.x);
         }
 
         //if (MoveY != 0)
@@ -235,7 +233,7 @@ public class CharacterMovement : MonoBehaviour
         //    _speed.x = Mathf.MoveTowards(_speed.x, MaxRun, RunAccel * mult * 0.5f * deltaTime);
         //}       
 
-        Console.LogFormat("Move speed X {0:F3}", _speed.x);
+        //Console.LogFormat("Move speed X {0:F3}", _speed.x);
     }
 
     private void Jumping()
@@ -275,12 +273,11 @@ public class CharacterMovement : MonoBehaviour
         // If jump button is held down and extra jump time is not exceeded...
         if (Jump && _jumpTimer < JumpTime)
         {
-            //var jumpProcess = _jumpTimer / JumpTime;
             _speed.y = JumpSpeed;
-            //_speed.y = Mathf.Lerp(JumpPower, 0.0f, jumpProcess);
-            //_speed.y = Mathf.Min(_speed.y, JumpPower);
+            //var jumpProcess = _jumpTimer / JumpTime;
+            //_speed.y = Mathf.Lerp(JumpSpeed, 0.0f, jumpProcess);
             _jumpTimer = Mathf.Min(_jumpTimer + deltaTime, JumpTime);
-            Console.Log("Jumping Timer");
+            //Console.Log("Jumping Timer");
         }
         else
         {
@@ -410,16 +407,16 @@ public class CharacterMovement : MonoBehaviour
     {
         MoveX = Input.GetAxisRaw("Horizontal");
         MoveY = Input.GetAxisRaw("Vertical");
-        Jump = Input.GetKey(KeyCode.J);
-        Dash = Input.GetKey(KeyCode.K);
+        Jump = Input.GetKey(KeyCode.C);
+        Dash = Input.GetKey(KeyCode.X);
     }
 
     private void Awake()
     {
-        ComputeRayOrigin();
-        ComputeRaysInterval();
         _groundMask = LayerMask.GetMask("Ground");
         _rigidbody = GetComponent<Rigidbody2D>();
         _boxCollider = GetComponent<BoxCollider2D>();
+        ComputeRayOrigin();
+        ComputeRaysInterval();
     }
 }

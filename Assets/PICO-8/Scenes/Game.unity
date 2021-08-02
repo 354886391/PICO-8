@@ -390,7 +390,7 @@ MonoBehaviour:
   MaxFall: -16
   FastMaxFall: -24
   FastMaxAccel: 30
-  RunAccel: 75
+  RunAccel: 100
   RunReduce: 40
   Gravity: 90
   HalfGravThreshold: 4
@@ -399,9 +399,8 @@ MonoBehaviour:
   ClimbSlipSpeed: -3.6
   ClimbAccel: 140
   ClimbGrabYMult: 0.2
-  JumpBoost: 4
-  JumpPower: 10.5
-  JumpPower2: 10
+  JumpHBoost: 4
+  JumpSpeed: 10.5
   JumpTime: 0.2
   JumpKeyTime: 0.15
   DashPower: 30
@@ -440,9 +439,9 @@ MonoBehaviour:
     bottomRight: {x: 0, y: 0}
   _groundMask:
     serializedVersion: 2
-    m_Bits: 256
-  _rigidbody: {fileID: 126606797}
-  _boxCollider: {fileID: 126606798}
+    m_Bits: 0
+  _rigidbody: {fileID: 0}
+  _boxCollider: {fileID: 0}
 --- !u!50 &126606797
 Rigidbody2D:
   serializedVersion: 4

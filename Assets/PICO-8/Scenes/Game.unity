@@ -386,6 +386,58 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34ddee103e663d24e9a5053d69e48809, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MaxRun: 9
+  MaxFall: -16
+  FastMaxFall: -24
+  FastMaxAccel: 30
+  RunAccel: 75
+  RunReduce: 40
+  Gravity: 90
+  HalfGravThreshold: 4
+  AirMult: 0.65
+  ClimbSpeed: 4.8
+  ClimbSlipSpeed: -3.6
+  ClimbAccel: 140
+  ClimbGrabYMult: 0.2
+  JumpBoost: 4
+  JumpPower: 10.5
+  JumpPower2: 10
+  JumpTime: 0.2
+  JumpKeyTime: 0.15
+  DashPower: 30
+  DashTime: 0.15
+  DashCooldownTime: 0.2
+  DashRefillCooldown: 0.1
+  SkinWidth: 0.02
+  MinOffset: 0.0001
+  VerticalRaysCount: 5
+  HorizontalRaysCount: 5
+  _onGround: 0
+  _hitCeiling: 0
+  _againstWall: 0
+  _maxFall: 0
+  _facing: {x: 1, y: 0}
+  _speed: {x: 0, y: 0}
+  _jump: 0
+  _isJumping: 0
+  _canJump: 1
+  _canJumpTimer: 0
+  _jumpTimer: 0
+  _jumpHeldDownTimer: 0
+  _midAirJump: 0
+  _midAirJumpCount: 0
+  _dash: 0
+  _isDashing: 0
+  _canDash: 1
+  _canDashTimer: 0
+  _dashTimer: 0
+  _dashCooldownTimer: 0
+  _verticalRaysInterval: 0
+  _horizontalRaysInterval: 0
+  _rayOrigin:
+    topLeft: {x: 0, y: 0}
+    bottomLeft: {x: 0, y: 0}
+    bottomRight: {x: 0, y: 0}
   _groundMask:
     serializedVersion: 2
     m_Bits: 256

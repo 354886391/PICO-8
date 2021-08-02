@@ -6,8 +6,8 @@ public class CharacterMovement : MonoBehaviour
 {
 
     #region Structs
-
-    private struct RayOrigin
+    [System.Serializable]
+    public struct RayOrigin
     {
         public Vector2 topLeft;
         public Vector2 bottomLeft;
@@ -17,83 +17,82 @@ public class CharacterMovement : MonoBehaviour
 
     #region Constants
 
-    private const float MaxRun = 9f;
-    private const float MaxFall = -16f;
-    private const float FastMaxFall = -24f;
-    private const float FastMaxAccel = 30f;
-    private const float RunAccel = 50f;
-    private const float RunReduce = 40f;
+    public float MaxRun = 9f;
+    public float MaxFall = -16f;
+    public float FastMaxFall = -24f;
+    public float FastMaxAccel = 30f;
+    public float RunAccel = 75f;
+    public float RunReduce = 30f;
 
-    private const float Gravity = 90f;
-    private const float HalfGravThreshold = 4f;
+    public float Gravity = 90f;
+    public float HalfGravThreshold = 4f;
 
-    private const float AirMult = 0.65f;
+    public float AirMult = 0.65f;
 
-    private const float ClimbSpeed = 4.8f;
-    private const float ClimbSlipSpeed = -3.6f;
-    private const float ClimbAccel = Gravity + 50f;
-    private const float ClimbGrabYMult = 0.2f;
+    public float ClimbSpeed = 4.8f;
+    public float ClimbSlipSpeed = -3.6f;
+    public float ClimbAccel = 90f + 50f;
+    public float ClimbGrabYMult = 0.2f;
 
     #region Jump
-    private const float JumpBoost = 4f;
-    private const float JumpPower = 10.5f;
-    private const float JumpPower2 = 10f;
-    private const float JumpTime = 0.2f;
-    private const float JumpKeyTime = 0.15f;
+    public float JumpHBoost = 4f;
+    public float JumpSpeed = 10.5f;
+    public float JumpTime = 0.2f;
+    public float JumpKeyTime = 0.15f;
 
     #endregion
 
     #region Dash   
-    private const float DashPower = 30f;
-    private const float DashTime = 0.15f;
-    private const float DashCooldownTime = 0.2f;
-    private const float DashRefillCooldown = 0.1f;
+    public float DashPower = 30f;
+    public float DashTime = 0.15f;
+    public float DashCooldownTime = 0.2f;
+    public float DashRefillCooldown = 0.1f;
     #endregion
 
-    private const float SkinWidth = 0.02f;
-    private const float MinOffset = 0.0001f;
-    private const float VerticalRaysCount = 5;
-    private const float HorizontalRaysCount = 5;
+    public float SkinWidth = 0.02f;
+    public float MinOffset = 0.0001f;
+    public float VerticalRaysCount = 5;
+    public float HorizontalRaysCount = 5;
     #endregion
 
     #region Vars
 
-    private bool _onGround;
-    private bool _hitCeiling;
-    private bool _againstWall;
+    public bool _onGround;
+    public bool _hitCeiling;
+    public bool _againstWall;
 
-    private float _maxFall;
+    public float _maxFall;
 
-    private Vector2 _facing = Vector2.right;
-    private Vector2 _speed;
+    public Vector2 _facing = Vector2.right;
+    public Vector2 _speed;
 
     #region Jump
-    private bool _jump;
-    private bool _isJumping;
-    private bool _canJump = true;
-    private bool _canJumpTimer = false;
-    private float _jumpTimer;
-    private float _jumpHeldDownTimer;
-    private int _midAirJump;
-    private int _midAirJumpCount = 0;   // 0 or 1
+    public bool _jump;
+    public bool _isJumping;
+    public bool _canJump = true;
+    public bool _canJumpTimer = false;
+    public float _jumpTimer;
+    public float _jumpHeldDownTimer;
+    public int _midAirJump;
+    public int _midAirJumpCount = 0;   // 0 or 1
     #endregion
 
     #region Dash
-    private bool _dash;
-    private bool _isDashing;
-    private bool _canDash = true;
-    private bool _canDashTimer = false;
-    private float _dashTimer;
-    private float _dashCooldownTimer;
+    public bool _dash;
+    public bool _isDashing;
+    public bool _canDash = true;
+    public bool _canDashTimer = false;
+    public float _dashTimer;
+    public float _dashCooldownTimer;
     #endregion
 
-    private float _verticalRaysInterval;
-    private float _horizontalRaysInterval;
+    public float _verticalRaysInterval;
+    public float _horizontalRaysInterval;
 
-    private RayOrigin _rayOrigin;
-    [SerializeField] private LayerMask _groundMask;
-    [SerializeField] private Rigidbody2D _rigidbody;
-    [SerializeField] private BoxCollider2D _boxCollider;
+    public RayOrigin _rayOrigin;
+    public LayerMask _groundMask;
+    public Rigidbody2D _rigidbody;
+    public BoxCollider2D _boxCollider;
     #endregion
 
     public float MoveX { get; set; }
@@ -213,23 +212,30 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
-
     /// <summary>
     /// 参考 Celeste 机制研究(https://www.cnblogs.com/tmzbot/p/12318561.html) 调整游戏数值
     /// </summary>
     /// <param name="deltaTime"></param>
     private void Moving(float deltaTime)
     {
-        float mult = _onGround ? 1.0f : 1f;
-        if (Mathf.Abs(_speed.x) >= MaxRun && Mathf.Sign(_speed.x) == MoveX)
+        float mult = _onGround ? 1.0f : 0.65f;
+        if (Mathf.Abs(_speed.x) > MaxRun && Mathf.Sign(_speed.x) == MoveX)
         {
             _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunReduce * mult * deltaTime);  //Reduce back from beyond the max speed
+            Console.LogFormat("Move speed X Reduce {0:F3}", _speed.x);
         }
         else
         {
-            _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunAccel * mult * deltaTime);   //Approach the max speed          
+            _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunAccel * mult * deltaTime);   //Approach the max speed
+            Console.LogFormat("Move speed X Approach {0:F3}", _speed.x);
         }
-        //Console.LogFormat("Move speed X {0:F3}", _speed.x);
+
+        //if (MoveY != 0)
+        //{
+        //    _speed.x = Mathf.MoveTowards(_speed.x, MaxRun, RunAccel * mult * 0.5f * deltaTime);
+        //}       
+
+        Console.LogFormat("Move speed X {0:F3}", _speed.x);
     }
 
     private void Jumping()
@@ -241,8 +247,8 @@ public class CharacterMovement : MonoBehaviour
         _canJump = false;
         _isJumping = true;
         _canJumpTimer = true;
-        _speed.x = JumpBoost * MoveX;
-        _speed.y = JumpPower;
+        _speed.x += JumpHBoost * MoveX;
+        _speed.y = JumpSpeed;
         Console.Log("Jumping");
         // Apply jump impulse
 
@@ -270,7 +276,7 @@ public class CharacterMovement : MonoBehaviour
         if (Jump && _jumpTimer < JumpTime)
         {
             //var jumpProcess = _jumpTimer / JumpTime;
-            _speed.y = JumpPower;
+            _speed.y = JumpSpeed;
             //_speed.y = Mathf.Lerp(JumpPower, 0.0f, jumpProcess);
             //_speed.y = Mathf.Min(_speed.y, JumpPower);
             _jumpTimer = Mathf.Min(_jumpTimer + deltaTime, JumpTime);
@@ -412,5 +418,8 @@ public class CharacterMovement : MonoBehaviour
     {
         ComputeRayOrigin();
         ComputeRaysInterval();
+        _groundMask = LayerMask.GetMask("Ground");
+        _rigidbody = GetComponent<Rigidbody2D>();
+        _boxCollider = GetComponent<BoxCollider2D>();
     }
 }

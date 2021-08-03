@@ -17,42 +17,45 @@ public class CharacterMovement : MonoBehaviour
 
     #region Constants
 
-    public float MaxRun = 9f;
-    public float MaxFall = -16f;
-    public float FastMaxFall = -24f;
-    public float FastMaxAccel = 30f;
-    public float RunAccel = 100f;
-    public float RunReduce = 40f;
+    public const float MaxRun = 9f;
+    public const float MaxFall = -16f;
+    public const float FastMaxFall = -24f;
+    public const float FastMaxAccel = 30f;
+    public const float RunAccel = 100f;
+    public const float RunReduce = 40f;
 
-    public float Gravity = 90f;
-    public float HalfGravThreshold = 4f;
+    public const float Gravity = 90f;
+    public const float HalfGravThreshold = 4f;
 
-    public float AirMult = 0.65f;
+    public const float AirMult = 0.65f;
 
-    public float ClimbSpeed = 4.8f;
-    public float ClimbSlipSpeed = -3.6f;
-    public float ClimbAccel = 90f + 50f;
-    public float ClimbGrabYMult = 0.2f;
+    public const float ClimbSpeed = 4.8f;
+    public const float ClimbSlipSpeed = -3.6f;
+    public const float ClimbAccel = 90f + 50f;
+    public const float ClimbGrabYMult = 0.2f;
 
     #region Jump
-    public float JumpHBoost = 4f;
-    public float JumpSpeed = 10.5f;
-    public float JumpTime = 0.2f;
-    public float JumpKeyTime = 0.15f;
+    public const float JumpHBoost = 4f;
+    public const float JumpSpeed = 10.5f;
+    public const float SuperJumpH = 26f;
+    public const float JumpTime = 0.2f;
+    public const float JumpKeyTime = 0.15f;
 
     #endregion
 
     #region Dash   
-    public float DashPower = 30f;
-    public float DashTime = 0.15f;
-    public float DashCooldownTime = 0.2f;
-    public float DashRefillCooldown = 0.1f;
+    public const float DashPower = 24f;
+    public const float DashTime = 0.15f;
+    public const float EndDashSpeed = 16f;
+    public const float EndDashUpMult = 0.75f;
+    public const float DashCooldownTime = 0.2f;
+    public const float DashRefillCooldown = 0.1f;
     #endregion
 
-    public float SkinWidth = 0.02f;
-    public float MinOffset = 0.0001f;
-    public float VerticalRaysCount = 5;
-    public float HorizontalRaysCount = 5;
+    public const float SkinWidth = 0.02f;
+    public const float MinOffset = 0.0001f;
+    public const float VerticalRaysCount = 5;
+    public const float HorizontalRaysCount = 5;
     #endregion
 
     #region Vars
@@ -63,7 +66,7 @@ public class CharacterMovement : MonoBehaviour
 
     public float _maxFall;
 
-    public Vector2 _facing = Vector2.right;
+    public Vector2 _facing;
     public Vector2 _speed;
 
     #region Jump
@@ -84,6 +87,9 @@ public class CharacterMovement : MonoBehaviour
     public bool _canDashTimer = false;
     public float _dashTimer;
     public float _dashCooldownTimer;
+    public Vector2 _dashDirection;
+    public Vector2 _beforeDashSpeed;
+
     #endregion
 
     public float _verticalRaysInterval;
@@ -104,13 +110,13 @@ public class CharacterMovement : MonoBehaviour
         get { return _jump; }
         set
         {
-            // If jump is released, allow to jump again
+            // 按键释放
             if (_jump && value == false)
             {
                 _canJump = true;
                 _jumpHeldDownTimer = 0.0f;
             }
-            // Update jump value; if pressed, update held down timer
+            // 按键充能
             _jump = value;
             if (_jump)
             {
@@ -138,10 +144,7 @@ public class CharacterMovement : MonoBehaviour
 
     public bool Dash
     {
-        get
-        {
-            return _dash;
-        }
+        get { return _dash; }
         set
         {
             if (_dash && value == false)
@@ -150,7 +153,7 @@ public class CharacterMovement : MonoBehaviour
                 _dashCooldownTimer = 0.0f;
             }
             _dash = value;
-            if (_dash)
+            if (!_dash)
             {
                 _dashCooldownTimer += Time.deltaTime;
             }
@@ -178,7 +181,8 @@ public class CharacterMovement : MonoBehaviour
 
     public void Facing()
     {
-        _facing = new Vector2(MoveX, MoveY);
+        _facing.y = MoveY;
+        if (MoveX != 0) _facing.x = MoveX;
     }
 
     private void DetectGround(float deltaTime)
@@ -252,6 +256,12 @@ public class CharacterMovement : MonoBehaviour
 
     }
 
+    private void SuperJumping()
+    {
+        _speed.x = SuperJumpH * _facing.x;
+        _speed.y = JumpSpeed;
+    }
+
     private void MidAirJumping()
     {
         if (_midAirJump > 0 && _onGround)
@@ -293,22 +303,66 @@ public class CharacterMovement : MonoBehaviour
         _canDash = false;
         _isDashing = true;
         _canDashTimer = true;
+        _beforeDashSpeed = _speed;
+        _speed = Vector2.zero;
+        _dashDirection = Vector2.zero;
     }
 
     private void UpdateDashTimer(float deltaTime)
     {
         if (!_canDashTimer) return;
-        if (Dash && _dashTimer < DashTime)
+        if (_dashTimer < DashTime)
         {
             var dashProcess = _dashTimer / DashTime;
-            _speed = Mathf.Lerp(DashPower, 0.0f, dashProcess) * _facing;
+            //_speed = Mathf.Lerp(DashPower, 0.0f, dashProcess) * _facing;
+            _speed = DashSpeed(_beforeDashSpeed, Vector2.Angle(new Vector2(MoveX, 0), new Vector2(0, MoveY)));
             _dashTimer = Mathf.Min(_dashTimer + deltaTime, DashTime);
+            Console.Log("Dashing Timer");
         }
         else
         {
             _dashTimer = 0.0f;
             _canDashTimer = false;
+
         }
+
+        //if (_dashDirection.y <= 0)
+        //{
+        //    _speed = _dashDirection * EndDashSpeed;
+        //    _speed.x *= _speed.x;
+        //    _speed.y *= _speed.y;
+        //}
+        //if (_speed.y < 0)
+        //{
+        //    _speed.y *= EndDashUpMult;
+        //}
+
+        //if (_dashDirection.y == 0)
+        //{
+        //    SuperJumping();
+        //}
+
+        //if (_dashDirection.x == 0 && _dashDirection.y == -1)
+        //{
+        //    SuperWallJump(-1 / 1);
+        //}
+        //else
+        //{
+        //    Walljump(-1 / 1);
+        //}
+
+        //var newSpeed = _dashDirection * DashPower;
+        //if (Mathf.Sign(_beforeDashSpeed.x) == Mathf.Sign(newSpeed.x) && Mathf.Abs(_beforeDashSpeed.x) > Mathf.Abs(newSpeed.x))
+        //    newSpeed.x = _beforeDashSpeed.x;
+        //_speed = newSpeed;
+    }
+
+    Vector2 DashSpeed(Vector2 originalSpeed, float angle)
+    {
+        Vector2 t = DashPower * new Vector2(Mathf.Cos(angle / 360 * 2 * Mathf.PI), -Mathf.Sin(angle / 360 * 2 * Mathf.PI));
+        if (originalSpeed.x * t.x > 0 && Mathf.Abs(originalSpeed.x) > Mathf.Abs(t.x))
+            t.x = originalSpeed.x;
+        return t;
     }
 
     private void CorrectionAndMove(float deltaTime)
@@ -413,6 +467,7 @@ public class CharacterMovement : MonoBehaviour
 
     private void Awake()
     {
+        _facing = Vector2.right;
         _groundMask = LayerMask.GetMask("Ground");
         _rigidbody = GetComponent<Rigidbody2D>();
         _boxCollider = GetComponent<BoxCollider2D>();

@@ -37,19 +37,30 @@ public class CharacterMovement : MonoBehaviour
     #region Jump
     public const float JumpHBoost = 4f;
     public const float JumpSpeed = 10.5f;
+
+    public const float JumpVarTime = 0.2f;
+    public const float JumpForceTime = 0.15f;
+
+    private const float WallJumpHSpeed = 13f;
+    private const float WallJumpForceTime = 0.16f;
+
     public const float SuperJumpH = 26f;
-    public const float JumpTime = 0.2f;
-    public const float JumpKeyTime = 0.15f;
+    public const float SuperJumpSpeed = 10.5f;
+
+    public const float SuperWallJumpH = 17f;
+    public const float SuperWallJumpSpeed = 16f;
+    public const float SuperWallJumpVarTime = 0.25f;
+    public const float SuperWallJumpForceTime = 0.2f;
+
 
     #endregion
 
-    #region Dash   
-    public const float DashPower = 24f;
-    public const float DashTime = 0.15f;
+    #region Dash  
+    public const float DashSpeed = 24f;
     public const float EndDashSpeed = 16f;
     public const float EndDashUpMult = 0.75f;
-    public const float DashCooldownTime = 0.2f;
-    public const float DashRefillCooldown = 0.1f;
+    public const float DashTime = 0.15f;
+    public const float DashCooldown = 0.2f;
     #endregion
 
     public const float SkinWidth = 0.02f;
@@ -245,7 +256,7 @@ public class CharacterMovement : MonoBehaviour
         if (!_onGround) return;
         if (!Jump || !_canJump) return;
         // Is jump button pressed within jump tolerance?
-        if (_jumpHeldDownTimer > JumpKeyTime) return;
+        if (_jumpHeldDownTimer > JumpForceTime) return;
         _canJump = false;
         _isJumping = true;
         _canJumpTimer = true;
@@ -258,8 +269,21 @@ public class CharacterMovement : MonoBehaviour
 
     private void SuperJumping()
     {
+
         _speed.x = SuperJumpH * _facing.x;
         _speed.y = JumpSpeed;
+    }
+
+    private void WallJumping(int dir)
+    {
+        _speed.x = WallJumpHSpeed * dir;
+        _speed.y = JumpSpeed;
+    }
+
+    private void SuperWallJumping(int dir)
+    {
+        _speed.x = SuperWallJumpH * dir;
+        _speed.y = SuperWallJumpSpeed;
     }
 
     private void MidAirJumping()
@@ -281,12 +305,12 @@ public class CharacterMovement : MonoBehaviour
     {
         if (!_canJumpTimer) return;
         // If jump button is held down and extra jump time is not exceeded...
-        if (Jump && _jumpTimer < JumpTime)
+        if (Jump && _jumpTimer < JumpVarTime)
         {
             _speed.y = JumpSpeed;
             //var jumpProcess = _jumpTimer / JumpTime;
             //_speed.y = Mathf.Lerp(JumpSpeed, 0.0f, jumpProcess);
-            _jumpTimer = Mathf.Min(_jumpTimer + deltaTime, JumpTime);
+            _jumpTimer = Mathf.Min(_jumpTimer + deltaTime, JumpVarTime);
             //Console.Log("Jumping Timer");
         }
         else
@@ -308,14 +332,41 @@ public class CharacterMovement : MonoBehaviour
         _dashDirection = Vector2.zero;
     }
 
+    /// <summary>
+    /// Idle状态: Dash方向---Facing
+    /// MoveX输入状态: Dash方向---MoveX
+    /// MoveY输入状态(MoveX为0): Dash方向---MoveY 1 SuperJump, -1 FastMaxFall
+    /// MoveX, MoveY同时输入状态: Dash方向: Angle(MoveX, MoveY)
+    /// </summary>
+    /// <param name="deltaTime"></param>
     private void UpdateDashTimer(float deltaTime)
     {
         if (!_canDashTimer) return;
         if (_dashTimer < DashTime)
         {
-            var dashProcess = _dashTimer / DashTime;
-            //_speed = Mathf.Lerp(DashPower, 0.0f, dashProcess) * _facing;
-            _speed = DashSpeed(_beforeDashSpeed, Vector2.Angle(new Vector2(MoveX, 0), new Vector2(0, MoveY)));
+            if (MoveX == 0 && MoveY == 0)
+            {
+                _speed = DashSpeed * _facing;
+            }
+            else if (MoveX != 0 && MoveY == 0)
+            {
+                _speed.x = DashSpeed * MoveX;
+            }
+            else if (MoveX == 0 && MoveY != 0)
+            {
+                if (MoveY == 1)
+                {
+                    SuperJumping(1);
+                }
+                else
+                {
+                    //FastMaxFall;
+                }
+            }
+            else
+            {
+                _speed = DashSpeed * new Vector2(MoveX, MoveY);
+            }
             _dashTimer = Mathf.Min(_dashTimer + deltaTime, DashTime);
             Console.Log("Dashing Timer");
         }
@@ -324,45 +375,11 @@ public class CharacterMovement : MonoBehaviour
             _dashTimer = 0.0f;
             _canDashTimer = false;
 
+            //if (DashDir.Y <= 0)
+            //    _speed = DashDir * EndDashSpeed;
+            if (_speed.y > 0)
+                _speed.y *= EndDashUpMult;
         }
-
-        //if (_dashDirection.y <= 0)
-        //{
-        //    _speed = _dashDirection * EndDashSpeed;
-        //    _speed.x *= _speed.x;
-        //    _speed.y *= _speed.y;
-        //}
-        //if (_speed.y < 0)
-        //{
-        //    _speed.y *= EndDashUpMult;
-        //}
-
-        //if (_dashDirection.y == 0)
-        //{
-        //    SuperJumping();
-        //}
-
-        //if (_dashDirection.x == 0 && _dashDirection.y == -1)
-        //{
-        //    SuperWallJump(-1 / 1);
-        //}
-        //else
-        //{
-        //    Walljump(-1 / 1);
-        //}
-
-        //var newSpeed = _dashDirection * DashPower;
-        //if (Mathf.Sign(_beforeDashSpeed.x) == Mathf.Sign(newSpeed.x) && Mathf.Abs(_beforeDashSpeed.x) > Mathf.Abs(newSpeed.x))
-        //    newSpeed.x = _beforeDashSpeed.x;
-        //_speed = newSpeed;
-    }
-
-    Vector2 DashSpeed(Vector2 originalSpeed, float angle)
-    {
-        Vector2 t = DashPower * new Vector2(Mathf.Cos(angle / 360 * 2 * Mathf.PI), -Mathf.Sin(angle / 360 * 2 * Mathf.PI));
-        if (originalSpeed.x * t.x > 0 && Mathf.Abs(originalSpeed.x) > Mathf.Abs(t.x))
-            t.x = originalSpeed.x;
-        return t;
     }
 
     private void CorrectionAndMove(float deltaTime)

@@ -56,11 +56,11 @@ public class CharacterMovement : MonoBehaviour
     #endregion
 
     #region Dash  
-    public const float DashSpeed = 24f;
+    public const float DashSpeed = 18f;
     public const float EndDashSpeed = 16f;
     public const float EndDashUpMult = 0.75f;
     public const float DashTime = 0.15f;
-    public const float DashCooldown = 0.2f;
+    public const float DashCooldownTime = 0.2f;
     #endregion
 
     public const float SkinWidth = 0.02f;
@@ -77,7 +77,6 @@ public class CharacterMovement : MonoBehaviour
 
     public float _maxFall;
 
-    public Vector2 _facing;
     public Vector2 _speed;
 
     #region Jump
@@ -98,7 +97,7 @@ public class CharacterMovement : MonoBehaviour
     public bool _canDashTimer = false;
     public float _dashTimer;
     public float _dashCooldownTimer;
-    public Vector2 _dashDirection;
+    public Vector2 _dashDir;
     public Vector2 _beforeDashSpeed;
 
     #endregion
@@ -115,6 +114,8 @@ public class CharacterMovement : MonoBehaviour
     public float MoveX { get; set; }
 
     public float MoveY { get; set; }
+
+    public int Facing { get; set; }
 
     public bool Jump
     {
@@ -148,11 +149,6 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
-    public bool IsFalling
-    {
-        get { return !_onGround && _speed.y < MinOffset; }
-    }
-
     public bool Dash
     {
         get { return _dash; }
@@ -161,7 +157,7 @@ public class CharacterMovement : MonoBehaviour
             if (_dash && value == false)
             {
                 _canDash = true;
-                _dashCooldownTimer = 0.0f;
+                //_dashCooldownTimer = 0.0f;
             }
             _dash = value;
             if (!_dash)
@@ -171,12 +167,29 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
+    public bool IsDashing
+    {
+        get
+        {
+            if (_isDashing && _speed.y < MinOffset)
+            {
+                _isDashing = false;
+            }
+            return _isDashing;
+        }
+    }
+
+    public bool IsFalling
+    {
+        get { return !_onGround && _speed.y < MinOffset; }
+    }
+
     public void Move(float deltaTime)
     {
         ComputeRayOrigin();
         DetectGround(deltaTime);
         ApplyGravity(deltaTime);
-        Facing();
+        CalcFacing();
         Moving(deltaTime);
         Jumping();
         MidAirJumping();
@@ -188,12 +201,6 @@ public class CharacterMovement : MonoBehaviour
         //LimitVerticalVelocity();
         //PreventGroundPenetration();
         CorrectionAndMove(deltaTime);
-    }
-
-    public void Facing()
-    {
-        _facing.y = MoveY;
-        if (MoveX != 0) _facing.x = MoveX;
     }
 
     private void DetectGround(float deltaTime)
@@ -219,10 +226,15 @@ public class CharacterMovement : MonoBehaviour
         _maxFall = Mathf.MoveTowards(_maxFall, MaxFall, FastMaxAccel * deltaTime);
         if (!_onGround)
         {
-            float mult = Mathf.Abs(_speed.y) < HalfGravThreshold && IsJumping ? 0.5f : 1.0f;
+            float mult = Mathf.Abs(_speed.y) < HalfGravThreshold && (IsJumping || IsDashing) ? 0.5f : 1.0f;
             _speed.y = Mathf.MoveTowards(_speed.y, _maxFall, Gravity * mult * deltaTime);
             if (Mathf.Abs(_speed.y) > MinOffset) Console.LogFormat("ApplyGravity after speed Y {0:F3}", _speed.y);
         }
+    }
+
+    public void CalcFacing()
+    {
+        if (MoveX != 0) Facing = (int)MoveX;
     }
 
     /// <summary>
@@ -269,8 +281,7 @@ public class CharacterMovement : MonoBehaviour
 
     private void SuperJumping()
     {
-
-        _speed.x = SuperJumpH * _facing.x;
+        _speed.x = SuperJumpH * Facing;
         _speed.y = JumpSpeed;
     }
 
@@ -321,20 +332,41 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
+    private void DashDir()
+    {
+        if (MoveX == 0 && MoveY == 0)
+        {
+            _dashDir = new Vector2(Facing, 0);
+        }
+        else if (MoveX != 0 && MoveY == 0)
+        {
+            _dashDir = new Vector2(MoveX, 0);
+        }
+        else if (MoveX == 0 && MoveY != 0)
+        {
+            _dashDir = new Vector2(0, MoveY);
+        }
+        else
+        {
+            _dashDir = new Vector2(MoveX, MoveY).normalized;
+        }
+    }
+
     private void Dashing()
     {
         if (!_dash || !_canDash) return;
+        if (_dashCooldownTimer < DashCooldownTime) return;
         _canDash = false;
         _isDashing = true;
         _canDashTimer = true;
         _beforeDashSpeed = _speed;
         _speed = Vector2.zero;
-        _dashDirection = Vector2.zero;
+        DashDir();
     }
 
     /// <summary>
     /// Idle状态: Dash方向---Facing
-    /// MoveX输入状态: Dash方向---MoveX
+    /// MoveX输入状态(MoveY为0): Dash方向---MoveX
     /// MoveY输入状态(MoveX为0): Dash方向---MoveY 1 SuperJump, -1 FastMaxFall
     /// MoveX, MoveY同时输入状态: Dash方向: Angle(MoveX, MoveY)
     /// </summary>
@@ -344,39 +376,17 @@ public class CharacterMovement : MonoBehaviour
         if (!_canDashTimer) return;
         if (_dashTimer < DashTime)
         {
-            if (MoveX == 0 && MoveY == 0)
-            {
-                _speed = DashSpeed * _facing;
-            }
-            else if (MoveX != 0 && MoveY == 0)
-            {
-                _speed.x = DashSpeed * MoveX;
-            }
-            else if (MoveX == 0 && MoveY != 0)
-            {
-                if (MoveY == 1)
-                {
-                    SuperJumping(1);
-                }
-                else
-                {
-                    //FastMaxFall;
-                }
-            }
-            else
-            {
-                _speed = DashSpeed * new Vector2(MoveX, MoveY);
-            }
+            _speed = DashSpeed * _dashDir;
             _dashTimer = Mathf.Min(_dashTimer + deltaTime, DashTime);
             Console.Log("Dashing Timer");
         }
         else
         {
             _dashTimer = 0.0f;
+            _dashCooldownTimer = 0.0f;
             _canDashTimer = false;
-
-            //if (DashDir.Y <= 0)
-            //    _speed = DashDir * EndDashSpeed;
+            if (_dashDir.y > 0)
+                _speed = EndDashSpeed * _dashDir;
             if (_speed.y > 0)
                 _speed.y *= EndDashUpMult;
         }
@@ -484,7 +494,7 @@ public class CharacterMovement : MonoBehaviour
 
     private void Awake()
     {
-        _facing = Vector2.right;
+        Facing = 1;
         _groundMask = LayerMask.GetMask("Ground");
         _rigidbody = GetComponent<Rigidbody2D>();
         _boxCollider = GetComponent<BoxCollider2D>();

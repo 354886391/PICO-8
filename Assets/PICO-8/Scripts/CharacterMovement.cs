@@ -187,7 +187,7 @@ public class CharacterMovement : MonoBehaviour
         ComputeRayOrigin();
         DetectGround(deltaTime);
         ApplyGravity(deltaTime);
-        CalcFacing();
+        ApplyFacing();
         Moving(deltaTime);
         Jumping();
         MidAirJumping();
@@ -240,12 +240,13 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
-    public void CalcFacing()
+    public void ApplyFacing()
     {
         if (MoveX != 0) _facing = (int)MoveX;
         Vector3 scale = transform.localScale;
         if (scale.x == _facing) return;
-        transform.localScale = new Vector3(scale.x * _facing, scale.y, scale.z);
+        transform.localScale = new Vector3(-scale.x, scale.y, scale.z);
+        Console.LogFormat("scale.x {0},  _facing {1}", scale.x, _facing);
     }
 
     /// <summary>
@@ -258,12 +259,12 @@ public class CharacterMovement : MonoBehaviour
         if (Mathf.Abs(_speed.x) > MaxRun && Mathf.Sign(_speed.x) == MoveX)
         {
             _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunReduce * mult * deltaTime);  //Reduce back from beyond the max speed
-            if (_speed.x != 0) Console.LogFormat("Move speed X Reduce {0:F3}", _speed.x);
+            //if (_speed.x != 0) Console.LogFormat("Move speed X Reduce {0:F3}", _speed.x);
         }
         else
         {
             _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunAccel * mult * deltaTime);   //Approach the max speed
-            if (_speed.x != 0) Console.LogFormat("Move speed X Approach {0:F3}", _speed.x);
+            //if (_speed.x != 0) Console.LogFormat("Move speed X Approach {0:F3}", _speed.x);
         }
         //Console.LogFormat("Move speed X {0:F3}", _speed.x);
     }
@@ -337,6 +338,12 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Idle状态: Dash方向---Facing
+    /// MoveX输入状态(MoveY为0): Dash方向---MoveX
+    /// MoveY输入状态(MoveX为0): Dash方向---MoveY 1 SuperJump, -1 FastMaxFall
+    /// MoveX, MoveY同时输入状态: Dash方向: Angle(MoveX, MoveY)
+    /// </summary>
     private void DashDir()
     {
         if (MoveX == 0 && MoveY == 0)
@@ -369,13 +376,6 @@ public class CharacterMovement : MonoBehaviour
         DashDir();
     }
 
-    /// <summary>
-    /// Idle状态: Dash方向---Facing
-    /// MoveX输入状态(MoveY为0): Dash方向---MoveX
-    /// MoveY输入状态(MoveX为0): Dash方向---MoveY 1 SuperJump, -1 FastMaxFall
-    /// MoveX, MoveY同时输入状态: Dash方向: Angle(MoveX, MoveY)
-    /// </summary>
-    /// <param name="deltaTime"></param>
     private void UpdateDashTimer(float deltaTime)
     {
         if (!_canDashTimer) return;

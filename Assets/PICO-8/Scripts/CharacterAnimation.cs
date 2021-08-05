@@ -30,6 +30,10 @@ public class CharacterAnimation : MonoBehaviour
     {
         if (movement._onGround)
         {
+            if (movement.MoveX == 0 && movement.MoveY == 0)
+            {
+                _anim.Play(idle);
+            }
             if (movement.MoveX != 0)
             {
                 _anim.Play(run);

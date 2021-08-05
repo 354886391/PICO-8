@@ -52,12 +52,11 @@ public class CharacterMovement : MonoBehaviour
     public const float SuperWallJumpVarTime = 0.25f;
     public const float SuperWallJumpForceTime = 0.2f;
 
-
     #endregion
 
     #region Dash  
-    public const float DashSpeed = 18f;
-    public const float EndDashSpeed = 16f;
+    public const float DashSpeed = 24f;
+    public const float EndDashSpeed = 9f;
     public const float EndDashUpMult = 0.75f;
     public const float DashTime = 0.15f;
     public const float DashCooldownTime = 0.2f;
@@ -70,13 +69,12 @@ public class CharacterMovement : MonoBehaviour
     #endregion
 
     #region Vars
-
     public bool _onGround;
     public bool _hitCeiling;
     public bool _againstWall;
 
+    public int _facing;
     public float _maxFall;
-
     public Vector2 _speed;
 
     #region Jump
@@ -115,7 +113,7 @@ public class CharacterMovement : MonoBehaviour
 
     public float MoveY { get; set; }
 
-    public int Facing { get; set; }
+
 
     public bool Jump
     {
@@ -160,7 +158,7 @@ public class CharacterMovement : MonoBehaviour
                 //_dashCooldownTimer = 0.0f;
             }
             _dash = value;
-            if (!_dash)
+            if (!_dash && _onGround)
             {
                 _dashCooldownTimer += Time.deltaTime;
             }
@@ -223,7 +221,17 @@ public class CharacterMovement : MonoBehaviour
 
     private void ApplyGravity(float deltaTime)
     {
-        _maxFall = Mathf.MoveTowards(_maxFall, MaxFall, FastMaxAccel * deltaTime);
+        float mf = MaxFall;
+        float fmf = FastMaxFall;
+        if (MoveY == -1 && _speed.y <= mf)
+        {
+            _maxFall = Mathf.MoveTowards(_maxFall, fmf, FastMaxAccel * deltaTime);
+        }
+        else
+        {
+            _maxFall = Mathf.MoveTowards(_maxFall, mf, FastMaxAccel * deltaTime);
+        }
+
         if (!_onGround)
         {
             float mult = Mathf.Abs(_speed.y) < HalfGravThreshold && (IsJumping || IsDashing) ? 0.5f : 1.0f;
@@ -234,7 +242,10 @@ public class CharacterMovement : MonoBehaviour
 
     public void CalcFacing()
     {
-        if (MoveX != 0) Facing = (int)MoveX;
+        if (MoveX != 0) _facing = (int)MoveX;
+        Vector3 scale = transform.localScale;
+        if (scale.x == _facing) return;
+        transform.localScale = new Vector3(scale.x * _facing, scale.y, scale.z);
     }
 
     /// <summary>
@@ -254,12 +265,6 @@ public class CharacterMovement : MonoBehaviour
             _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunAccel * mult * deltaTime);   //Approach the max speed
             if (_speed.x != 0) Console.LogFormat("Move speed X Approach {0:F3}", _speed.x);
         }
-
-        //if (MoveY != 0)
-        //{
-        //    _speed.x = Mathf.MoveTowards(_speed.x, MaxRun, RunAccel * mult * 0.5f * deltaTime);
-        //}       
-
         //Console.LogFormat("Move speed X {0:F3}", _speed.x);
     }
 
@@ -281,7 +286,7 @@ public class CharacterMovement : MonoBehaviour
 
     private void SuperJumping()
     {
-        _speed.x = SuperJumpH * Facing;
+        _speed.x = SuperJumpH * _facing;
         _speed.y = JumpSpeed;
     }
 
@@ -336,7 +341,7 @@ public class CharacterMovement : MonoBehaviour
     {
         if (MoveX == 0 && MoveY == 0)
         {
-            _dashDir = new Vector2(Facing, 0);
+            _dashDir = new Vector2(_facing, 0);
         }
         else if (MoveX != 0 && MoveY == 0)
         {
@@ -494,7 +499,7 @@ public class CharacterMovement : MonoBehaviour
 
     private void Awake()
     {
-        Facing = 1;
+        _facing = 1;
         _groundMask = LayerMask.GetMask("Ground");
         _rigidbody = GetComponent<Rigidbody2D>();
         _boxCollider = GetComponent<BoxCollider2D>();

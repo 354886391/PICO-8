@@ -337,6 +337,7 @@ GameObject:
   - component: {fileID: 126606797}
   - component: {fileID: 126606794}
   - component: {fileID: 126606795}
+  - component: {fileID: 126606796}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -374,6 +375,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _movement: {fileID: 126606795}
+  _animation: {fileID: 126606796}
 --- !u!114 &126606795
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -386,36 +388,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34ddee103e663d24e9a5053d69e48809, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxRun: 9
-  MaxFall: -16
-  FastMaxFall: -24
-  FastMaxAccel: 30
-  RunAccel: 100
-  RunReduce: 40
-  Gravity: 90
-  HalfGravThreshold: 4
-  AirMult: 0.65
-  ClimbSpeed: 4.8
-  ClimbSlipSpeed: -3.6
-  ClimbAccel: 140
-  ClimbGrabYMult: 0.2
-  JumpHBoost: 4
-  JumpSpeed: 10.5
-  JumpTime: 0.2
-  JumpKeyTime: 0.15
-  DashPower: 30
-  DashTime: 0.15
-  DashCooldownTime: 0.2
-  DashRefillCooldown: 0.1
-  SkinWidth: 0.02
-  MinOffset: 0.0001
-  VerticalRaysCount: 5
-  HorizontalRaysCount: 5
   _onGround: 0
   _hitCeiling: 0
   _againstWall: 0
+  _facing: 0
   _maxFall: 0
-  _facing: {x: 1, y: 0}
   _speed: {x: 0, y: 0}
   _jump: 0
   _isJumping: 0
@@ -431,6 +408,8 @@ MonoBehaviour:
   _canDashTimer: 0
   _dashTimer: 0
   _dashCooldownTimer: 0
+  _dashDir: {x: 0, y: 0}
+  _beforeDashSpeed: {x: 0, y: 0}
   _verticalRaysInterval: 0
   _horizontalRaysInterval: 0
   _rayOrigin:
@@ -442,6 +421,19 @@ MonoBehaviour:
     m_Bits: 0
   _rigidbody: {fileID: 0}
   _boxCollider: {fileID: 0}
+--- !u!114 &126606796
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 126606792}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e0cd3971231da64b8c0e994a0f8be6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _anim: {fileID: 1539991422}
 --- !u!50 &126606797
 Rigidbody2D:
   serializedVersion: 4
@@ -4431,6 +4423,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1539991420}
   - component: {fileID: 1539991421}
+  - component: {fileID: 1539991422}
   m_Layer: 9
   m_Name: Body
   m_TagString: Untagged
@@ -4500,6 +4493,25 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!95 &1539991422
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1539991419}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 407acae45c43c82499bab3620f46ab4f, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &1639266817
 GameObject:
   m_ObjectHideFlags: 0
@@ -4696,6 +4708,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1936604953}
   - component: {fileID: 1936604954}
+  - component: {fileID: 1936604955}
   m_Layer: 0
   m_Name: Hairs
   m_TagString: Untagged
@@ -4773,6 +4786,28 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1936604955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1936604952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 115d76f19d525094d86f9ab5950697f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  HairTrans:
+  - {fileID: 282470077}
+  - {fileID: 435851614}
+  - {fileID: 621321805}
+  - {fileID: 1038796886}
+  - {fileID: 97476056}
+  - {fileID: 321046046}
+  - {fileID: 2084421131}
+  - {fileID: 1639266818}
+  PastPositions: []
 --- !u!1 &1995783156
 GameObject:
   m_ObjectHideFlags: 0

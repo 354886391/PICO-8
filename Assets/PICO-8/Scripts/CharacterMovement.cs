@@ -73,7 +73,7 @@ public class CharacterMovement : MonoBehaviour
     public bool _hitCeiling;
     public bool _againstWall;
 
-    public int _facing;
+    
     public float _maxFall;
     public Vector2 _speed;
 
@@ -113,7 +113,7 @@ public class CharacterMovement : MonoBehaviour
 
     public float MoveY { get; set; }
 
-
+    public int Facing { get; set; }
 
     public bool Jump
     {
@@ -236,17 +236,17 @@ public class CharacterMovement : MonoBehaviour
         {
             float mult = Mathf.Abs(_speed.y) < HalfGravThreshold && (IsJumping || IsDashing) ? 0.5f : 1.0f;
             _speed.y = Mathf.MoveTowards(_speed.y, _maxFall, Gravity * mult * deltaTime);
-            if (Mathf.Abs(_speed.y) > MinOffset) Console.LogFormat("ApplyGravity after speed Y {0:F3}", _speed.y);
+            //if (Mathf.Abs(_speed.y) > MinOffset) Console.LogFormat("ApplyGravity after speed Y {0:F3}", _speed.y);
         }
     }
 
     public void ApplyFacing()
     {
-        if (MoveX != 0) _facing = (int)MoveX;
+        if (MoveX != 0) Facing = (int)MoveX;
         Vector3 scale = transform.localScale;
-        if (scale.x == _facing) return;
+        if (scale.x == Facing) return;
         transform.localScale = new Vector3(-scale.x, scale.y, scale.z);
-        Console.LogFormat("scale.x {0},  _facing {1}", scale.x, _facing);
+        Console.LogFormat("scale.x {0},  _facing {1}", scale.x, Facing);
     }
 
     /// <summary>
@@ -287,7 +287,7 @@ public class CharacterMovement : MonoBehaviour
 
     private void SuperJumping()
     {
-        _speed.x = SuperJumpH * _facing;
+        _speed.x = SuperJumpH * Facing;
         _speed.y = JumpSpeed;
     }
 
@@ -348,7 +348,7 @@ public class CharacterMovement : MonoBehaviour
     {
         if (MoveX == 0 && MoveY == 0)
         {
-            _dashDir = new Vector2(_facing, 0);
+            _dashDir = new Vector2(Facing, 0);
         }
         else if (MoveX != 0 && MoveY == 0)
         {
@@ -499,7 +499,7 @@ public class CharacterMovement : MonoBehaviour
 
     private void Awake()
     {
-        _facing = 1;
+        Facing = 1;
         _groundMask = LayerMask.GetMask("Ground");
         _rigidbody = GetComponent<Rigidbody2D>();
         _boxCollider = GetComponent<BoxCollider2D>();

@@ -7,8 +7,6 @@ public class CharacterAnimation : MonoBehaviour
     private int idle;
     private int run;
     private int jump;
-    private int fall;
-    private int dash;
     private int lookUp;
     private int lookDown;
     [SerializeField]
@@ -19,33 +17,47 @@ public class CharacterAnimation : MonoBehaviour
         idle = Animator.StringToHash("Idle");
         run = Animator.StringToHash("Run");
         jump = Animator.StringToHash("Jump");
-        fall = Animator.StringToHash("Fall");
-        dash = Animator.StringToHash("Dash");
         lookUp = Animator.StringToHash("LookUp");
         lookDown = Animator.StringToHash("LookDown");
     }
 
-
+    /// <param name="movement"></param>
     public void UpdateAnimation(CharacterMovement movement)
     {
+        var moveX = movement.MoveX;
+        var moveY = movement.MoveY;
         if (movement._onGround)
         {
-            if (movement.MoveX == 0 && movement.MoveY == 0)
+            if (moveX == 0 && moveY == 0)
             {
                 _anim.Play(idle);
             }
-            if (movement.MoveX != 0)
+            else if (moveX != 0)
             {
                 _anim.Play(run);
             }
-            else if (movement.MoveY > 0)
+            else if (moveY != 0)
             {
-                _anim.Play(lookUp);
-            }
-            else if (movement.MoveY < 0)
-            {
-                _anim.Play(lookDown);
+                _anim.Play(moveY > 0 ? lookUp : lookDown);
             }
         }
+        else if (movement.IsJumping || movement.IsDashing)
+        {
+            _anim.Play(jump);
+        }
+    }
+
+}
+
+public static class Utility
+{
+    public static bool IsPlaying(this Animator animator, int stateNameHash)
+    {
+        var stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        if (stateInfo.shortNameHash == stateNameHash)
+        {
+            return true;
+        }
+        return false;
     }
 }

@@ -19,11 +19,12 @@ public class CharacterController : MonoBehaviour
     {
         _movement.UpdateInput();
         _animation.UpdateAnimation(_movement);
+        _movement.Move(Time.deltaTime);
     }
 
     private void FixedUpdate()
     {
-        _movement.Move(Time.deltaTime);
+       
     }
 
 }

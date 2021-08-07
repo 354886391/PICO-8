@@ -41,7 +41,7 @@ public class CharacterAnimation : MonoBehaviour
                 _anim.Play(moveY > 0 ? lookUp : lookDown);
             }
         }
-        else if (movement.IsJumping || movement.IsDashing)
+        else if (movement.IsJumping || movement.IsDashing || movement.IsFalling)
         {
             _anim.Play(jump);
         }

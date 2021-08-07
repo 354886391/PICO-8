@@ -55,7 +55,7 @@ public class CharacterMovement : MonoBehaviour
     #endregion
 
     #region Dash  
-    public const float DashSpeed = 24f;
+    public const float DashSpeed = 16f;
     public const float EndDashSpeed = 9f;
     public const float EndDashUpMult = 0.75f;
     public const float DashTime = 0.15f;
@@ -73,7 +73,7 @@ public class CharacterMovement : MonoBehaviour
     public bool _hitCeiling;
     public bool _againstWall;
 
-    
+
     public float _maxFall;
     public Vector2 _speed;
 
@@ -155,7 +155,6 @@ public class CharacterMovement : MonoBehaviour
             if (_dash && value == false)
             {
                 _canDash = true;
-                //_dashCooldownTimer = 0.0f;
             }
             _dash = value;
             if (!_dash && _onGround)
@@ -221,22 +220,22 @@ public class CharacterMovement : MonoBehaviour
 
     private void ApplyGravity(float deltaTime)
     {
-        float mf = MaxFall;
-        float fmf = FastMaxFall;
-        if (MoveY == -1 && _speed.y <= mf)
-        {
-            _maxFall = Mathf.MoveTowards(_maxFall, fmf, FastMaxAccel * deltaTime);
-        }
-        else
-        {
-            _maxFall = Mathf.MoveTowards(_maxFall, mf, FastMaxAccel * deltaTime);
-        }
-
+        //float mf = MaxFall;
+        //float fmf = FastMaxFall;
+        //if (MoveY == -1 && _speed.y <= mf)
+        //{
+        //    _maxFall = Mathf.MoveTowards(_maxFall, fmf, FastMaxAccel * deltaTime);
+        //}
+        //else
+        //{
+        //    _maxFall = Mathf.MoveTowards(_maxFall, mf, FastMaxAccel * deltaTime);
+        //}
+        _maxFall = MaxFall;
         if (!_onGround)
         {
-            float mult = Mathf.Abs(_speed.y) < HalfGravThreshold && (IsJumping || IsDashing) ? 0.5f : 1.0f;
+            float mult = Mathf.Abs(_speed.y) < HalfGravThreshold && (IsJumping || IsFalling) ? 0.5f : 1.0f;
             _speed.y = Mathf.MoveTowards(_speed.y, _maxFall, Gravity * mult * deltaTime);
-            //if (Mathf.Abs(_speed.y) > MinOffset) Console.LogFormat("ApplyGravity after speed Y {0:F3}", _speed.y);
+            if (Mathf.Abs(_speed.y) > MinOffset) Console.LogFormat("ApplyGravity after speed Y {0:F3}", _speed.y);
         }
     }
 
@@ -273,14 +272,13 @@ public class CharacterMovement : MonoBehaviour
     {
         if (!_onGround) return;
         if (!Jump || !_canJump) return;
-        // Is jump button pressed within jump tolerance?
         if (_jumpHeldDownTimer > JumpForceTime) return;
         _canJump = false;
         _isJumping = true;
         _canJumpTimer = true;
         _speed.x += JumpHBoost * MoveX;
         _speed.y = JumpSpeed;
-        Console.Log("Jumping");
+        Console.LogFormat("Jumping {0}", _speed.y);
         // Apply jump impulse
 
     }
@@ -325,10 +323,10 @@ public class CharacterMovement : MonoBehaviour
         if (Jump && _jumpTimer < JumpVarTime)
         {
             _speed.y = JumpSpeed;
-            //var jumpProcess = _jumpTimer / JumpTime;
+            //var jumpProcess = _jumpTimer / JumpVarTime;
             //_speed.y = Mathf.Lerp(JumpSpeed, 0.0f, jumpProcess);
             _jumpTimer = Mathf.Min(_jumpTimer + deltaTime, JumpVarTime);
-            //Console.Log("Jumping Timer");
+            Console.LogFormat("Jumping Timer {0}", _speed.y);
         }
         else
         {
@@ -344,23 +342,23 @@ public class CharacterMovement : MonoBehaviour
     /// MoveY输入状态(MoveX为0): Dash方向---MoveY 1 SuperJump, -1 FastMaxFall
     /// MoveX, MoveY同时输入状态: Dash方向: Angle(MoveX, MoveY)
     /// </summary>
-    private void DashDir()
+    private void DashDir(ref Vector2 dashDir)
     {
         if (MoveX == 0 && MoveY == 0)
         {
-            _dashDir = new Vector2(Facing, 0);
+            dashDir = new Vector2(Facing, 0);
         }
         else if (MoveX != 0 && MoveY == 0)
         {
-            _dashDir = new Vector2(MoveX, 0);
+            dashDir = new Vector2(MoveX, 0);
         }
         else if (MoveX == 0 && MoveY != 0)
         {
-            _dashDir = new Vector2(0, MoveY);
+            dashDir = new Vector2(0, MoveY);
         }
         else
         {
-            _dashDir = new Vector2(MoveX, MoveY).normalized;
+            dashDir = new Vector2(MoveX, MoveY).normalized;
         }
     }
 
@@ -373,7 +371,8 @@ public class CharacterMovement : MonoBehaviour
         _canDashTimer = true;
         _beforeDashSpeed = _speed;
         _speed = Vector2.zero;
-        DashDir();
+        DashDir(ref _dashDir);
+        Console.LogFormat("Dashing {0}", _speed);
     }
 
     private void UpdateDashTimer(float deltaTime)
@@ -381,16 +380,20 @@ public class CharacterMovement : MonoBehaviour
         if (!_canDashTimer) return;
         if (_dashTimer < DashTime)
         {
-            _speed = DashSpeed * _dashDir;
+            //_speed = DashSpeed * _dashDir;
+            var newSpeed = _dashDir * DashSpeed;
+            if (Mathf.Sign(_beforeDashSpeed.x) == Mathf.Sign(newSpeed.x) && Mathf.Abs(_beforeDashSpeed.x) > Mathf.Abs(newSpeed.x))
+                newSpeed.x = _beforeDashSpeed.x;
+            _speed = newSpeed;
             _dashTimer = Mathf.Min(_dashTimer + deltaTime, DashTime);
-            Console.Log("Dashing Timer");
+            Console.LogFormat("Dashing Timer {0}", _speed);
         }
         else
         {
             _dashTimer = 0.0f;
             _dashCooldownTimer = 0.0f;
             _canDashTimer = false;
-            if (_dashDir.y > 0)
+            if (_dashDir.y < 0)
                 _speed = EndDashSpeed * _dashDir;
             if (_speed.y > 0)
                 _speed.y *= EndDashUpMult;

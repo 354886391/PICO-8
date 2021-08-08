@@ -12,19 +12,19 @@ public class CharacterController : MonoBehaviour
     private void Awake()
     {
         Application.targetFrameRate = 60;
-        Time.fixedDeltaTime = 0.0166667f;
+        Time.fixedDeltaTime = 0.02f;
     }
 
     private void Update()
     {
         _movement.UpdateInput();
         _animation.UpdateAnimation(_movement);
-        _movement.Move(Time.deltaTime);
+
     }
 
     private void FixedUpdate()
     {
-       
+        _movement.Move(Time.fixedDeltaTime);
     }
 
 }

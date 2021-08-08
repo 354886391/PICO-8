@@ -9,6 +9,10 @@ public class CharacterAnimation : MonoBehaviour
     private int jump;
     private int lookUp;
     private int lookDown;
+
+    private Color normalRed = new Color(1f, 0f, 77 / 255f);
+    private Color dashBlue = new Color(41 / 255f, 173 / 255f, 1f);
+
     [SerializeField]
     private Animator _anim;
 
@@ -26,7 +30,7 @@ public class CharacterAnimation : MonoBehaviour
     {
         var moveX = movement.MoveX;
         var moveY = movement.MoveY;
-        if (movement._onGround)
+        if (movement.OnGround)
         {
             if (moveX == 0 && moveY == 0)
             {
@@ -45,6 +49,15 @@ public class CharacterAnimation : MonoBehaviour
         {
             _anim.Play(jump);
         }
+        if (movement.IsDashing && !movement.OnGround)
+        {
+            Console.LogFormat("Is dashing {0}", movement.IsDashing);
+            _anim.SetColor(dashBlue);
+        }
+        else
+        {
+            _anim.SetColor(normalRed);
+        }
     }
 
 }
@@ -59,5 +72,10 @@ public static class Utility
             return true;
         }
         return false;
+    }
+
+    public static void SetColor(this Animator anim, Color color)
+    {
+        anim.GetComponentInChildren<SpriteRenderer>().color = color;
     }
 }

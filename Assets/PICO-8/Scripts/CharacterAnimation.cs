@@ -49,9 +49,8 @@ public class CharacterAnimation : MonoBehaviour
         {
             _anim.Play(jump);
         }
-        if (movement.IsDashing && !movement.OnGround)
+        if (movement.IsDashing)
         {
-            Console.LogFormat("Is dashing {0}", movement.IsDashing);
             _anim.SetColor(dashBlue);
         }
         else

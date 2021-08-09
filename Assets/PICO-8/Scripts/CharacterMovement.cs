@@ -86,17 +86,25 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private int _midAirJumpCount = 0;   // 0 or 1
     #endregion
 
-    #region Dash
-    [SerializeField] private bool _isFreeze;
+    #region Dash    
     [SerializeField] private bool _dash;
     [SerializeField] private bool _isDashing;
+    [SerializeField] private bool _isFreezing;
     [SerializeField] private bool _canDash = true;
     [SerializeField] private bool _canDashTimer = false;
     [SerializeField] private float _dashTimer;
     [SerializeField] private float _dashCooldownTimer;
     [SerializeField] private Vector2 _dashDir;
     [SerializeField] private Vector2 _beforeDashSpeed;
+    #endregion
 
+    #region Climb
+    [SerializeField] private bool _climb;
+    [SerializeField] private bool _isClimbing;
+    [SerializeField] private bool _canClimb = true;
+    [SerializeField] private bool _canClimbTimer = false;
+    [SerializeField] private float _climbTimer;
+    [SerializeField] private float _climbCooldownTimer;
     #endregion
 
     private float _verticalRaysInterval;
@@ -114,6 +122,12 @@ public class CharacterMovement : MonoBehaviour
 
     public int Facing { get; set; }
 
+    public Vector2 Speed
+    {
+        get { return _speed; }
+        set { _speed = value; }
+    }
+
     public bool OnGround { get; set; }
 
     public bool HitCeiling { get; set; }
@@ -121,7 +135,7 @@ public class CharacterMovement : MonoBehaviour
     public bool AgainstWall { get; set; }
 
     /// <summary>
-    /// TODO
+    /// 按键响应
     /// </summary>
     public bool Jump
     {
@@ -129,13 +143,13 @@ public class CharacterMovement : MonoBehaviour
         set
         {
             // 按键释放
-            if (_jump && value == false)
+            if (_jump && !value)
             {
                 _canJump = true;
                 _jumpHeldDownTimer = 0.0f;
             }
-            // 按键充能
             _jump = value;
+            // 按键充能
             if (_jump)
             {
                 _jumpHeldDownTimer += Time.deltaTime;
@@ -156,42 +170,41 @@ public class CharacterMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// TODO
+    /// 按键响应
     /// </summary>
     public bool Dash
     {
         get { return _dash; }
         set
         {
-            if (_dash && value == false)
+            if (_dash && !value)
             {
                 _canDash = true;
             }
             _dash = value;
-            if (!_dash && OnGround)
+            if (!_isDashing)
             {
                 _dashCooldownTimer += Time.deltaTime;
             }
         }
     }
 
-    /// <summary>
-    /// TODO
-    /// </summary>
     public bool IsDashing
     {
         get
         {
-            //if (!_dash && ! _canDashTimer)
-            //{
-            //    _isDashing = false;
-            //}
-            //if (_isDashing)
-            //{
-            //    _isDashing = false;
-            //}
+            if (_isDashing && !_canDashTimer && OnGround)
+            {
+                _isDashing = false;
+            }
             return _isDashing;
         }
+    }
+
+    public bool Climb
+    {
+        get { return _climb; }
+        set { _climb = value; }
     }
 
     public bool IsFalling
@@ -249,7 +262,7 @@ public class CharacterMovement : MonoBehaviour
         //    _maxFall = Mathf.MoveTowards(_maxFall, mf, FastMaxAccel * deltaTime);
         //}
         _maxFall = MaxFall;
-        if (!OnGround && !_isFreeze)
+        if (!OnGround && !_isFreezing)
         {
             float mult = Mathf.Abs(_speed.y) < HalfGravThreshold && (IsJumping || IsFalling) ? 0.5f : 1.0f;
             _speed.y = Mathf.MoveTowards(_speed.y, _maxFall, Gravity * mult * deltaTime);
@@ -402,13 +415,13 @@ public class CharacterMovement : MonoBehaviour
             if (_dashTimer > 0.05f)
             {
                 _speed = DashSpeed * _dashDir;
-                _isFreeze = false;                
-                Console.LogFormat("Dashing Timer Freeze {0}, Speed {1}", _isFreeze, _speed);
+                _isFreezing = false;
+                Console.LogFormat("Dashing Timer Freeze {0}, Speed {1}", _isFreezing, _speed);
             }
             else
             {
-                _isFreeze = true;
-                Console.LogFormat("Freezing Timer Freeze {0}, Speed {1}", _isFreeze, _speed);
+                _isFreezing = true;
+                Console.LogFormat("Freezing Timer Freeze {0}, Speed {1}", _isFreezing, _speed);
             }
             _dashTimer = Mathf.Min(_dashTimer + deltaTime, DashTime);
         }
@@ -422,6 +435,11 @@ public class CharacterMovement : MonoBehaviour
             if (_speed.y > 0)
                 _speed.y *= EndDashUpMult;
         }
+    }
+
+    private void Climbing()
+    {
+
     }
 
     private void CorrectionAndMove(float deltaTime)

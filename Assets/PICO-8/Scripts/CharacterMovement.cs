@@ -27,13 +27,7 @@ public class CharacterMovement : MonoBehaviour
 
     public const float Gravity = 90f;
     public const float HalfGravThreshold = 4f;
-
     public const float AirMult = 0.65f;
-
-    public const float ClimbSpeed = 4.8f;
-    public const float ClimbSlipSpeed = -3.6f;
-    public const float ClimbAccel = 90f + 50f;
-    public const float ClimbGrabYMult = 0.2f;
 
     #region Jump
     public const float JumpHBoost = 4f;
@@ -52,7 +46,6 @@ public class CharacterMovement : MonoBehaviour
     public const float SuperWallJumpSpeed = 16f;
     public const float SuperWallJumpVarTime = 0.25f;
     public const float SuperWallJumpForceTime = 0.2f;
-
     #endregion
 
     #region Dash  
@@ -63,10 +56,26 @@ public class CharacterMovement : MonoBehaviour
     public const float DashCooldownTime = 0.2f;
     #endregion
 
+    #region Climb
+
+    private const float ClimbUpSpeed = 4.5f;
+    private const float ClimbDownSpeed = 8f;
+    private const float ClimbSlipSpeed = 3f;
+    private const float ClimbAccel = 90f;
+    private const float ClimbGrabYMult = .2f;
+    private const float ClimbNoMoveTime = .1f;
+    private const float ClimbTiredThreshold = 2f;
+    private const float ClimbMaxStamina = 110;
+    private const float ClimbUpCost = 100 / 2.2f;
+    private const float ClimbStillCost = 100 / 10f;
+    private const float ClimbJumpCost = 110 / 4f;
+    #endregion
+
     public const float SkinWidth = 0.02f;
     public const float MinOffset = 0.0001f;
     public const float VerticalRaysCount = 5;
     public const float HorizontalRaysCount = 5;
+
     #endregion
 
     #region Vars
@@ -105,6 +114,8 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private bool _canClimbTimer = false;
     [SerializeField] private float _climbTimer;
     [SerializeField] private float _climbCooldownTimer;
+    [SerializeField] private float _wallSlideTimer;
+    [SerializeField] private float _climbMoMoveTimer;
     #endregion
 
     private float _verticalRaysInterval;
@@ -121,6 +132,8 @@ public class CharacterMovement : MonoBehaviour
     public float MoveY { get; set; }
 
     public int Facing { get; set; }
+
+    public float Stamina { get; set; }
 
     public Vector2 Speed
     {
@@ -204,7 +217,18 @@ public class CharacterMovement : MonoBehaviour
     public bool Climb
     {
         get { return _climb; }
-        set { _climb = value; }
+        set
+        {
+            if (_climb && !value)
+            {
+                _canClimb = true;
+            }
+            _climb = value;
+            if (true)
+            {
+
+            }
+        }
     }
 
     public bool IsFalling
@@ -224,6 +248,8 @@ public class CharacterMovement : MonoBehaviour
         UpdateJumpTimer(deltaTime);
         Dashing();
         UpdateDashTimer(deltaTime);
+        Climbing();
+        UpdateClimbTimer(deltaTime);
         //SnapToGround();
         //LimitLateralVelocity();
         //LimitVerticalVelocity();
@@ -437,8 +463,24 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 设计:
+    /// @1撞到墙立即静止
+    /// </summary>
     private void Climbing()
     {
+        if (!_climb || !_canClimb) return;
+        if (_climbMoMoveTimer < ClimbNoMoveTime) return;
+        _canClimb = false;
+        _isClimbing = true;
+        _canClimbTimer = true;
+        _speed.x = 0;
+        _speed.y *= ClimbGrabYMult;
+    }
+
+    private void UpdateClimbTimer(float deltaTime)
+    {
+        if (OnGround) Stamina = ClimbMaxStamina;
 
     }
 
@@ -540,6 +582,7 @@ public class CharacterMovement : MonoBehaviour
         MoveY = Input.GetAxisRaw("Vertical");
         Jump = Input.GetKey(KeyCode.C);
         Dash = Input.GetKey(KeyCode.X);
+        Climb = Input.GetKey(KeyCode.Z);
     }
 
     private void Awake()

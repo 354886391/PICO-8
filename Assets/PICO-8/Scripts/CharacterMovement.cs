@@ -64,6 +64,7 @@ public class CharacterMovement : MonoBehaviour
     private const float ClimbAccel = 90f;
     private const float ClimbGrabYMult = .2f;
     private const float ClimbNoMoveTime = .1f;
+    private const float ClimbVarTime = 2f;
     private const float ClimbTiredThreshold = 2f;
     private const float ClimbMaxStamina = 110;
     private const float ClimbUpCost = 100 / 2.2f;
@@ -214,21 +215,38 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 按键响应
+    /// </summary>
     public bool Climb
     {
         get { return _climb; }
         set
         {
-            if (_climb && !value)
+            if (_climb && !value && AgainstWall)
             {
                 _canClimb = true;
+                _climbTimer = 0.0f;
             }
             _climb = value;
-            if (true)
+            if (_climb && AgainstWall)
             {
-
+                _climbTimer += Time.deltaTime;
             }
         }
+    }
+
+    public bool IsClimbing
+    {
+        get
+        {
+            if (_isClimbing && !_canClimbTimer && OnGround)
+            {
+                _isClimbing = false;
+            }
+            return _isClimbing;
+        }
+
     }
 
     public bool IsFalling
@@ -480,7 +498,16 @@ public class CharacterMovement : MonoBehaviour
 
     private void UpdateClimbTimer(float deltaTime)
     {
-        if (OnGround) Stamina = ClimbMaxStamina;
+        if (!_canClimbTimer) return;
+        if (_climbTimer > ClimbVarTime) return;
+        if (MoveY > 0)
+        {
+            _speed.y = ClimbSlipSpeed;
+        }
+        else if (MoveY < 0)
+        {
+
+        }
 
     }
 

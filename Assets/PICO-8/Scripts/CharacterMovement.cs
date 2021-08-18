@@ -346,7 +346,7 @@ public class CharacterMovement : MonoBehaviour
     private void Jumping()
     {
         if (!OnGround) return;
-        if (!Jump || !_canJump) return;
+        if (!_jump || !_canJump) return;
         if (_jumpHeldDownTimer > JumpForceTime) return;
         _canJump = false;
         _isJumping = true;
@@ -381,7 +381,7 @@ public class CharacterMovement : MonoBehaviour
         if (_midAirJump > 0 && OnGround)
             _midAirJump = 0;
         if (OnGround) return;
-        if (!Jump || !_canJump) return;
+        if (!_jump || !_canJump) return;
         if (_midAirJump >= _midAirJumpCount) return;
         _midAirJump++;
         _canJump = false;
@@ -395,7 +395,7 @@ public class CharacterMovement : MonoBehaviour
     {
         if (!_canJumpTimer) return;
         // If jump button is held down and extra jump time is not exceeded...
-        if (Jump && _jumpTimer < JumpVarTime)
+        if (_jump && _jumpTimer < JumpVarTime)
         {
             _speed.y = JumpSpeed;
             //var jumpProcess = _jumpTimer / JumpVarTime;

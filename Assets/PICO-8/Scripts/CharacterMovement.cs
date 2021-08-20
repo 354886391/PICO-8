@@ -186,18 +186,20 @@ public class CharacterMovement : MonoBehaviour
             {
                 _dashHeldDownTimer += Time.deltaTime;
             }
-            _canDashCooldDown = _onGround;
-            if (_onGround)
+            if (!_canDashCooldDown)
             {
                 _dashCooldDownTimer = 0.0f;
             }
-            if (_canDashCooldDown)
+            else
             {
                 _dashCooldDownTimer += Time.deltaTime;
             }
         }
     }
 
+    /// <summary>
+    /// 包括下降的部分
+    /// </summary>
     public bool IsDashing
     {
         get
@@ -391,6 +393,11 @@ public class CharacterMovement : MonoBehaviour
 
     private void DashBegin()
     {
+        if (_dash)
+        {
+
+        }
+        if (_canDashCooldDown) return;
         if (!_dash || !_canDash) return;
         if (_dashHeldDownTimer > DashToleranceTime) return;
         _canDash = false;
@@ -398,7 +405,19 @@ public class CharacterMovement : MonoBehaviour
         _canDashTimer = true;
         _speed = Vector2.zero;
         CamputeDashDir();
-        Console.LogFormat("Dashing {0}", _speed);
+        Console.LogFormat("DashBegin {0}", _speed);
+    }
+
+    private void DashCooldDownUpdate()
+    {
+        if (!_canDashCooldDown)
+        {
+            _dashCooldDownTimer = 0.0f;
+        }
+        else
+        {
+            _dashCooldDownTimer += Time.deltaTime;
+        }
     }
 
     /// <summary>
@@ -444,8 +463,9 @@ public class CharacterMovement : MonoBehaviour
                 Console.LogFormat("Freezing Timer Freeze {0}, Speed {1}", _isFreezing, _speed);
             }
             _dashTimer = Mathf.Min(_dashTimer + deltaTime, DashTime);
+            Console.LogFormat("DashUpdate {0}", _speed);
         }
-        else
+        else if (_onGround)
         {
             DashEnd();
         }
@@ -455,6 +475,8 @@ public class CharacterMovement : MonoBehaviour
     {
         _dashTimer = 0.0f;
         _canDashTimer = false;
+        _canDashCooldDown = true;
+        Console.LogFormat("DashEnd {0}", _speed);
     }
 
     /// <summary>

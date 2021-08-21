@@ -36,7 +36,7 @@ public class CharacterMovement : MonoBehaviour
 
     #region Dash  
     public const float DashSpeed = 18f;
-    public const float DashTime = 0.2f;
+    public const float DashTime = 0.2f - 0.05f;
     public const float DashToleranceTime = 0.2f;
     public const float DashCooldownTime = 0.2f;
     #endregion
@@ -186,14 +186,6 @@ public class CharacterMovement : MonoBehaviour
             {
                 _dashHeldDownTimer += Time.deltaTime;
             }
-            if (!_canDashCooldDown)
-            {
-                _dashCooldDownTimer = 0.0f;
-            }
-            else
-            {
-                _dashCooldDownTimer += Time.deltaTime;
-            }
         }
     }
 
@@ -261,6 +253,7 @@ public class CharacterMovement : MonoBehaviour
         JumpBegin();
         MidAirJumpBegin();
         JumpUpdate(deltaTime);
+        CooldDownUpdate();
         DashBegin();
         DashUpdate(deltaTime);
         Climbing();
@@ -307,7 +300,7 @@ public class CharacterMovement : MonoBehaviour
         {
             float mult = Mathf.Abs(_speed.y) < HalfGravThreshold && (IsJumping || IsFalling) ? 0.5f : 1.0f;
             _speed.y = Mathf.MoveTowards(_speed.y, _maxFall, Gravity * mult * deltaTime);
-            if (Mathf.Abs(_speed.y) > MinOffset) Console.LogFormat("ApplyGravity after speed Y {0:F3}", _speed.y);
+            //if (Mathf.Abs(_speed.y) > MinOffset) Console.LogFormat("ApplyGravity after speed Y {0:F3}", _speed.y);
         }
     }
 
@@ -330,12 +323,10 @@ public class CharacterMovement : MonoBehaviour
         if (Mathf.Abs(_speed.x) > MaxRun && Mathf.Sign(_speed.x) == MoveX)
         {
             _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunReduce * mult * deltaTime);  //Reduce back from beyond the max speed
-            //if (_speed.x != 0) Console.LogFormat("Move speed X Reduce {0:F3}", _speed.x);
         }
         else
         {
             _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunAccel * mult * deltaTime);   //Approach the max speed
-            //if (_speed.x != 0) Console.LogFormat("Move speed X Approach {0:F3}", _speed.x);
         }
         //Console.LogFormat("Move speed X {0:F3}", _speed.x);
     }
@@ -393,10 +384,6 @@ public class CharacterMovement : MonoBehaviour
 
     private void DashBegin()
     {
-        if (_dash)
-        {
-
-        }
         if (_canDashCooldDown) return;
         if (!_dash || !_canDash) return;
         if (_dashHeldDownTimer > DashToleranceTime) return;
@@ -405,18 +392,21 @@ public class CharacterMovement : MonoBehaviour
         _canDashTimer = true;
         _speed = Vector2.zero;
         CamputeDashDir();
+        //Console.Freeze(50);
         Console.LogFormat("DashBegin {0}", _speed);
     }
 
-    private void DashCooldDownUpdate()
+    private void CooldDownUpdate()
     {
-        if (!_canDashCooldDown)
+        if (!_canDashCooldDown) return;
+        if (_dashCooldDownTimer < DashCooldownTime)
         {
-            _dashCooldDownTimer = 0.0f;
+            _dashCooldDownTimer = Mathf.Min(_dashCooldDownTimer + Time.deltaTime, DashCooldownTime);
         }
         else
         {
-            _dashCooldDownTimer += Time.deltaTime;
+            _dashCooldDownTimer = 0.0f;
+            _canDashCooldDown = false;
         }
     }
 
@@ -455,17 +445,17 @@ public class CharacterMovement : MonoBehaviour
             {
                 _isFreezing = false;
                 _speed = DashSpeed * _dashDir;
-                Console.LogFormat("Dashing Timer Freeze {0}, Speed {1}", _isFreezing, _speed);
+                Console.LogFormat("Dashing Timer Freeze <color=red>{0}</color>, Speed {1}", _isFreezing, _speed);
             }
             else
             {
                 _isFreezing = true;
-                Console.LogFormat("Freezing Timer Freeze {0}, Speed {1}", _isFreezing, _speed);
+                _speed = Vector2.zero;
+                Console.LogWarningFormat("Freezing Timer Freeze <color=green>{0}</color>, Speed {1}", _isFreezing, _speed);
             }
             _dashTimer = Mathf.Min(_dashTimer + deltaTime, DashTime);
-            Console.LogFormat("DashUpdate {0}", _speed);
         }
-        else if (_onGround)
+        else
         {
             DashEnd();
         }
@@ -506,7 +496,6 @@ public class CharacterMovement : MonoBehaviour
         {
 
         }
-
     }
 
     private void CorrectionAndMove(float deltaTime)
@@ -608,6 +597,7 @@ public class CharacterMovement : MonoBehaviour
         Jump = Input.GetKey(KeyCode.C);
         Dash = Input.GetKey(KeyCode.X);
         Climb = Input.GetKey(KeyCode.Z);
+        //Console.LogWarning("timeScale " + Time.timeScale + "deltaTime " + Time.deltaTime);
     }
 
     private void Awake()

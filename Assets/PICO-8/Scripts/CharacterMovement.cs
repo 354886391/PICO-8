@@ -39,7 +39,7 @@ public class CharacterMovement : MonoBehaviour
     public const float EndDashSpeed = 16f;
     public const float DashTime = 0.15f;
     public const float DashToleranceTime = 0.2f;
-    public const float DashCooldownTime = 0.2f;
+    public const float DashCooldownTime = 0.2f + 0.3f;
     #endregion
 
     #region Climb
@@ -160,6 +160,9 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 仅上升阶段
+    /// </summary>
     public bool IsJumping
     {
         get
@@ -193,6 +196,9 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 包括上升与下降部分
+    /// </summary>
     public bool IsDashing
     {
         get
@@ -238,6 +244,9 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 仅下降阶段
+    /// </summary>
     public bool IsFalling
     {
         get { return !_onGround && _speed.y < MinOffset; }
@@ -463,6 +472,7 @@ public class CharacterMovement : MonoBehaviour
 
     private void DashEnd()
     {
+        //if (!_onGround) return;
         _dashTimer = 0.0f;
         _canDashTimer = false;
         _canDashCooldDown = true;

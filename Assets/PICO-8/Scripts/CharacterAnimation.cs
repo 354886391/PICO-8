@@ -7,8 +7,10 @@ public class CharacterAnimation : MonoBehaviour
     private int idle;
     private int run;
     private int jump;
+    private int climb;
     private int lookUp;
     private int lookDown;
+
 
     private Color normalRed = new Color(1f, 0f, 77 / 255f);
     private Color dashBlue = new Color(41 / 255f, 173 / 255f, 1f);
@@ -48,6 +50,10 @@ public class CharacterAnimation : MonoBehaviour
         else if (movement.IsJumping || movement.IsDashing || movement.IsFalling)
         {
             _anim.Play(jump);
+        }
+        if (movement.IsClimbing)
+        {
+            _anim.Play(climb);
         }
         if (movement.IsDashing)
         {

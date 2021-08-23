@@ -38,7 +38,7 @@ public class CharacterMovement : MonoBehaviour
     public const float DashSpeed = 24f;
     public const float EndDashSpeed = 16f;
     public const float DashTime = 0.15f;
-    public const float DashToleranceTime = 0.2f;
+    public const float DashToleranceTime = 0.15f;
     public const float DashCooldownTime = 0.2f + 0.3f;
     #endregion
 
@@ -46,11 +46,11 @@ public class CharacterMovement : MonoBehaviour
     private const float ClimbUpSpeed = 4.5f;
     private const float ClimbDownSpeed = 8f;
     private const float ClimbSlipSpeed = 3f;
-    private const float ClimbToleranceTime = 2f;
+    private const float ClimbTime = 0.5f;
+    private const float ClimbToleranceTime = 0.15f;
     private const float ClimbAccel = 90f;
     private const float ClimbGrabYMult = .2f;
     private const float ClimbNoMoveTime = .1f;
-    private const float ClimbVarTime = 2f;
     private const float ClimbTiredThreshold = 2f;
     private const float ClimbMaxStamina = 110;
     private const float ClimbUpCost = 100 / 2.2f;
@@ -197,7 +197,7 @@ public class CharacterMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// 包括上升与下降部分
+    /// 仅上升阶段
     /// </summary>
     public bool IsDashing
     {
@@ -222,12 +222,12 @@ public class CharacterMovement : MonoBehaviour
             if (_climb && !value && _againstWall)
             {
                 _canClimb = true;
-                _climbTimer = 0.0f;
+                _climbHeldDownTimer = 0.0f;
             }
             _climb = value;
             if (_climb && _againstWall)
             {
-                _climbTimer += Time.deltaTime;
+                _climbHeldDownTimer += Time.deltaTime;
             }
         }
     }
@@ -236,7 +236,7 @@ public class CharacterMovement : MonoBehaviour
     {
         get
         {
-            if (_isClimbing && !_againstWall)
+            if (_isClimbing && !_canClimbTimer)
             {
                 _isClimbing = false;
             }
@@ -492,16 +492,30 @@ public class CharacterMovement : MonoBehaviour
         _canClimb = false;
         _isClimbing = true;
         _canClimbTimer = true;
-        _speed = Vector2.zero;
         Console.LogFormat("ClimbBegin {0}", _speed);
     }
 
     private void ClimbUpdate(float deltaTime)
     {
-        if (!_againstWall) return;
         if (!_canClimbTimer) return;
-        if (_climbTimer > ClimbVarTime) return;
-        _speed.y = MoveY > 0 ? ClimbUpSpeed : (MoveY < 0 ? ClimbDownSpeed : ClimbSlipSpeed);
+        if (_climbTimer < ClimbTime)
+        {
+            if (_climbTimer > 0.05f)
+            {
+                _isFreezing = false;
+                _speed.y = MoveY > 0 ? ClimbUpSpeed : (MoveY < 0 ? ClimbDownSpeed : ClimbSlipSpeed);
+            }
+            else
+            {
+                _isFreezing = true;
+                _speed = Vector2.zero;
+            }
+            _climbTimer = Mathf.Min(_climbTimer + deltaTime, ClimbTime);
+        }
+        else
+        {
+            ClimbEnd();
+        }
 
     }
 
@@ -509,7 +523,6 @@ public class CharacterMovement : MonoBehaviour
     {
         _climbTimer = 0.0f;
         _canClimbTimer = false;
-        _canDashCooldDown = true;
         Console.LogFormat("ClimbEnd {0}", _speed);
     }
 

@@ -525,7 +525,7 @@ public class CharacterMovement : MonoBehaviour
     private void AgainstWallUpdate(float deltaTime)
     {
         if (!_againstWall) return;
-        if (!(_climb || _dash) && MoveX == Facing)
+        if (!(_climb && _dash) && MoveX == Facing)
         {
             _speed.y = Mathf.MoveTowards(_speed.y, ClimbSlipSpeed, ClimbAccel * deltaTime);
         }

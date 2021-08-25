@@ -55,16 +55,10 @@ public class CharacterAnimation : MonoBehaviour
         {
             _anim.Play(climb);
         }
-        if (movement.IsDashing)
-        {
-            _anim.SetColor(dashBlue);
-        }
-        else
-        {
-            _anim.SetColor(normalRed);
-        }
-    }
 
+        // SetColor
+        _anim.SetColor(movement.IsDashing ? dashBlue : normalRed);
+    }
 }
 
 public static class Utility

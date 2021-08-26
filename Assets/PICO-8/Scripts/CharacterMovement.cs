@@ -48,6 +48,7 @@ public class CharacterMovement : MonoBehaviour
     private const float ClimbSlipSpeed = -3f;
     private const float ClimbTime = 2.0f;
     private const float ClimbToleranceTime = 0.15f;
+    private const float ClimbCooldDownTime = 0.2f;
     private const float ClimbAccel = 90f;
     private const float ClimbGrabYMult = .2f;
     private const float ClimbNoMoveTime = .1f;
@@ -66,7 +67,8 @@ public class CharacterMovement : MonoBehaviour
 
     #region Vars
     [SerializeField] private bool _onGround;
-    [SerializeField] private bool _againstWall;
+    [SerializeField] private int _hCollision;
+    [SerializeField] private int _vCollision;
     [SerializeField] private bool _isFreezing;
     [SerializeField] private float _maxFall;
     [SerializeField] private Vector2 _speed;
@@ -99,6 +101,7 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private bool _isClimbing;
     [SerializeField] private bool _canClimb;
     [SerializeField] private bool _canClimbTimer;
+    [SerializeField] private bool _canClimbCooldDown;
     [SerializeField] private float _climbTimer;
     [SerializeField] private float _climbHeldDownTimer;
     [SerializeField] private float _climbCooldownTimer;
@@ -137,10 +140,10 @@ public class CharacterMovement : MonoBehaviour
 
     public bool HitCeiling { get; set; }
 
-    public bool AgainstWall
+    public int AgainstWall
     {
-        get { return _againstWall; }
-        set { _againstWall = value; }
+        get { return _hCollision; }
+        set { _hCollision = value; }
     }
 
     /// <summary>
@@ -223,7 +226,7 @@ public class CharacterMovement : MonoBehaviour
         get { return _climb; }
         set
         {
-            if (_climb && !value && _againstWall)
+            if (_climb && !value)
             {
                 _canClimb = true;
                 _climbHeldDownTimer = 0.0f;
@@ -261,12 +264,12 @@ public class CharacterMovement : MonoBehaviour
         ComputeRayOrigin();
         DetectGround(deltaTime);
         ApplyGravity(deltaTime);
+        CooldDown(deltaTime);
         ApplyFacing();
         Moving(deltaTime);
         JumpBegin();
         MidAirJumpBegin();
         JumpUpdate(deltaTime);
-        CooldDownUpdate(deltaTime);
         DashBegin();
         DashUpdate(deltaTime);
         ClimbBegin();
@@ -392,18 +395,32 @@ public class CharacterMovement : MonoBehaviour
         _canJumpTimer = false;
     }
 
-    private void CooldDownUpdate(float deltaTime)
+    private void CooldDown(float deltaTime)
     {
         if (!_onGround) return;
-        if (!_canDashCooldDown) return;
-        if (_dashCooldDownTimer < DashCooldownTime)
+        if (_canDashCooldDown)
         {
-            _dashCooldDownTimer = Mathf.Min(_dashCooldDownTimer + deltaTime, DashCooldownTime);
+            if (_dashCooldDownTimer < DashCooldownTime)
+            {
+                _dashCooldDownTimer = Mathf.Min(_dashCooldDownTimer + deltaTime, DashCooldownTime);
+            }
+            else
+            {
+                _dashCooldDownTimer = 0.0f;
+                _canDashCooldDown = false;
+            }
         }
-        else
+        if (_canClimbCooldDown)
         {
-            _dashCooldDownTimer = 0.0f;
-            _canDashCooldDown = false;
+            if (_climbCooldownTimer < ClimbCooldDownTime)
+            {
+                _climbCooldownTimer = Mathf.Min(_climbCooldownTimer + deltaTime, ClimbCooldDownTime);
+            }
+            else
+            {
+                _climbCooldownTimer = 0.0f;
+                _canClimbCooldDown = false;
+            }
         }
     }
 
@@ -487,7 +504,8 @@ public class CharacterMovement : MonoBehaviour
     /// </summary>
     private void ClimbBegin()
     {
-        if (!_againstWall) return;
+        if (_hCollision == 0) return;
+        if (_canClimbCooldDown) return;
         if (!_climb || !_canClimb) return;
         if (_climbHeldDownTimer > ClimbToleranceTime) return;
         _canClimb = false;
@@ -501,19 +519,8 @@ public class CharacterMovement : MonoBehaviour
         if (!_canClimbTimer) return;
         if (_climb && _climbTimer < ClimbTime)
         {
-            if (MoveY > 0)
-            {
-                _speed.y = MoveY * ClimbUpSpeed;
-            }
-            else if (MoveY < 0)
-            {
-                _speed.y = MoveY * ClimbDownSpeed;
-            }
-            else
-            {
-                _speed.y = 0.0f;
-            }
-            //_speed.y = MoveY * (MoveY > 0 ? ClimbUpSpeed : (MoveY < 0 ? ClimbDownSpeed : 0.0f));
+            _speed.x = 0.0f;
+            _speed.y = MoveY * (MoveY > 0 ? ClimbUpSpeed : (MoveY < 0 ? ClimbDownSpeed : 0.0f));
             _climbTimer = Mathf.Min(_climbTimer + deltaTime, ClimbTime);
         }
         else
@@ -526,12 +533,13 @@ public class CharacterMovement : MonoBehaviour
     {
         _climbTimer = 0.0f;
         _canClimbTimer = false;
+        _canClimbCooldDown = true;
         Console.LogFormat("ClimbEnd {0}", _speed);
     }
 
     private void AgainstWallUpdate(float deltaTime)
     {
-        if (!_againstWall) return;
+        if (_hCollision == 0) return;
         if (Climb || Dash) return;
         if (IsJumping || IsDashing) return;
         if (MoveX == Facing)
@@ -555,58 +563,73 @@ public class CharacterMovement : MonoBehaviour
         MoveToPosition(deltaMovement);
     }
 
-    private void FixedHorizontally(ref Vector2 deltaMovement)
+    /// <summary>
+    /// 水平修正
+    /// </summary>
+    private RaycastHit2D FixedHorizontally(ref Vector2 deltaMovement)
     {
-        _againstWall = false;
+        _hCollision = 0;
         var isGoingRight = deltaMovement.x > MinOffset;
         var origin = isGoingRight ? _rayOrigin.bottomRight : _rayOrigin.bottomLeft;
         var direction = isGoingRight ? Vector2.right : Vector2.left;
         var distance = Mathf.Abs(deltaMovement.x) + SkinWidth;
+        RaycastHit2D raycastHit = new RaycastHit2D();
         for (int i = 0; i < VerticalRaysCount; i++)
         {
             var rayOrigin = new Vector2(origin.x, origin.y + _verticalRaysInterval * i);
-            var _raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
+            raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
             Console.DrawRay(rayOrigin, direction * distance, Color.blue);
-            if (_raycastHit)
+            if (raycastHit)
             {
-                _againstWall = true;
+
                 if (isGoingRight)
                 {
-                    deltaMovement.x = _raycastHit.distance - SkinWidth;   // 右方
+                    _hCollision = 1;
+                    deltaMovement.x = raycastHit.distance - SkinWidth;   // 右方
                 }
                 else
                 {
-                    deltaMovement.x = SkinWidth - _raycastHit.distance;   // 左方
+                    _hCollision = -1;
+                    deltaMovement.x = SkinWidth - raycastHit.distance;   // 左方
                 }
-                if (Mathf.Abs(deltaMovement.x) < MinOffset) return;
+                if (Mathf.Abs(deltaMovement.x) < MinOffset) return raycastHit;
             }
         }
+        return raycastHit;
     }
 
-    private void FixedVertically(ref Vector2 deltaMovement)
+    /// <summary>
+    /// 竖直修正
+    /// </summary>
+    private RaycastHit2D FixedVertically(ref Vector2 deltaMovement)
     {
+        _vCollision = 0;
         var isGoingUp = deltaMovement.y > MinOffset;
         var origin = isGoingUp ? _rayOrigin.topLeft : _rayOrigin.bottomLeft;
         var direction = isGoingUp ? Vector2.up : Vector2.down;
         var distance = Mathf.Abs(deltaMovement.y) + SkinWidth;
+        RaycastHit2D raycastHit = new RaycastHit2D();
         for (int i = 0; i < HorizontalRaysCount; i++)
         {
             var rayOrigin = new Vector2(origin.x + _horizontalRaysInterval * i, origin.y);
-            var _raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
+            raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
             Console.DrawRay(rayOrigin, direction * distance, Color.red);
-            if (_raycastHit)
+            if (raycastHit)
             {
                 if (isGoingUp)
                 {
-                    deltaMovement.y = _raycastHit.distance - SkinWidth;   // 上方
+                    _vCollision = 1;
+                    deltaMovement.y = raycastHit.distance - SkinWidth;   // 上方
                 }
                 else
                 {
-                    deltaMovement.y = SkinWidth - _raycastHit.distance;   // 下方
+                    _vCollision = -1;
+                    deltaMovement.y = SkinWidth - raycastHit.distance;   // 下方
                 }
-                if (Mathf.Abs(deltaMovement.y) < MinOffset) return;
+                if (Mathf.Abs(deltaMovement.y) < MinOffset) return raycastHit;
             }
         }
+        return raycastHit;
     }
 
     private void MoveToPosition(Vector2 deltaMovement)

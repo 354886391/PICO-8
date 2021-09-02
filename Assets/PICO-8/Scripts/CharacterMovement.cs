@@ -11,6 +11,7 @@ public class CharacterMovement : MonoBehaviour
         public Vector2 bottomLeft;
         public Vector2 bottomRight;
     }
+
     #endregion
 
     #region Constants
@@ -67,8 +68,8 @@ public class CharacterMovement : MonoBehaviour
 
     #region Vars
     [SerializeField] private bool _onGround;
-    [SerializeField] private int _hCollision;
-    [SerializeField] private int _vCollision;
+    [SerializeField] private int _hCollision;   // 水平方向与墙壁的碰撞检测(需持续施加力), -1 left, 0 None, 1 right 
+    [SerializeField] private int _vCollision;   // 竖直方向, 同上
     [SerializeField] private bool _isFreezing;
     [SerializeField] private float _maxFall;
     [SerializeField] private Vector2 _speed;
@@ -514,12 +515,18 @@ public class CharacterMovement : MonoBehaviour
         Console.LogFormat("ClimbBegin {0}", _speed);
     }
 
+    /// <summary>
+    /// 抓住墙时, 必须继续按住向墙方向移动的方向键, 否则_hCollision = 0 (ERROR)
+    /// 在撞到墙时, 按住 Z键即应该转抓住墙壁, 不需同时按住方向键
+    /// 抓住墙壁时, 松开Z键开始下落, 若未降到地面再次按下Z键应再次抓住墙壁
+    /// </summary>
+    /// <param name="deltaTime"></param>
     private void ClimbUpdate(float deltaTime)
     {
+        //if (_hCollision == 0) return;
         if (!_canClimbTimer) return;
         if (_climb && _climbTimer < ClimbTime)
         {
-            _speed.x = 0.0f;
             _speed.y = MoveY * (MoveY > 0 ? ClimbUpSpeed : (MoveY < 0 ? ClimbDownSpeed : 0.0f));
             _climbTimer = Mathf.Min(_climbTimer + deltaTime, ClimbTime);
         }
@@ -550,6 +557,8 @@ public class CharacterMovement : MonoBehaviour
 
     private void CorrectionAndMove(float deltaTime)
     {
+        _hCollision = 0;
+        _vCollision = 0;
         var deltaMovement = _speed * deltaTime;
         if (deltaMovement.x != 0.0f)
         {
@@ -568,7 +577,6 @@ public class CharacterMovement : MonoBehaviour
     /// </summary>
     private RaycastHit2D FixedHorizontally(ref Vector2 deltaMovement)
     {
-        _hCollision = 0;
         var isGoingRight = deltaMovement.x > MinOffset;
         var origin = isGoingRight ? _rayOrigin.bottomRight : _rayOrigin.bottomLeft;
         var direction = isGoingRight ? Vector2.right : Vector2.left;
@@ -603,7 +611,6 @@ public class CharacterMovement : MonoBehaviour
     /// </summary>
     private RaycastHit2D FixedVertically(ref Vector2 deltaMovement)
     {
-        _vCollision = 0;
         var isGoingUp = deltaMovement.y > MinOffset;
         var origin = isGoingUp ? _rayOrigin.topLeft : _rayOrigin.bottomLeft;
         var direction = isGoingUp ? Vector2.up : Vector2.down;

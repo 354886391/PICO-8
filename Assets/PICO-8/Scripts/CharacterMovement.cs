@@ -280,6 +280,9 @@ public class CharacterMovement : MonoBehaviour
         CorrectionAndMove(deltaTime);
     }
 
+    /// <summary>
+    /// Todo空中落地瞬间根据速度, 更改角色scale, 产生Q弹效果
+    /// </summary>
     private void DetectGround(float deltaTime)
     {
         _onGround = false;
@@ -298,6 +301,10 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Todo空中贴墙瞬间根据速度, 更改角色scale, 产生Q弹效果
+    /// </summary>
+    /// <param name="deltaTime"></param>
     private void DetectWall(float deltaTime)
     {
         _againstWall = false;

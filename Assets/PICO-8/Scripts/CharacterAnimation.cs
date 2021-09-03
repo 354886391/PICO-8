@@ -55,7 +55,6 @@ public class CharacterAnimation : MonoBehaviour
         {
             _anim.Play(climb);
         }
-
         // SetColor
         _anim.SetColor(movement.IsDashing ? dashBlue : normalRed);
     }

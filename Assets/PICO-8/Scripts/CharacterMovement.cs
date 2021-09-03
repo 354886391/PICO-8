@@ -68,8 +68,7 @@ public class CharacterMovement : MonoBehaviour
 
     #region Vars
     [SerializeField] private bool _onGround;
-    [SerializeField] private int _hCollision;   // 水平方向与墙壁的碰撞检测(需持续施加力), -1 left, 0 None, 1 right 
-    [SerializeField] private int _vCollision;   // 竖直方向, 同上
+    [SerializeField] private bool _againstWall;
     [SerializeField] private bool _isFreezing;
     [SerializeField] private float _maxFall;
     [SerializeField] private Vector2 _speed;
@@ -141,10 +140,10 @@ public class CharacterMovement : MonoBehaviour
 
     public bool HitCeiling { get; set; }
 
-    public int AgainstWall
+    public bool AgainstWall
     {
-        get { return _hCollision; }
-        set { _hCollision = value; }
+        get { return _againstWall; }
+        set { _againstWall = value; }
     }
 
     /// <summary>
@@ -263,10 +262,12 @@ public class CharacterMovement : MonoBehaviour
     public void Move(float deltaTime)
     {
         ComputeRayOrigin();
-        DetectGround(deltaTime);
-        ApplyGravity(deltaTime);
-        CooldDown(deltaTime);
         ApplyFacing();
+        DetectGround(deltaTime);
+        DetectWall(deltaTime);
+        ApplyGravity(deltaTime);
+        CooldDownUpdate(deltaTime);
+
         Moving(deltaTime);
         JumpBegin();
         MidAirJumpBegin();
@@ -287,12 +288,30 @@ public class CharacterMovement : MonoBehaviour
         var distance = Mathf.Abs(_speed.y * deltaTime) + SkinWidth;
         for (int i = 0; i < HorizontalRaysCount; i++)
         {
-            var rayOrigin = new Vector2(origin.x + _horizontalRaysInterval * i, origin.y - SkinWidth);
+            var rayOrigin = new Vector2(origin.x + _horizontalRaysInterval * i, origin.y);
             var raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
             Console.DrawRay(rayOrigin, direction * distance, Color.green);
-            if (raycastHit /*&& raycastHit.distance < 0.001f + _skinWidth*/)
+            if (raycastHit)
             {
                 _onGround = true; break;
+            }
+        }
+    }
+
+    private void DetectWall(float deltaTime)
+    {
+        _againstWall = false;
+        var origin = Facing < 0 ? _rayOrigin.bottomLeft : _rayOrigin.bottomRight;
+        var direction = Vector2.right * Facing;
+        var distance = Mathf.Abs(_speed.x * deltaTime) + SkinWidth;
+        for (int i = 0; i < VerticalRaysCount; i++)
+        {
+            var rayOrigin = new Vector2(origin.x, origin.y + _verticalRaysInterval * i);
+            var raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
+            Console.DrawRay(rayOrigin, direction * distance, Color.red);
+            if (raycastHit)
+            {
+                _againstWall = true; break;
             }
         }
     }
@@ -396,7 +415,7 @@ public class CharacterMovement : MonoBehaviour
         _canJumpTimer = false;
     }
 
-    private void CooldDown(float deltaTime)
+    private void CooldDownUpdate(float deltaTime)
     {
         if (!_onGround) return;
         if (_canDashCooldDown)
@@ -491,7 +510,6 @@ public class CharacterMovement : MonoBehaviour
 
     private void DashEnd()
     {
-        //if (!_onGround) return;
         _dashTimer = 0.0f;
         _canDashTimer = false;
         _canDashCooldDown = true;
@@ -499,13 +517,9 @@ public class CharacterMovement : MonoBehaviour
         Console.LogFormat("DashEnd {0}", _speed);
     }
 
-    /// <summary>
-    /// 设计:
-    /// @1撞到墙立即静止
-    /// </summary>
     private void ClimbBegin()
     {
-        if (_hCollision == 0) return;
+        if (!_againstWall) return;
         if (_canClimbCooldDown) return;
         if (!_climb || !_canClimb) return;
         if (_climbHeldDownTimer > ClimbToleranceTime) return;
@@ -516,19 +530,23 @@ public class CharacterMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// 抓住墙时, 必须继续按住向墙方向移动的方向键, 否则_hCollision = 0 (ERROR)
     /// 在撞到墙时, 按住 Z键即应该转抓住墙壁, 不需同时按住方向键
-    /// 抓住墙壁时, 松开Z键开始下落, 若未降到地面再次按下Z键应再次抓住墙壁
+    /// Todo: 抓住墙壁时, 松开Z键开始下落, 若未降到地面再次按下Z键应再次抓住墙壁
     /// </summary>
-    /// <param name="deltaTime"></param>
     private void ClimbUpdate(float deltaTime)
     {
-        //if (_hCollision == 0) return;
         if (!_canClimbTimer) return;
-        if (_climb && _climbTimer < ClimbTime)
+        if (_againstWall)
         {
-            _speed.y = MoveY * (MoveY > 0 ? ClimbUpSpeed : (MoveY < 0 ? ClimbDownSpeed : 0.0f));
-            _climbTimer = Mathf.Min(_climbTimer + deltaTime, ClimbTime);
+            if (_climb && _climbTimer < ClimbTime)
+            {
+                _speed.y = MoveY * (MoveY > 0 ? ClimbUpSpeed : (MoveY < 0 ? ClimbDownSpeed : 0.0f));
+                _climbTimer = Mathf.Min(_climbTimer + deltaTime, ClimbTime);
+            }
+            else
+            {
+                ClimbEnd();
+            }
         }
         else
         {
@@ -544,11 +562,15 @@ public class CharacterMovement : MonoBehaviour
         Console.LogFormat("ClimbEnd {0}", _speed);
     }
 
+    /// <summary>
+    /// 在空中贴到墙璧时缓慢下落
+    /// </summary>
+    /// <param name="deltaTime"></param>
     private void AgainstWallUpdate(float deltaTime)
     {
-        if (_hCollision == 0) return;
-        if (Climb || Dash) return;
-        if (IsJumping || IsDashing) return;
+        if (!_againstWall) return;
+        //if (Climb || Dash) return;
+        //if (IsJumping || IsDashing) return;
         if (MoveX == Facing)
         {
             _speed.y = Mathf.MoveTowards(_speed.y, ClimbSlipSpeed, ClimbAccel * deltaTime);
@@ -557,8 +579,6 @@ public class CharacterMovement : MonoBehaviour
 
     private void CorrectionAndMove(float deltaTime)
     {
-        _hCollision = 0;
-        _vCollision = 0;
         var deltaMovement = _speed * deltaTime;
         if (deltaMovement.x != 0.0f)
         {
@@ -592,15 +612,13 @@ public class CharacterMovement : MonoBehaviour
 
                 if (isGoingRight)
                 {
-                    _hCollision = 1;
                     deltaMovement.x = raycastHit.distance - SkinWidth;   // 右方
                 }
                 else
                 {
-                    _hCollision = -1;
                     deltaMovement.x = SkinWidth - raycastHit.distance;   // 左方
                 }
-                if (Mathf.Abs(deltaMovement.x) < MinOffset) return raycastHit;
+                //if (Mathf.Abs(deltaMovement.x) < MinOffset) return raycastHit;
             }
         }
         return raycastHit;
@@ -625,15 +643,13 @@ public class CharacterMovement : MonoBehaviour
             {
                 if (isGoingUp)
                 {
-                    _vCollision = 1;
                     deltaMovement.y = raycastHit.distance - SkinWidth;   // 上方
                 }
                 else
                 {
-                    _vCollision = -1;
                     deltaMovement.y = SkinWidth - raycastHit.distance;   // 下方
                 }
-                if (Mathf.Abs(deltaMovement.y) < MinOffset) return raycastHit;
+                //if (Mathf.Abs(deltaMovement.y) < MinOffset) return raycastHit;
             }
         }
         return raycastHit;

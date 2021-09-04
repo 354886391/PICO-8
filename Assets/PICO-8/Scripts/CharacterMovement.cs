@@ -45,7 +45,7 @@ public class CharacterMovement : MonoBehaviour
 
     #region Climb
     private const float ClimbUpSpeed = 4.5f;
-    private const float ClimbDownSpeed = 8f;
+    private const float ClimbDownSpeed = -8f;
     private const float ClimbSlipSpeed = -3f;
     private const float ClimbTime = 2.0f;
     private const float ClimbToleranceTime = 0.15f;
@@ -77,7 +77,7 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private bool _jump;
     [SerializeField] private bool _isJumping;
     [SerializeField] private bool _canJump;
-    [SerializeField] private bool _canJumpTimer;
+    [SerializeField] private bool _canJumpUpdate;
     [SerializeField] private float _jumpTimer;
     [SerializeField] private float _jumpHeldDownTimer;
     [SerializeField] private int _midAirJumps;
@@ -87,7 +87,7 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private bool _dash;
     [SerializeField] private bool _isDashing;
     [SerializeField] private bool _canDash;
-    [SerializeField] private bool _canDashTimer;
+    [SerializeField] private bool _canDashUpdate;
     [SerializeField] private bool _canDashCooldDown;
     [SerializeField] private float _dashTimer;
     [SerializeField] private float _dashHeldDownTimer;
@@ -100,7 +100,7 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private bool _climb;
     [SerializeField] private bool _isClimbing;
     [SerializeField] private bool _canClimb;
-    [SerializeField] private bool _canClimbTimer;
+    [SerializeField] private bool _canClimbUpdate;
     [SerializeField] private bool _canClimbCooldDown;
     [SerializeField] private float _climbTimer;
     [SerializeField] private float _climbHeldDownTimer;
@@ -243,7 +243,7 @@ public class CharacterMovement : MonoBehaviour
     {
         get
         {
-            if (_isClimbing && !_canClimbTimer)
+            if (_isClimbing && !_canClimbUpdate)
             {
                 _isClimbing = false;
             }
@@ -276,7 +276,7 @@ public class CharacterMovement : MonoBehaviour
         DashUpdate(deltaTime);
         ClimbBegin();
         ClimbUpdate(deltaTime);
-        AgainstWallUpdate(deltaTime);
+        //AgainstWallUpdate(deltaTime);
         CorrectionAndMove(deltaTime);
     }
 
@@ -378,7 +378,7 @@ public class CharacterMovement : MonoBehaviour
         if (_jumpHeldDownTimer > JumpToleranceTime) return;
         _canJump = false;
         _isJumping = true;
-        _canJumpTimer = true;
+        _canJumpUpdate = true;
         _speed.x += JumpHBoost * MoveX;
         _speed.y = JumpSpeed;
         Console.LogFormat("Jumping {0}", _speed.y);
@@ -394,14 +394,14 @@ public class CharacterMovement : MonoBehaviour
         _midAirJumps++;
         _canJump = false;
         _isJumping = true;
-        _canJumpTimer = true;
+        _canJumpUpdate = true;
         // Apply jump impulse
 
     }
 
     private void JumpUpdate(float deltaTime)
     {
-        if (!_canJumpTimer) return;
+        if (!_canJumpUpdate) return;
         if (_jump && _jumpTimer < JumpTime)
         {
             _speed.y = JumpSpeed;
@@ -419,7 +419,7 @@ public class CharacterMovement : MonoBehaviour
     private void JumpEnd()
     {
         _jumpTimer = 0.0f;
-        _canJumpTimer = false;
+        _canJumpUpdate = false;
     }
 
     private void CooldDownUpdate(float deltaTime)
@@ -484,7 +484,7 @@ public class CharacterMovement : MonoBehaviour
         if (_dashHeldDownTimer > DashToleranceTime) return;
         _canDash = false;
         _isDashing = true;
-        _canDashTimer = true;
+        _canDashUpdate = true;
         CamputeDashDir();
         //Console.Freeze(50);
         Console.LogFormat("DashBegin {0}", _speed);
@@ -492,7 +492,7 @@ public class CharacterMovement : MonoBehaviour
 
     private void DashUpdate(float deltaTime)
     {
-        if (!_canDashTimer) return;
+        if (!_canDashUpdate) return;
         if (_dashTimer < DashTime)
         {
             if (_dashTimer > 0.05f)
@@ -518,7 +518,7 @@ public class CharacterMovement : MonoBehaviour
     private void DashEnd()
     {
         _dashTimer = 0.0f;
-        _canDashTimer = false;
+        _canDashUpdate = false;
         _canDashCooldDown = true;
         _speed = EndDashSpeed * _dashDir;
         Console.LogFormat("DashEnd {0}", _speed);
@@ -532,7 +532,9 @@ public class CharacterMovement : MonoBehaviour
         if (_climbHeldDownTimer > ClimbToleranceTime) return;
         _canClimb = false;
         _isClimbing = true;
-        _canClimbTimer = true;
+        _canClimbUpdate = true;
+        _speed.x = 0;
+        _speed.y *= ClimbGrabYMult;
         Console.LogFormat("ClimbBegin {0}", _speed);
     }
 
@@ -542,12 +544,27 @@ public class CharacterMovement : MonoBehaviour
     /// </summary>
     private void ClimbUpdate(float deltaTime)
     {
-        if (!_canClimbTimer) return;
+        if (!_canClimbUpdate) return;
         if (_againstWall)
         {
+            float target = 0;
+            if (_onGround) _climbTimer = 0;
             if (_climb && _climbTimer < ClimbTime)
             {
-                _speed.y = MoveY * (MoveY > 0 ? ClimbUpSpeed : (MoveY < 0 ? ClimbDownSpeed : 0.0f));
+                if (MoveY > 0)
+                {
+                    target = ClimbUpSpeed;
+                }
+                else if (MoveY < 0)
+                {
+                    target = ClimbDownSpeed;
+                }
+                else if (MoveX == Facing)
+                {
+                    target = ClimbSlipSpeed;
+                }
+                _speed.y = target;
+                //_speed.y = Mathf.MoveTowards(_speed.y, target, ClimbAccel * deltaTime);
                 _climbTimer = Mathf.Min(_climbTimer + deltaTime, ClimbTime);
             }
             else
@@ -561,11 +578,24 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
+    private void AgainstWallUpdate(float deltaTime)
+    {
+        if (_againstWall)
+        {
+            //if (Climb || Dash) return;
+            //if (IsJumping || IsDashing) return;
+            if (MoveX == Facing)
+            {
+                _speed.y = Mathf.MoveTowards(_speed.y, ClimbSlipSpeed, ClimbAccel * deltaTime);
+            }
+        }
+    }
+
     private void ClimbEnd()
     {
         _climbTimer = 0.0f;
-        _canClimbTimer = false;
-        _canClimbCooldDown = true;
+        _canClimbUpdate = false;
+        //_canClimbCooldDown = true;
         Console.LogFormat("ClimbEnd {0}", _speed);
     }
 
@@ -573,16 +603,7 @@ public class CharacterMovement : MonoBehaviour
     /// 在空中贴到墙璧时缓慢下落
     /// </summary>
     /// <param name="deltaTime"></param>
-    private void AgainstWallUpdate(float deltaTime)
-    {
-        if (!_againstWall) return;
-        //if (Climb || Dash) return;
-        //if (IsJumping || IsDashing) return;
-        if (MoveX == Facing)
-        {
-            _speed.y = Mathf.MoveTowards(_speed.y, ClimbSlipSpeed, ClimbAccel * deltaTime);
-        }
-    }
+
 
     private void CorrectionAndMove(float deltaTime)
     {

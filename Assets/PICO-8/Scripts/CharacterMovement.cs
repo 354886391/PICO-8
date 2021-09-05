@@ -288,12 +288,12 @@ public class CharacterMovement : MonoBehaviour
         _onGround = false;
         var origin = _rayOrigin.bottomLeft;
         var direction = Vector2.down;
-        var distance = Mathf.Abs(_speed.y * deltaTime) + SkinWidth;
+        var distance = Mathf.Abs(_speed.y * deltaTime) + SkinWidth * 2f;
         for (int i = 0; i < HorizontalRaysCount; i++)
         {
             var rayOrigin = new Vector2(origin.x + _horizontalRaysInterval * i, origin.y);
             var raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
-            Console.DrawRay(rayOrigin, direction * distance, Color.green);
+            Console.DrawRay(rayOrigin, direction * distance, Color.red);
             if (raycastHit)
             {
                 _onGround = true; break;
@@ -310,7 +310,7 @@ public class CharacterMovement : MonoBehaviour
         _againstWall = false;
         var origin = Facing < 0 ? _rayOrigin.bottomLeft : _rayOrigin.bottomRight;
         var direction = Vector2.right * Facing;
-        var distance = Mathf.Abs(_speed.x * deltaTime) + SkinWidth;
+        var distance = Mathf.Abs(_speed.x * deltaTime) + SkinWidth * 2f;
         for (int i = 0; i < VerticalRaysCount; i++)
         {
             var rayOrigin = new Vector2(origin.x, origin.y + _verticalRaysInterval * i);
@@ -547,47 +547,43 @@ public class CharacterMovement : MonoBehaviour
         if (!_canClimbUpdate) return;
         if (_againstWall)
         {
-            float target = 0;
-            if (_onGround) _climbTimer = 0;
-            if (_climb && _climbTimer < ClimbTime)
+            if (_climb)
             {
-                if (MoveY > 0)
+                float target = 0;
+                if (_climbTimer < ClimbTime)
                 {
-                    target = ClimbUpSpeed;
+                    if (MoveY > 0)
+                    {
+                        target = ClimbUpSpeed;
+                    }
+                    else if (MoveY < 0)
+                    {
+                        target = ClimbDownSpeed;
+                    }
+                    else if (MoveX == Facing)
+                    {
+                        target = ClimbSlipSpeed;
+                    }
+                    _speed.y = target;
+                    //_speed.y = Mathf.MoveTowards(_speed.y, target, ClimbAccel * deltaTime);
+                    _climbTimer = Mathf.Min(_climbTimer + deltaTime, ClimbTime);
                 }
-                else if (MoveY < 0)
+                else
                 {
-                    target = ClimbDownSpeed;
+                    // 停止更新, Climb进入CD状态
+                    ClimbEnd();
                 }
-                else if (MoveX == Facing)
-                {
-                    target = ClimbSlipSpeed;
-                }
-                _speed.y = target;
-                //_speed.y = Mathf.MoveTowards(_speed.y, target, ClimbAccel * deltaTime);
-                _climbTimer = Mathf.Min(_climbTimer + deltaTime, ClimbTime);
             }
             else
             {
-                ClimbEnd();
+                // 松开Climb按键
+                _canClimbUpdate = false;
             }
         }
         else
         {
-            ClimbEnd();
-        }
-    }
-
-    private void AgainstWallUpdate(float deltaTime)
-    {
-        if (_againstWall)
-        {
-            //if (Climb || Dash) return;
-            //if (IsJumping || IsDashing) return;
-            if (MoveX == Facing)
-            {
-                _speed.y = Mathf.MoveTowards(_speed.y, ClimbSlipSpeed, ClimbAccel * deltaTime);
-            }
+            // 不再撞到墙壁
+            _canClimbUpdate = false;
         }
     }
 
@@ -595,7 +591,7 @@ public class CharacterMovement : MonoBehaviour
     {
         _climbTimer = 0.0f;
         _canClimbUpdate = false;
-        //_canClimbCooldDown = true;
+        _canClimbCooldDown = true;
         Console.LogFormat("ClimbEnd {0}", _speed);
     }
 
@@ -634,7 +630,7 @@ public class CharacterMovement : MonoBehaviour
         {
             var rayOrigin = new Vector2(origin.x, origin.y + _verticalRaysInterval * i);
             raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
-            Console.DrawRay(rayOrigin, direction * distance, Color.blue);
+            //Console.DrawRay(rayOrigin, direction * distance, Color.blue);
             if (raycastHit)
             {
 
@@ -666,7 +662,7 @@ public class CharacterMovement : MonoBehaviour
         {
             var rayOrigin = new Vector2(origin.x + _horizontalRaysInterval * i, origin.y);
             raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
-            Console.DrawRay(rayOrigin, direction * distance, Color.red);
+            //Console.DrawRay(rayOrigin, direction * distance, Color.red);
             if (raycastHit)
             {
                 if (isGoingUp)

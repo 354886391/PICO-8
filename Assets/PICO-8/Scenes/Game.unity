@@ -397,14 +397,14 @@ MonoBehaviour:
   _jump: 0
   _isJumping: 0
   _canJump: 1
-  _canJumpTimer: 0
+  _canJumpUpdate: 0
   _jumpTimer: 0
   _jumpHeldDownTimer: 0
   _midAirJumps: 0
   _dash: 0
   _isDashing: 0
   _canDash: 1
-  _canDashTimer: 0
+  _canDashUpdate: 0
   _canDashCooldDown: 0
   _dashTimer: 0
   _dashHeldDownTimer: 0
@@ -414,7 +414,8 @@ MonoBehaviour:
   _climb: 0
   _isClimbing: 0
   _canClimb: 0
-  _canClimbTimer: 0
+  _canClimbUpdate: 0
+  _canClimbCooldDown: 0
   _climbTimer: 0
   _climbHeldDownTimer: 0
   _climbCooldownTimer: 0
@@ -4903,7 +4904,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1995783157
 Transform:
   m_ObjectHideFlags: 0

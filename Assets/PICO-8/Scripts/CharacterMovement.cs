@@ -17,8 +17,7 @@ public class CharacterMovement : MonoBehaviour
     #region Constants
     public const float MaxRun = 9f;
     public const float MaxFall = -16f;
-    public const float FastMaxFall = -24f;
-    public const float FastMaxAccel = 30f;
+    public const float FallAccel = 30f;
     public const float RunAccel = 100f;
     public const float RunReduce = 40f;
 
@@ -45,12 +44,13 @@ public class CharacterMovement : MonoBehaviour
 
     #region Climb
     private const float ClimbUpSpeed = 4.5f;
-    private const float ClimbDownSpeed = -8f;
+    private const float ClimbDownSpeed = -6f;
     private const float ClimbSlipSpeed = -3f;
     private const float ClimbTime = 2.0f;
     private const float ClimbToleranceTime = 0.15f;
-    private const float ClimbCooldDownTime = 0.2f;
+    private const float ClimbCooldownTime = 0.2f;
     private const float ClimbAccel = 90f;
+    private const float SlideAccel = 90f;
     private const float ClimbGrabYMult = .2f;
     private const float ClimbNoMoveTime = .1f;
     private const float ClimbTiredThreshold = 2f;
@@ -88,10 +88,10 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private bool _isDashing;
     [SerializeField] private bool _canDash;
     [SerializeField] private bool _canDashUpdate;
-    [SerializeField] private bool _canDashCooldDown;
+    [SerializeField] private bool _isDashCooldown;
     [SerializeField] private float _dashTimer;
     [SerializeField] private float _dashHeldDownTimer;
-    [SerializeField] private float _dashCooldDownTimer;
+    [SerializeField] private float _dashCooldownTimer;
     [SerializeField] private Vector2 _dashDir;
     [SerializeField] private Vector2 _beforeDashSpeed;
     #endregion
@@ -101,7 +101,7 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private bool _isClimbing;
     [SerializeField] private bool _canClimb;
     [SerializeField] private bool _canClimbUpdate;
-    [SerializeField] private bool _canClimbCooldDown;
+    [SerializeField] private bool _isClimbCooldown;
     [SerializeField] private float _climbTimer;
     [SerializeField] private float _climbHeldDownTimer;
     [SerializeField] private float _climbCooldownTimer;
@@ -266,7 +266,7 @@ public class CharacterMovement : MonoBehaviour
         DetectGround(deltaTime);
         DetectWall(deltaTime);
         ApplyGravity(deltaTime);
-        CooldDownUpdate(deltaTime);
+        CooldownUpdate(deltaTime);
 
         Moving(deltaTime);
         JumpBegin();
@@ -325,17 +325,15 @@ public class CharacterMovement : MonoBehaviour
 
     private void ApplyGravity(float deltaTime)
     {
-        //float mf = MaxFall;
-        //float fmf = FastMaxFall;
-        //if (MoveY == -1 && _speed.y <= mf)
-        //{
-        //    _maxFall = Mathf.MoveTowards(_maxFall, fmf, FastMaxAccel * deltaTime);
-        //}
-        //else
-        //{
-        //    _maxFall = Mathf.MoveTowards(_maxFall, mf, FastMaxAccel * deltaTime);
-        //}
-        _maxFall = MaxFall;
+        // Slide if it is against a wall and moving towards it
+        if (_againstWall && MoveX == Facing)
+        {
+            _maxFall = Mathf.MoveTowards(_maxFall, ClimbSlipSpeed, SlideAccel * deltaTime);
+        }
+        else
+        {
+            _maxFall = Mathf.MoveTowards(_maxFall, MaxFall, FallAccel * deltaTime);
+        }
         if (!_onGround || !_isFreezing)
         {
             float mult = Mathf.Abs(_speed.y) < HalfGravThreshold && (IsJumping || IsDashing || IsFalling) ? 0.5f : 1.0f;
@@ -422,31 +420,34 @@ public class CharacterMovement : MonoBehaviour
         _canJumpUpdate = false;
     }
 
-    private void CooldDownUpdate(float deltaTime)
+    /// <summary>
+    /// 仅在地面时更新冷却时间
+    /// </summary>
+    private void CooldownUpdate(float deltaTime)
     {
         if (!_onGround) return;
-        if (_canDashCooldDown)
+        if (_isDashCooldown)
         {
-            if (_dashCooldDownTimer < DashCooldownTime)
+            if (_dashCooldownTimer < DashCooldownTime)
             {
-                _dashCooldDownTimer = Mathf.Min(_dashCooldDownTimer + deltaTime, DashCooldownTime);
+                _dashCooldownTimer = Mathf.Min(_dashCooldownTimer + deltaTime, DashCooldownTime);
             }
             else
             {
-                _dashCooldDownTimer = 0.0f;
-                _canDashCooldDown = false;
+                _dashCooldownTimer = 0.0f;
+                _isDashCooldown = false;
             }
         }
-        if (_canClimbCooldDown)
+        if (_isClimbCooldown)
         {
-            if (_climbCooldownTimer < ClimbCooldDownTime)
+            if (_climbCooldownTimer < ClimbCooldownTime)
             {
-                _climbCooldownTimer = Mathf.Min(_climbCooldownTimer + deltaTime, ClimbCooldDownTime);
+                _climbCooldownTimer = Mathf.Min(_climbCooldownTimer + deltaTime, ClimbCooldownTime);
             }
             else
             {
                 _climbCooldownTimer = 0.0f;
-                _canClimbCooldDown = false;
+                _isClimbCooldown = false;
             }
         }
     }
@@ -479,7 +480,7 @@ public class CharacterMovement : MonoBehaviour
 
     private void DashBegin()
     {
-        if (_canDashCooldDown) return;
+        if (_isDashCooldown) return;
         if (!_dash || !_canDash) return;
         if (_dashHeldDownTimer > DashToleranceTime) return;
         _canDash = false;
@@ -519,7 +520,7 @@ public class CharacterMovement : MonoBehaviour
     {
         _dashTimer = 0.0f;
         _canDashUpdate = false;
-        _canDashCooldDown = true;
+        _isDashCooldown = true;
         _speed = EndDashSpeed * _dashDir;
         Console.LogFormat("DashEnd {0}", _speed);
     }
@@ -527,7 +528,7 @@ public class CharacterMovement : MonoBehaviour
     private void ClimbBegin()
     {
         if (!_againstWall) return;
-        if (_canClimbCooldDown) return;
+        if (_isClimbCooldown) return;
         if (!_climb || !_canClimb) return;
         if (_climbHeldDownTimer > ClimbToleranceTime) return;
         _canClimb = false;
@@ -540,58 +541,52 @@ public class CharacterMovement : MonoBehaviour
 
     /// <summary>
     /// 在撞到墙时, 按住 Z键即应该转抓住墙壁, 不需同时按住方向键
-    /// Todo: 抓住墙壁时, 松开Z键开始下落, 若未降到地面再次按下Z键应再次抓住墙壁
+    /// 抓住墙壁时, 松开Z键开始下落, 若未降到地面再次按下Z键应再次抓住墙壁
+    /// Todo: 向上攀爬时, 如果初速度不够, 则攀爬速度过慢
     /// </summary>
     private void ClimbUpdate(float deltaTime)
     {
-        if (!_canClimbUpdate) return;
-        if (_againstWall)
+        if (_canClimbUpdate)
         {
-            if (_climb)
+            if (_againstWall)
             {
-                float target = 0;
-                if (_climbTimer < ClimbTime)
+                if (_climb)
                 {
-                    if (MoveY > 0)
+                    float target = 0;
+                    if (_climbTimer < ClimbTime)
                     {
-                        target = ClimbUpSpeed;
+                        if (MoveY > 0)
+                        {
+                            _speed.y = 3.0f;
+                            target = ClimbUpSpeed;
+                        }
+                        else if (MoveY < 0)
+                        {
+                            _speed.y = -4.0f;
+                            target = ClimbDownSpeed;
+                        }
+                        //_speed.y = target;
+                        _speed.y = Mathf.MoveTowards(_speed.y, target, ClimbAccel * deltaTime);
+                        _climbTimer = Mathf.Min(_climbTimer + deltaTime, ClimbTime);
                     }
-                    else if (MoveY < 0)
-                    {
-                        target = ClimbDownSpeed;
-                    }
-                    else if (MoveX == Facing)
-                    {
-                        target = ClimbSlipSpeed;
-                    }
-                    _speed.y = target;
-                    //_speed.y = Mathf.MoveTowards(_speed.y, target, ClimbAccel * deltaTime);
-                    _climbTimer = Mathf.Min(_climbTimer + deltaTime, ClimbTime);
+                    else ClimbEnd();   // Cooldown                 
                 }
-                else
-                {
-                    // 停止更新, Climb进入CD状态
-                    ClimbEnd();
-                }
+                else _canClimbUpdate = false;   // 松开Climb按键                    
             }
-            else
+            else // 离开墙体
             {
-                // 松开Climb按键
+                _climbTimer = 0.0f;
                 _canClimbUpdate = false;
             }
         }
-        else
-        {
-            // 不再撞到墙壁
-            _canClimbUpdate = false;
-        }
+        if (_onGround && _climbTimer != 0) _climbTimer = 0.0f;
     }
 
     private void ClimbEnd()
     {
         _climbTimer = 0.0f;
         _canClimbUpdate = false;
-        _canClimbCooldDown = true;
+        _isClimbCooldown = true;    // 仅在地面时更新
         Console.LogFormat("ClimbEnd {0}", _speed);
     }
 

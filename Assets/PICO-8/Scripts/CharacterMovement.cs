@@ -348,7 +348,7 @@ public class CharacterMovement : MonoBehaviour
         Vector3 scale = transform.localScale;
         if (scale.x == Facing) return;
         transform.localScale = new Vector3(-scale.x, scale.y, scale.z);
-        Console.LogFormat("scale.x {0},  _facing {1}", scale.x, Facing);
+        //Console.LogFormat("scale.x {0},  _facing {1}", scale.x, Facing);
     }
 
     /// <summary>

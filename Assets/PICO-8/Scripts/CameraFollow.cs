@@ -22,18 +22,15 @@ public class CameraFollow : MonoBehaviour
             var cameraTargetPostion = transform.position;
             float differenceTarget = transform.position.x - _targetTransform.position.x;
 
-            if (differenceTarget > 0)   // target is to the left of bound
+            if (Mathf.Abs(differenceTarget) > _boundHeight)
             {
-                if (Mathf.Abs(differenceTarget) > _boundWidth)
+                if (differenceTarget > 0)
                 {
-                    cameraTargetPostion = transform.position - (differenceTarget - _boundHeight) * Vector3.right;
+                    cameraTargetPostion = cameraTargetPostion - (differenceTarget - _boundHeight) * Vector3.right;
                 }
-            }
-            else if (differenceTarget < 0)  // right
-            {
-                if (Mathf.Abs(differenceTarget) > _boundWidth)
+                else if (differenceTarget < 0)
                 {
-                    cameraTargetPostion = transform.position - (differenceTarget + _boundWidth) * Vector3.right;
+                    cameraTargetPostion = cameraTargetPostion - (differenceTarget + _boundHeight) * Vector3.right;
                 }
             }
             return cameraTargetPostion;

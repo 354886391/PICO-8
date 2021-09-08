@@ -335,10 +335,10 @@ GameObject:
   - component: {fileID: 126606793}
   - component: {fileID: 126606798}
   - component: {fileID: 126606797}
+  - component: {fileID: 126606799}
   - component: {fileID: 126606794}
   - component: {fileID: 126606795}
   - component: {fileID: 126606796}
-  - component: {fileID: 126606799}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -1133,7 +1133,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _targetTransform: {fileID: 126606793}
-  _followSpeed: 3
+  _followSpeed: 9
   distanceToTarget: 0
 --- !u!20 &519420031
 Camera:

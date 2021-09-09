@@ -7,54 +7,28 @@ public class CameraFollow : MonoBehaviour
     [SerializeField]
     private Transform _targetTransform;
     [SerializeField]
-    private float _followSpeed = 3.0f;
-    [SerializeField]
-    private float distanceToTarget;
+    private float _followSpeed = 12.0f;
 
-    private float _boundWidth;  //half
-    private float _boundHeight; //half
+    private float _screenHalfWidth;     // half
+    private float _screenHalfHeight;    // half
+    private Vector3 currentVelocity;
     private LineRenderer _lineRenderer;
 
     private Vector3 CameraTargetPosition
     {
         get
         {
-            var cameraTargetPostion = transform.position;
-            float differenceTarget = transform.position.x - _targetTransform.position.x;
-
-            if (Mathf.Abs(differenceTarget) > _boundHeight)
-            {
-                if (differenceTarget > 0)
-                {
-                    cameraTargetPostion = cameraTargetPostion - (differenceTarget - _boundHeight) * Vector3.right;
-                }
-                else if (differenceTarget < 0)
-                {
-                    cameraTargetPostion = cameraTargetPostion - (differenceTarget + _boundHeight) * Vector3.right;
-                }
-            }
-            return cameraTargetPostion;
-        }
-    }
-
-    private Vector3 CameraTargetPosition2
-    {
-        get
-        {
-            var wannaPosition = transform.position;
             var cameraPostion = transform.position;
             var targetPosition = _targetTransform.position;
-
-            var difference = targetPosition - cameraPostion;
-            if (difference.x < 0)
+            float differenceTarget = cameraPostion.x - targetPosition.x;
+            if (Mathf.Abs(differenceTarget) > _screenHalfHeight)
             {
-                wannaPosition = difference - _boundWidth * Vector3.left;
+                if (differenceTarget > 0)
+                    cameraPostion -= (differenceTarget - _screenHalfHeight) * Vector3.right;
+                else if (differenceTarget < 0)
+                    cameraPostion -= (differenceTarget + _screenHalfHeight) * Vector3.right;
             }
-            if (difference.x > 0)
-            {
-                wannaPosition = difference - _boundWidth * Vector3.right;
-            }
-            return wannaPosition;
+            return cameraPostion;
         }
     }
 
@@ -67,11 +41,9 @@ public class CameraFollow : MonoBehaviour
     private void GetScreenSize()
     {
         var renderingRate = (float)Display.main.renderingWidth / Display.main.renderingHeight;
-        var cameraHeight = Camera.main.orthographicSize;
-        var cameraWidth = cameraHeight * renderingRate;
-        _boundWidth = cameraWidth * 0.618f;
-        _boundHeight = cameraHeight * 0.618f;
-        Console.LogFormat("Width {0}, height {1}, Rate {2}", cameraWidth, cameraHeight, renderingRate);
+        _screenHalfHeight = Camera.main.orthographicSize;
+        _screenHalfWidth = _screenHalfHeight * renderingRate;
+        Console.LogFormat("Width {0}, height {1}, Rate {2}", _screenHalfWidth, _screenHalfHeight, renderingRate);
     }
 
     private void InitLineRenderer()
@@ -79,17 +51,18 @@ public class CameraFollow : MonoBehaviour
         var center = transform.position;
         var go = new GameObject("BoundBox");
         go.transform.SetParent(transform);
-        go.transform.position = new Vector3(center.x - _boundWidth, center.y - _boundHeight);
+        go.transform.position = new Vector3(center.x - _screenHalfWidth, center.y - _screenHalfHeight);
         _lineRenderer = go.AddComponent<LineRenderer>();
         _lineRenderer.startWidth = 0.1f;
         _lineRenderer.endWidth = 0.1f;
     }
 
+    [System.Diagnostics.Conditional("ENABLE_DEBUG")]
     private void DrawBoundBox()
     {
         var center = transform.position;
-        var min = new Vector3(center.x - _boundWidth, center.y - _boundHeight);
-        var max = new Vector3(center.x + _boundWidth, center.y + _boundHeight);
+        var min = new Vector3(center.x - _screenHalfWidth, center.y - _screenHalfHeight);
+        var max = new Vector3(center.x + _screenHalfWidth, center.y + _screenHalfHeight);
         _lineRenderer.positionCount = 5;
         _lineRenderer.SetPosition(0, new Vector3(max.x, min.y, -0.1f));
         _lineRenderer.SetPosition(1, new Vector3(max.x, max.y, -0.1f));
@@ -98,13 +71,9 @@ public class CameraFollow : MonoBehaviour
         _lineRenderer.SetPosition(4, new Vector3(max.x, min.y, -0.1f));
     }
 
-    public void Update()
-    {
-        DrawBoundBox();
-    }
-
     public void LateUpdate()
     {
-        transform.position = Vector3.Lerp(transform.position, CameraTargetPosition, _followSpeed * Time.deltaTime);
+        DrawBoundBox();
+        transform.position = Vector3.SmoothDamp(transform.position, CameraTargetPosition, ref currentVelocity, Time.deltaTime, _followSpeed);
     }
 }

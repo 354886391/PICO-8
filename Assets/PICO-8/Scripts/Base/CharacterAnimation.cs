@@ -72,7 +72,7 @@ public class CharacterAnimation : MonoBehaviour
         var bounceScale = new Vector3(originScale.x, originScale.y * 0.8f, originScale.z);
         if (jumpTween == null)
         {
-            jumpTween = transform.DOScale(bounceScale, 0.1f).SetEase(Ease.InOutCirc).SetLoops(2, LoopType.Yoyo).SetAutoKill(false);
+            jumpTween = transform.DOScaleY(bounceScale.y, 0.15f).SetEase(Ease.OutBack).OnComplete(() => { transform.DOScaleY(originScale.y, 0.05f).SetEase(Ease.InBack); }).SetAutoKill(false);
         }
         else
         {

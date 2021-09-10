@@ -1132,7 +1132,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _targetTransform: {fileID: 126606793}
-  _followSpeed: 8
+  _followSpeed: 10
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0

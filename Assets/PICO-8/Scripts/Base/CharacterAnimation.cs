@@ -16,7 +16,11 @@ public class CharacterAnimation : MonoBehaviour
     private Color dashBlue = new Color(41 / 255f, 173 / 255f, 1f);
 
     [SerializeField]
-    private Animator _anim;
+    private Animator _animator;
+    [SerializeField]
+    private Transform _groupTransform;
+    [SerializeField]
+    private Sprite[] _particleSprites;
 
     private void Awake()
     {
@@ -30,8 +34,9 @@ public class CharacterAnimation : MonoBehaviour
 
     private void AddCharacterMovementEvent()
     {
-        CharacterMovement.JumpBeginEvent += JumpBeginBounce;
-        CharacterMovement.JumpEndEvent += JumpEndBounce;
+        CharacterMovement.JumpBeginEvent += JumpBeginHandler;
+        CharacterMovement.DashBeginEvent += DashBeginHandler;
+        CharacterMovement.LandingEvent += LandingHandler;
     }
 
     /// <param name="movement"></param>
@@ -43,36 +48,41 @@ public class CharacterAnimation : MonoBehaviour
         {
             if (moveX == 0 && moveY == 0)
             {
-                _anim.Play(idle);
+                _animator.Play(idle);
             }
             else if (moveX != 0)
             {
-                _anim.Play(run);
+                _animator.Play(run);
             }
             else if (moveY != 0)
             {
-                _anim.Play(moveY > 0 ? lookUp : lookDown);
+                _animator.Play(moveY > 0 ? lookUp : lookDown);
             }
         }
         else if (movement.IsJumping || movement.IsDashing || movement.IsFalling)
         {
-            _anim.Play(jump);
+            _animator.Play(jump);
         }
         if (movement.IsClimbing)
         {
-            _anim.Play(climb);
+            _animator.Play(climb);
         }
         // SetColor
-        _anim.SetColor(movement.IsDashing ? dashBlue : normalRed);
+        _animator.SetColor(movement.IsDashing ? dashBlue : normalRed);
     }
 
-    private void QJumpBounce(CharacterMovement movement)
+    [ContextMenu("TakeoffBounce")]
+    private void TakeOffBounce()
     {
-        var originScale = transform.localScale;
-        var bounceScale = new Vector3(originScale.x, originScale.y * 0.8f, originScale.z);
+        var yPercentage = 0.8f;  //Todo: 根据Speed动态调整
+        var originScale = _groupTransform.localScale;
+        var bounceScale = new Vector3(originScale.x, originScale.y * yPercentage, originScale.z);
         if (jumpTween == null)
         {
-            jumpTween = transform.DOScaleY(bounceScale.y, 0.15f).SetEase(Ease.OutBack).OnComplete(() => { transform.DOScaleY(originScale.y, 0.05f).SetEase(Ease.InBack); }).SetAutoKill(false);
+            jumpTween = _groupTransform.DOScaleY(bounceScale.y, 0.15f)
+                .SetEase(Ease.OutBack)
+                .OnComplete(() => { _groupTransform.DOScaleY(originScale.y, 0.05f).SetEase(Ease.InBack); })
+                .SetAutoKill(false);
         }
         else
         {
@@ -80,14 +90,56 @@ public class CharacterAnimation : MonoBehaviour
         }
     }
 
-    private void JumpBeginBounce(CharacterMovement movement)
+    /// <summary>
+    /// 落地瞬间不能更改角色scale, 否则会多次触发地面检测机制
+    /// </summary>
+    [ContextMenu("LandingBounce")]
+    private void LandingBounce()
     {
-        QJumpBounce(movement);
+        var yPercentage = 0.8f;  //Todo: 根据Speed动态调整
+        var originScale = _groupTransform.localScale;
+        var bounceScale = new Vector3(originScale.x, originScale.y * yPercentage, originScale.z);
+        if (jumpTween == null)
+        {
+            jumpTween = _groupTransform.DOScaleY(bounceScale.y, 0.15f)
+                .SetEase(Ease.InBack)
+                .OnComplete(() => { _groupTransform.DOScaleY(originScale.y, 0.05f).SetEase(Ease.Linear); })
+                .SetAutoKill(false);
+        }
+        else
+        {
+            jumpTween.ChangeStartValue(originScale).ChangeEndValue(bounceScale).Restart();
+        }
     }
 
-    private void JumpEndBounce(CharacterMovement movement)
+    [ContextMenu("JumpParticle")]
+    private void JumpParticle(CharacterMovement movement)
     {
-        //QJumpBounce(movement);
+        // 动画 应该跟随角色, 还是在地面起跳点?
+        var go = new GameObject("JumpParticle");
+        go.transform.position = transform.position;
+        go.transform.localScale = new Vector3(movement.Facing, 1.0f, 1.0f);
+        var renderer = go.AddComponent<SpriteRenderer>();
+        renderer.Animate(_particleSprites, 12f, null, () => Destroy(go));
     }
+
+    private void JumpBeginHandler(CharacterMovement movement)
+    {
+        TakeOffBounce();
+        JumpParticle(movement);
+    }
+
+    private void DashBeginHandler(CharacterMovement movement)
+    {
+        TakeOffBounce();
+        JumpParticle(movement);
+    }
+
+    private void LandingHandler(CharacterMovement movement)
+    {
+        LandingBounce();
+        Console.LogFormat("Landing speed {0}", movement.Speed);
+    }
+
 }
 

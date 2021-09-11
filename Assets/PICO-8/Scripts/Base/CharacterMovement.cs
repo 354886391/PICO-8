@@ -69,6 +69,7 @@ public class CharacterMovement : MonoBehaviour
 
     #region Vars
     [SerializeField] private bool _onGround;
+    [SerializeField] private bool _wasOnGround;
     [SerializeField] private bool _againstWall;
     [SerializeField] private bool _isFreezing;
     [SerializeField] private float _maxFall;
@@ -123,13 +124,15 @@ public class CharacterMovement : MonoBehaviour
     public static event Action<CharacterMovement> JumpUpdateEvent;
     public static event Action<CharacterMovement> JumpEndEvent;
 
-    public event Action<CharacterMovement> DashBeginEvent;
-    public event Action<CharacterMovement> DashUpdateEvent;
-    public event Action<CharacterMovement> DashEndEvent;
+    public static event Action<CharacterMovement> DashBeginEvent;
+    public static event Action<CharacterMovement> DashUpdateEvent;
+    public static event Action<CharacterMovement> DashEndEvent;
 
-    public event Action<CharacterMovement> ClimbBeginEvent;
-    public event Action<CharacterMovement> ClimbupdateEvent;
-    public event Action<CharacterMovement> ClimbEndEvent;
+    public static event Action<CharacterMovement> ClimbBeginEvent;
+    public static event Action<CharacterMovement> ClimbupdateEvent;
+    public static event Action<CharacterMovement> ClimbEndEvent;
+
+    public static event Action<CharacterMovement> LandingEvent;
 
     #endregion
 
@@ -147,10 +150,22 @@ public class CharacterMovement : MonoBehaviour
         set { _speed = value; }
     }
 
+    /// <summary>
+    /// 当前帧是否在地面
+    /// </summary>
     public bool OnGround
     {
         get { return _onGround; }
         set => _onGround = value;
+    }
+
+    /// <summary>
+    /// 上一帧是否在地面
+    /// </summary>
+    public bool WasOnGround
+    {
+        get { return _wasOnGround; }
+        set => _wasOnGround = value;
     }
 
     public bool HitCeiling { get; set; }
@@ -276,7 +291,7 @@ public class CharacterMovement : MonoBehaviour
 
     public void Move(float deltaTime)
     {
-        ComputeRayOrigin();
+        ComputeRayOrigin();       
         ApplyFacing();
         DetectGround(deltaTime);
         DetectWall(deltaTime);
@@ -291,13 +306,12 @@ public class CharacterMovement : MonoBehaviour
         DashUpdate(deltaTime);
         ClimbBegin();
         ClimbUpdate(deltaTime);
-        //AgainstWallUpdate(deltaTime);
-        CorrectionAndMove(deltaTime);
+        LandingUpdate();
+        CorrectionAndMove(deltaTime);       
+        _wasOnGround = _onGround;
+        
     }
 
-    /// <summary>
-    /// Todo空中落地瞬间根据速度, 更改角色scale, 产生Q弹效果
-    /// </summary>
     private void DetectGround(float deltaTime)
     {
         _onGround = false;
@@ -313,10 +327,6 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Todo空中贴墙瞬间根据速度, 更改角色scale, 产生Q弹效果
-    /// </summary>
-    /// <param name="deltaTime"></param>
     private void DetectWall(float deltaTime)
     {
         _againstWall = false;
@@ -390,7 +400,7 @@ public class CharacterMovement : MonoBehaviour
         _speed.y = JumpSpeed;
         //事件回调
         JumpBeginEvent?.Invoke(this);
-        Console.LogFormat("JumpBegin {0}", _speed.y);
+        //Console.LogFormat("JumpBegin {0}", _speed.y);
     }
 
     private void MidAirJumpBegin()
@@ -405,7 +415,7 @@ public class CharacterMovement : MonoBehaviour
         _isJumping = true;
         _canJumpUpdate = true;
         MidAirJumpBeginEvent?.Invoke(this);
-        Console.LogFormat("MidAirJumpBegin {0}", _speed.y);
+        //Console.LogFormat("MidAirJumpBegin {0}", _speed.y);
     }
 
     private void JumpUpdate(float deltaTime)
@@ -418,7 +428,7 @@ public class CharacterMovement : MonoBehaviour
             //_speed.y = Mathf.Lerp(JumpSpeed, 0.0f, jumpProcess);
             _jumpTimer = Mathf.Min(_jumpTimer + deltaTime, JumpTime);
             JumpUpdateEvent?.Invoke(this);
-            Console.LogFormat("Jumping Timer {0}", _speed.y);
+            //Console.LogFormat("Jumping Timer {0}", _speed.y);
         }
         else
         {
@@ -431,7 +441,7 @@ public class CharacterMovement : MonoBehaviour
         _jumpTimer = 0.0f;
         _canJumpUpdate = false;
         JumpEndEvent?.Invoke(this);
-        Console.LogFormat("JumpEnd {0}", _speed);
+        //Console.LogFormat("JumpEnd {0}", _speed);
     }
 
     /// <summary>
@@ -502,7 +512,7 @@ public class CharacterMovement : MonoBehaviour
         _canDashUpdate = true;
         CamputeDashDir();
         DashBeginEvent?.Invoke(this);
-        Console.LogFormat("DashBegin {0}", _speed);
+        //Console.LogFormat("DashBegin {0}", _speed);
     }
 
     private void DashUpdate(float deltaTime)
@@ -514,13 +524,13 @@ public class CharacterMovement : MonoBehaviour
             {
                 _isFreezing = false;
                 _speed = DashSpeed * _dashDir;
-                Console.LogFormat("<color=red>Dashing Timer</color>, Speed {0} isDashing {1}", _speed, _isDashing);
+                //Console.LogFormat("<color=red>Dashing Timer</color>, Speed {0} isDashing {1}", _speed, _isDashing);
             }
             else
             {
                 _isFreezing = true;
                 _speed = Vector2.zero;
-                Console.LogWarningFormat("<color=green>Freezing Timer</color>, Speed {0} isDashing {1}", _speed, _isDashing);
+                //Console.LogWarningFormat("<color=green>Freezing Timer</color>, Speed {0} isDashing {1}", _speed, _isDashing);
             }
             DashUpdateEvent?.Invoke(this);
             _dashTimer = Mathf.Min(_dashTimer + deltaTime, DashTime);
@@ -538,7 +548,7 @@ public class CharacterMovement : MonoBehaviour
         _isDashCooldown = true;
         _speed = EndDashSpeed * _dashDir;
         DashEndEvent?.Invoke(this);
-        Console.LogFormat("DashEnd {0}", _speed);
+        //Console.LogFormat("DashEnd {0}", _speed);
     }
 
     private void ClimbBegin()
@@ -553,7 +563,7 @@ public class CharacterMovement : MonoBehaviour
         _speed.x = 0;
         _speed.y *= ClimbGrabYMult;
         ClimbBeginEvent?.Invoke(this);
-        Console.LogFormat("ClimbBegin {0}", _speed);
+        //Console.LogFormat("ClimbBegin {0}", _speed);
     }
 
     /// <summary>
@@ -606,17 +616,15 @@ public class CharacterMovement : MonoBehaviour
         _canClimbUpdate = false;
         _isClimbCooldown = true;    // 仅在地面时更新
         ClimbEndEvent?.Invoke(this);
-        Console.LogFormat("ClimbEnd {0}", _speed);
+        //Console.LogFormat("ClimbEnd {0}", _speed);
     }
 
-    /// <summary>
-    /// 落地时的前一个动作是什么
-    /// </summary>
-    public bool WhyOnGround(out int state, out Vector2 speed)
+    public void LandingUpdate()
     {
-        state = 0;
-        speed = this._speed;
-        return false;
+        if (!_wasOnGround && _onGround)
+        {
+            LandingEvent?.Invoke(this);
+        }
     }
 
     private void CorrectionAndMove(float deltaTime)

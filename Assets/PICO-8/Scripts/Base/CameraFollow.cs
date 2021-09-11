@@ -51,7 +51,7 @@ public class CameraFollow : MonoBehaviour
         var renderingRate = (float)Display.main.renderingWidth / Display.main.renderingHeight;
         _screenHalfHeight = Camera.main.orthographicSize;
         _screenHalfWidth = _screenHalfHeight * renderingRate;
-        Console.LogFormat("Width {0}, height {1}, Rate {2}", _screenHalfWidth, _screenHalfHeight, renderingRate);
+        //Console.LogFormat("Width {0}, height {1}, Rate {2}", _screenHalfWidth, _screenHalfHeight, renderingRate);
     }
 
     private void InitLineRenderer()

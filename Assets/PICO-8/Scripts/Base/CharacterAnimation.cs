@@ -74,14 +74,14 @@ public class CharacterAnimation : MonoBehaviour
     [ContextMenu("TakeoffBounce")]
     private void TakeOffBounce()
     {
-        var yPercentage = 0.8f;  //Todo: 根据Speed动态调整
+        var yPercentage = 0.7f;  //Todo: 根据Speed动态调整
         var originScale = _groupTransform.localScale;
         var bounceScale = new Vector3(originScale.x, originScale.y * yPercentage, originScale.z);
         if (jumpTween == null)
         {
             jumpTween = _groupTransform.DOScaleY(bounceScale.y, 0.15f)
                 .SetEase(Ease.OutBack)
-                .OnComplete(() => { _groupTransform.DOScaleY(originScale.y, 0.05f).SetEase(Ease.InBack); })
+                .OnComplete(() => { _groupTransform.DOScaleY(originScale.y, 0.05f).SetEase(Ease.Linear); })
                 .SetAutoKill(false);
         }
         else
@@ -96,14 +96,15 @@ public class CharacterAnimation : MonoBehaviour
     [ContextMenu("LandingBounce")]
     private void LandingBounce()
     {
-        var yPercentage = 0.8f;  //Todo: 根据Speed动态调整
+        var xPercentage = 0.9f;
+        var yPercentage = 0.9f;  //Todo: 根据Speed动态调整
         var originScale = _groupTransform.localScale;
-        var bounceScale = new Vector3(originScale.x, originScale.y * yPercentage, originScale.z);
+        var bounceScale = new Vector3(originScale.x * xPercentage, originScale.y * yPercentage, originScale.z);
         if (jumpTween == null)
         {
-            jumpTween = _groupTransform.DOScaleY(bounceScale.y, 0.15f)
+            jumpTween = _groupTransform.DOScale(bounceScale, 0.1f)
                 .SetEase(Ease.InBack)
-                .OnComplete(() => { _groupTransform.DOScaleY(originScale.y, 0.05f).SetEase(Ease.Linear); })
+                .OnComplete(() => { _groupTransform.DOScale(originScale, 0.05f).SetEase(Ease.Linear); })
                 .SetAutoKill(false);
         }
         else
@@ -131,7 +132,8 @@ public class CharacterAnimation : MonoBehaviour
 
     private void DashBeginHandler(CharacterMovement movement)
     {
-        TakeOffBounce();
+        if (movement.OnGround)
+            TakeOffBounce();    // 在空中Dash时轨迹曲折
         JumpParticle(movement);
     }
 

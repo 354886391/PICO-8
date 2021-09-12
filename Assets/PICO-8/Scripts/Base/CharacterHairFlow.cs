@@ -34,7 +34,7 @@ public class CharacterHairFlow : MonoBehaviour
         }
     }
 
-    public void SetHairFlow(int face)
+    public void SetHairFlow(int face, Vector2 speed)
     {
         for (int i = 0; i < HairTrans.Length; i++)
         {

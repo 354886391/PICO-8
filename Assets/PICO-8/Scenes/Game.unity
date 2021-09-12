@@ -4796,9 +4796,16 @@ MonoBehaviour:
   - {fileID: 435851614}
   - {fileID: 1038796886}
   - {fileID: 321046046}
-  - {fileID: 0}
+  - {fileID: 2022618633}
   - {fileID: 1639266818}
-  PastPositions: []
+  HairMaxPositions:
+  - {x: -0.375, y: 0, z: 0}
+  - {x: -0.5, y: 0, z: 0}
+  - {x: -0.625, y: 0, z: 0}
+  - {x: -0.875, y: -0.125, z: 0}
+  - {x: -1.125, y: -0.125, z: 0}
+  - {x: -1.375, y: -0.125, z: 0}
+  HairOriginPosition: []
 --- !u!1 &1995783156
 GameObject:
   m_ObjectHideFlags: 0

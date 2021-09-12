@@ -12,9 +12,6 @@ public class CharacterAnimation : MonoBehaviour
 
     private Tweener jumpTween;
 
-    private Color normalRed = new Color(1f, 0f, 77 / 255f);
-    private Color dashBlue = new Color(41 / 255f, 173 / 255f, 1f);
-
     [SerializeField]
     private Animator _animator;
     [SerializeField]
@@ -22,17 +19,17 @@ public class CharacterAnimation : MonoBehaviour
     [SerializeField]
     private Sprite[] _particleSprites;
 
-    private void Awake()
+    private void Start()
     {
         idle = Animator.StringToHash("Idle");
         run = Animator.StringToHash("Run");
         jump = Animator.StringToHash("Jump");
         lookUp = Animator.StringToHash("LookUp");
         lookDown = Animator.StringToHash("LookDown");
-        AddCharacterMovementEvent();
+        AddMovementEvent();
     }
 
-    private void AddCharacterMovementEvent()
+    private void AddMovementEvent()
     {
         CharacterMovement.JumpBeginEvent += JumpBeginHandler;
         CharacterMovement.DashBeginEvent += DashBeginHandler;
@@ -67,8 +64,6 @@ public class CharacterAnimation : MonoBehaviour
         {
             _animator.Play(climb);
         }
-        // SetColor
-        _animator.SetColor(movement.IsDashing ? dashBlue : normalRed);
     }
 
     [ContextMenu("TakeoffBounce")]
@@ -80,7 +75,7 @@ public class CharacterAnimation : MonoBehaviour
         if (jumpTween == null)
         {
             jumpTween = _groupTransform.DOScaleY(bounceScale.y, 0.15f)
-                .SetEase(Ease.OutBack)
+                .SetEase(Ease.OutCubic)
                 .OnComplete(() => { _groupTransform.DOScaleY(originScale.y, 0.05f).SetEase(Ease.Linear); })
                 .SetAutoKill(false);
         }
@@ -132,9 +127,9 @@ public class CharacterAnimation : MonoBehaviour
 
     private void DashBeginHandler(CharacterMovement movement)
     {
-        if (movement.OnGround)
-            TakeOffBounce();    // 在空中Dash时轨迹曲折
+        if (movement.OnGround) TakeOffBounce();   // 在空中Dash时轨迹曲折: Line1曲折, Line2无影响                
         JumpParticle(movement);
+
     }
 
     private void LandingHandler(CharacterMovement movement)

@@ -1,12 +1,12 @@
 ﻿using DG.Tweening;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CharacterHairFlow : MonoBehaviour
 {
+    public Transform TargetTrans;
     public Transform[] HairTrans;
-    public Vector3[] HairMaxPositions;
-    public Vector3[] HairMaxYPositions;
-    public Vector3[] HairOriginPosition;
+    private List<Vector3> _positionList;
     private SpriteRenderer[] _hairRenderers;
 
     private Color _normalRed = new Color(1f, 0f, 77 / 255f);
@@ -14,6 +14,9 @@ public class CharacterHairFlow : MonoBehaviour
 
     private void Start()
     {
+        _positionList = new List<Vector3>();
+        for (int i = 0; i < 5; i++)
+            _positionList.Add(TargetTrans.localPosition);
         _hairRenderers = GetComponentsInChildren<SpriteRenderer>();   //包含父Renderer
         AddMovementEvent();
     }
@@ -27,40 +30,36 @@ public class CharacterHairFlow : MonoBehaviour
 
     public void UpdateHairFlow(CharacterMovement movement)
     {
-        if (movement.Speed == Vector2.zero)
+        transform.localScale = new Vector3(movement.Facing, 1, 1);
+        var currentPosition = TargetTrans.localPosition;
+        // 更新历史位置列表(每帧更新1次，最多保留n帧之前的位置)
+        _positionList.RemoveAt(0);
+        _positionList.Add(currentPosition);
+        var deltaDistance = (float)_positionList.Count / HairTrans.Length;
+        for (int i = 0; i < HairTrans.Length; i++)
         {
-            ResetHairPlace();
-        }
-        else
-        {
-            SetHairFlow(movement.Speed);
+            // 0 ~ m_PositionList.Count
+            int index = Mathf.CeilToInt((i + 1) * deltaDistance) - 1;
+            // 头发的顺序为从大到小，位置的顺序为从远（旧）到近（新）
+            HairTrans[HairTrans.Length - i - 1].localPosition = _positionList[index];
         }
     }
 
-    public void ResetHairPlace()
+    public void ResetPlace()
     {
-
-        for (int i = 0; i < HairTrans.Length; i++)
+        foreach (var item in HairTrans)
         {
-            HairTrans[i].DOLocalMove(HairOriginPosition[i], 0.1f, false);
+            item.localPosition = TargetTrans.localPosition;
         }
+
+        _positionList.Clear();
+        for (int i = 0; i < 5; i++)
+            _positionList.Add(transform.localPosition);
     }
 
     public void SetHairFlow(Vector2 speed)
     {
-        for (int i = 0; i < HairTrans.Length; i++)
-        {
-            Vector2 tempTarget = Vector2.one;
-            if (speed.x != 0)
-            {
-                tempTarget = HairMaxPositions[i];
-            }
-            if (speed.y != 0)
-            {
-                tempTarget = HairMaxYPositions[i];
-            }
-            //HairTrans[i].DOLocalMove(tempTarget, 0.2f);
-        }
+
     }
 
     private void SetHairColor(Color color)
@@ -85,47 +84,5 @@ public class CharacterHairFlow : MonoBehaviour
     {
         SetHairColor(_normalRed);
     }
-
-    [ContextMenu("InitHairMaxPosition")]
-    private void InitHairMaxXPosition()
-    {
-        HairMaxPositions = new Vector3[HairTrans.Length];
-        for (int i = 0; i < HairTrans.Length; i++)
-        {
-            HairMaxPositions[i] = HairTrans[i].localPosition;
-        }
-    }
-
-    [ContextMenu("InitHairMaxYPosition")]
-    private void InitHairMaxYPosition()
-    {
-        HairMaxYPositions = new Vector3[HairTrans.Length];
-        for (int i = 0; i < HairTrans.Length; i++)
-        {
-            HairMaxYPositions[i] = HairTrans[i].localPosition;
-        }
-    }
-
-    public class HairNode
-    {
-        public float MaxRange;
-        public float MinRange;
-        public Vector3 Position;
-        public HairNode NextNode;
-
-        public void SetRange(float max, float min)
-        {
-            MaxRange = max;
-            MinRange = min;
-        }
-
-        private bool MoveNext(ref HairNode node)
-        {
-            node = NextNode;
-            return NextNode != null;
-        }
-    }
-
-
 }
 

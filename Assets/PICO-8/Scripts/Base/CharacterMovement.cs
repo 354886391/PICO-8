@@ -291,7 +291,7 @@ public class CharacterMovement : MonoBehaviour
 
     public void Move(float deltaTime)
     {
-        ComputeRayOrigin();       
+        ComputeRayOrigin();
         ApplyFacing();
         DetectGround(deltaTime);
         DetectWall(deltaTime);
@@ -307,11 +307,14 @@ public class CharacterMovement : MonoBehaviour
         ClimbBegin();
         ClimbUpdate(deltaTime);
         LandingUpdate();
-        CorrectionAndMove(deltaTime);       
+        CorrectionAndMove(deltaTime);
         _wasOnGround = _onGround;
-        
     }
 
+    /// <summary>
+    /// 检测到地面时, 此时仍然距离地面有[0, skinWidth]的距离
+    /// </summary>
+    /// <param name="deltaTime"></param>
     private void DetectGround(float deltaTime)
     {
         _onGround = false;
@@ -353,11 +356,12 @@ public class CharacterMovement : MonoBehaviour
         {
             _maxFall = Mathf.MoveTowards(_maxFall, MaxFall, FallAccel * deltaTime);
         }
-        if (!_onGround || !_isFreezing)
+        if (!_onGround)
         {
+            if (_isFreezing) return;
             float mult = Mathf.Abs(_speed.y) < HalfGravThreshold && (IsJumping || IsDashing || IsFalling) ? 0.5f : 1.0f;
             _speed.y = Mathf.MoveTowards(_speed.y, _maxFall, Gravity * mult * deltaTime);
-            //if (Mathf.Abs(_speed.y) > MinOffset) Console.LogFormat("ApplyGravity after speed Y {0:F3}", _speed.y);
+            //if (Mathf.Abs(_speed.y) > MinOffset) Console.LogFormat("ApplyGravity after speed Y {0:F3} OnGround {1}", _speed.y, _onGround);
         }
     }
 
@@ -639,6 +643,8 @@ public class CharacterMovement : MonoBehaviour
             FixedVertically(ref deltaMovement);
         }
         _speed = deltaMovement / deltaTime;
+        if (Mathf.Abs(_speed.x) < MinOffset) _speed.x = 0.0f;
+        if (Mathf.Abs(_speed.y) < MinOffset) _speed.y = 0.0f;
         MoveToPosition(deltaMovement);
     }
 
@@ -651,7 +657,7 @@ public class CharacterMovement : MonoBehaviour
         var origin = isGoingRight ? _rayOrigin.bottomRight : _rayOrigin.bottomLeft;
         var direction = isGoingRight ? Vector2.right : Vector2.left;
         var distance = Mathf.Abs(deltaMovement.x) + SkinWidth;
-        RaycastHit2D raycastHit = new RaycastHit2D();
+        var raycastHit = new RaycastHit2D();
         for (int i = 0; i < VerticalRaysCount; i++)
         {
             var rayOrigin = new Vector2(origin.x, origin.y + _verticalRaysInterval * i);
@@ -683,7 +689,7 @@ public class CharacterMovement : MonoBehaviour
         var origin = isGoingUp ? _rayOrigin.topLeft : _rayOrigin.bottomLeft;
         var direction = isGoingUp ? Vector2.up : Vector2.down;
         var distance = Mathf.Abs(deltaMovement.y) + SkinWidth;
-        RaycastHit2D raycastHit = new RaycastHit2D();
+        var raycastHit = new RaycastHit2D();
         for (int i = 0; i < HorizontalRaysCount; i++)
         {
             var rayOrigin = new Vector2(origin.x + _horizontalRaysInterval * i, origin.y);

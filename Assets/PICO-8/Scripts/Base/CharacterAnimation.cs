@@ -64,6 +64,7 @@ public class CharacterAnimation : MonoBehaviour
         {
             _animator.Play(climb);
         }
+        
     }
 
     [ContextMenu("TakeoffBounce")]

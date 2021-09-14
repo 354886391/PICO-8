@@ -6,6 +6,8 @@ public class CharacterController : MonoBehaviour
     private CharacterMovement _movement;
     [SerializeField]
     private CharacterAnimation _animation;
+    [SerializeField]
+    private CharacterHairFlow _hairFlow;
 
     private void Awake()
     {
@@ -17,7 +19,7 @@ public class CharacterController : MonoBehaviour
     {
         _movement.UpdateInput();
         _animation.UpdateAnimation(_movement);
-
+        _hairFlow.UpdateHairFlow(_movement);
     }
 
     private void FixedUpdate()

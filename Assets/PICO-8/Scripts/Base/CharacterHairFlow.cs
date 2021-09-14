@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DG.Tweening;
 using UnityEngine;
-using DG.Tweening;
 
 public class CharacterHairFlow : MonoBehaviour
 {
     public Transform[] HairTrans;
     public Vector3[] HairMaxPositions;
+    public Vector3[] HairMaxYPositions;
     public Vector3[] HairOriginPosition;
     private SpriteRenderer[] _hairRenderers;
-
 
     private Color _normalRed = new Color(1f, 0f, 77 / 255f);
     private Color _dashBlue = new Color(41 / 255f, 173 / 255f, 1f);
@@ -23,22 +21,45 @@ public class CharacterHairFlow : MonoBehaviour
     private void AddMovementEvent()
     {
         CharacterMovement.DashBeginEvent += DashBeginHandler;
+        CharacterMovement.DashEndEvent += DashEndHandler;
         CharacterMovement.LandingEvent += LandingHandler;
+    }
+
+    public void UpdateHairFlow(CharacterMovement movement)
+    {
+        if (movement.Speed == Vector2.zero)
+        {
+            ResetHairPlace();
+        }
+        else
+        {
+            SetHairFlow(movement.Speed);
+        }
     }
 
     public void ResetHairPlace()
     {
+
         for (int i = 0; i < HairTrans.Length; i++)
         {
-            HairTrans[i].DOLocalMove(HairOriginPosition[i], 0.1f, true);
+            HairTrans[i].DOLocalMove(HairOriginPosition[i], 0.1f, false);
         }
     }
 
-    public void SetHairFlow(int face, Vector2 speed)
+    public void SetHairFlow(Vector2 speed)
     {
         for (int i = 0; i < HairTrans.Length; i++)
         {
-            HairTrans[i].DOLocalMove(HairMaxPositions[i], 0.1f, true);
+            Vector2 tempTarget = Vector2.one;
+            if (speed.x != 0)
+            {
+                tempTarget = HairMaxPositions[i];
+            }
+            if (speed.y != 0)
+            {
+                tempTarget = HairMaxYPositions[i];
+            }
+            //HairTrans[i].DOLocalMove(tempTarget, 0.2f);
         }
     }
 
@@ -46,13 +67,8 @@ public class CharacterHairFlow : MonoBehaviour
     {
         foreach (var item in _hairRenderers)
         {
-            item.color = color;
+            if (item.color != color) item.color = color;
         }
-    }
-
-    private void LandingHandler(CharacterMovement obj)
-    {
-        SetHairColor(_normalRed);
     }
 
     private void DashBeginHandler(CharacterMovement obj)
@@ -60,8 +76,18 @@ public class CharacterHairFlow : MonoBehaviour
         SetHairColor(_dashBlue);
     }
 
+    private void DashEndHandler(CharacterMovement obj)
+    {
+        if (obj.OnGround) SetHairColor(_normalRed);
+    }
+
+    private void LandingHandler(CharacterMovement obj)
+    {
+        SetHairColor(_normalRed);
+    }
+
     [ContextMenu("InitHairMaxPosition")]
-    private void InitHairMaxPosition()
+    private void InitHairMaxXPosition()
     {
         HairMaxPositions = new Vector3[HairTrans.Length];
         for (int i = 0; i < HairTrans.Length; i++)
@@ -69,4 +95,37 @@ public class CharacterHairFlow : MonoBehaviour
             HairMaxPositions[i] = HairTrans[i].localPosition;
         }
     }
+
+    [ContextMenu("InitHairMaxYPosition")]
+    private void InitHairMaxYPosition()
+    {
+        HairMaxYPositions = new Vector3[HairTrans.Length];
+        for (int i = 0; i < HairTrans.Length; i++)
+        {
+            HairMaxYPositions[i] = HairTrans[i].localPosition;
+        }
+    }
+
+    public class HairNode
+    {
+        public float MaxRange;
+        public float MinRange;
+        public Vector3 Position;
+        public HairNode NextNode;
+
+        public void SetRange(float max, float min)
+        {
+            MaxRange = max;
+            MinRange = min;
+        }
+
+        private bool MoveNext(ref HairNode node)
+        {
+            node = NextNode;
+            return NextNode != null;
+        }
+    }
+
+
 }
+

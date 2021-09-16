@@ -5,9 +5,10 @@ using UnityEngine;
 public class CharacterHairFlow : MonoBehaviour
 {
     public Transform TargetTrans;   // player
-    private int _positionCount;
-    private int _hairRendererCount;
-    private List<Vector3> _positionQueue;    // 5
+    private int _positionCount = 6;
+    private int _hairRendererCount = 6;
+    private List<Vector3> _positionList;    // 6
+    [SerializeField]
     private SpriteRenderer[] _hairRenderers;    // 7
 
     private Color _normalRed = new Color(1f, 0f, 77 / 255f);
@@ -15,12 +16,10 @@ public class CharacterHairFlow : MonoBehaviour
 
     private void Start()
     {
-        _positionQueue = new List<Vector3>();
-        for (int i = 0; i < 5; i++)
-            _positionQueue.Add(TargetTrans.localPosition);
-        _hairRenderers = GetComponentsInChildren<SpriteRenderer>();   //包含父Renderer
-        _positionCount = _positionQueue.Count;
-        _hairRendererCount = _hairRenderers.Length;
+        _positionList = new List<Vector3>();
+        for (int i = 0; i < _positionCount; i++)
+            _positionList.Add(TargetTrans.localPosition);
+        //_hairRenderers = GetComponentsInChildren<SpriteRenderer>();   //包含父Renderer
         AddMovementEvent();
     }
 
@@ -32,14 +31,19 @@ public class CharacterHairFlow : MonoBehaviour
     }
 
     public void UpdateHairFlow(CharacterMovement movement)
-    {        
-        _positionQueue.RemoveAt(0);
+    {
+        _positionList.RemoveAt(0);
         var targetPosition = TargetTrans.localPosition;
-        _positionQueue.Add(targetPosition);
-        for (int i = 1; i < _hairRenderers.Length; i++)
+        _positionList.Add(targetPosition);
+        for (int i = 0; i < _hairRendererCount; i++)
         {
-            _hairRenderers[i].transform.localPosition = _positionQueue[i];
-        }     
+            _hairRenderers[i].transform.localScale = new Vector3(-movement.Facing, 1, 1);
+            _hairRenderers[i].transform.localPosition = _positionList[_positionCount - 1 - i] + new Vector3(-movement.Facing * 0.5f, -0.125f, -0.1f);
+        }
+        if (movement.Speed == Vector2.zero)
+        {
+            ResetPlace();
+        }
     }
 
     public void ResetPlace()
@@ -48,16 +52,13 @@ public class CharacterHairFlow : MonoBehaviour
         {
             item.transform.localPosition = TargetTrans.localPosition;
         }
-        _positionQueue.Clear();
-        for (int i = 0; i < 5; i++)
-            _positionQueue.Add(transform.localPosition);
     }
 
     private void SetHairColor(Color color)
     {
         foreach (var item in _hairRenderers)
         {
-            //if (item.color != color) item.color = color;
+            if (item.color != color) item.color = color;
         }
     }
 

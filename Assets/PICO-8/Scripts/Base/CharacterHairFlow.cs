@@ -4,20 +4,23 @@ using UnityEngine;
 
 public class CharacterHairFlow : MonoBehaviour
 {
-    public Transform TargetTrans;
-    public Transform[] HairTrans;
-    private List<Vector3> _positionList;
-    private SpriteRenderer[] _hairRenderers;
+    public Transform TargetTrans;   // player
+    private int _positionCount;
+    private int _hairRendererCount;
+    private List<Vector3> _positionQueue;    // 5
+    private SpriteRenderer[] _hairRenderers;    // 7
 
     private Color _normalRed = new Color(1f, 0f, 77 / 255f);
     private Color _dashBlue = new Color(41 / 255f, 173 / 255f, 1f);
 
     private void Start()
     {
-        _positionList = new List<Vector3>();
+        _positionQueue = new List<Vector3>();
         for (int i = 0; i < 5; i++)
-            _positionList.Add(TargetTrans.localPosition);
+            _positionQueue.Add(TargetTrans.localPosition);
         _hairRenderers = GetComponentsInChildren<SpriteRenderer>();   //包含父Renderer
+        _positionCount = _positionQueue.Count;
+        _hairRendererCount = _hairRenderers.Length;
         AddMovementEvent();
     }
 
@@ -29,44 +32,32 @@ public class CharacterHairFlow : MonoBehaviour
     }
 
     public void UpdateHairFlow(CharacterMovement movement)
-    {
-        transform.localScale = new Vector3(movement.Facing, 1, 1);
-        var currentPosition = TargetTrans.localPosition;
-        // 更新历史位置列表(每帧更新1次，最多保留n帧之前的位置)
-        _positionList.RemoveAt(0);
-        _positionList.Add(currentPosition);
-        var deltaDistance = (float)_positionList.Count / HairTrans.Length;
-        for (int i = 0; i < HairTrans.Length; i++)
+    {        
+        _positionQueue.RemoveAt(0);
+        var targetPosition = TargetTrans.localPosition;
+        _positionQueue.Add(targetPosition);
+        for (int i = 1; i < _hairRenderers.Length; i++)
         {
-            // 0 ~ m_PositionList.Count
-            int index = Mathf.CeilToInt((i + 1) * deltaDistance) - 1;
-            // 头发的顺序为从大到小，位置的顺序为从远（旧）到近（新）
-            HairTrans[HairTrans.Length - i - 1].localPosition = _positionList[index];
-        }
+            _hairRenderers[i].transform.localPosition = _positionQueue[i];
+        }     
     }
 
     public void ResetPlace()
     {
-        foreach (var item in HairTrans)
+        foreach (var item in _hairRenderers)
         {
-            item.localPosition = TargetTrans.localPosition;
+            item.transform.localPosition = TargetTrans.localPosition;
         }
-
-        _positionList.Clear();
+        _positionQueue.Clear();
         for (int i = 0; i < 5; i++)
-            _positionList.Add(transform.localPosition);
-    }
-
-    public void SetHairFlow(Vector2 speed)
-    {
-
+            _positionQueue.Add(transform.localPosition);
     }
 
     private void SetHairColor(Color color)
     {
         foreach (var item in _hairRenderers)
         {
-            if (item.color != color) item.color = color;
+            //if (item.color != color) item.color = color;
         }
     }
 

@@ -6,9 +6,12 @@ using UnityEngine;
 public class CharacterHairFlow : MonoBehaviour
 {
     public Transform TargetTrans;   // player
+
     private int _positionCount = 6;
     private int _hairRendererCount = 6;
     private List<Vector3> _positionList = new List<Vector3>();    // 6
+    [SerializeField]
+    private HairFlow _hairFlow = new HairFlow();
     [SerializeField]
     private List<SpriteRenderer> _hairRenderers = new List<SpriteRenderer>();    // 6
 
@@ -17,9 +20,8 @@ public class CharacterHairFlow : MonoBehaviour
 
     private void Start()
     {
-        for (int i = 0; i < _positionCount; i++)
-            _positionList.Add(TargetTrans.localPosition);
         AddMovementEvent();
+        _hairFlow.Initialize(TargetTrans.localPosition);
     }
 
     private void AddMovementEvent()
@@ -36,26 +38,19 @@ public class CharacterHairFlow : MonoBehaviour
             item.transform.localPosition = TargetTrans.localPosition;
     }
 
+    private int index = 0;
     public void UpdateHairFlow(CharacterMovement movement)
     {
-        _positionList.RemoveAt(0);
-        _positionList.Add(TargetTrans.localPosition);
-        for (int i = 0; i < _hairRendererCount; i++)
-        {
-            _hairRenderers[i].transform.localScale = new Vector3(-movement.Facing, 1, 1);
-            _hairRenderers[i].transform.localPosition = _positionList[_positionCount - 1 - i] + new Vector3(-movement.Facing * 0.5f, -0.125f, -0.1f);
-        }
-    }
-
-    private int index = 0;
-    public IEnumerator UpdateHairFlow2(CharacterMovement movement)
-    {
+        //_positionList.RemoveAt(0);
+        //_positionList.Add(TargetTrans.localPosition);
+        //for (int i = 0; i < _hairRendererCount; i++)
+        //{
+        //    _hairRenderers[i].transform.localScale = new Vector3(-movement.Facing, 1, 1);
+        //    _hairRenderers[i].transform.localPosition = _positionList[_positionCount - 1 - i] + new Vector3(-movement.Facing * 0.5f, -0.125f, -0.1f);
+        //}
         if (index == 6) index = 0;  // 更新到结尾时重置索引
-        _positionList[5 - index] = TargetTrans.localPosition;
         _hairRenderers[index].transform.localScale = new Vector3(-movement.Facing, 1, 1);
-        _hairRenderers[index].transform.localPosition = _positionList[index];
-        ++index;
-        yield return null;
+        _hairRenderers[index].transform.localPosition = _hairFlow.Update(TargetTrans.localPosition, () => ++index);
 
     }
 
@@ -83,33 +78,87 @@ public class CharacterHairFlow : MonoBehaviour
     }
 }
 
-public class player_hair
+[System.Serializable]
+public class HairFlow
 {
-    private class node
+    [System.Serializable]
+    private class Node
     {
-        public float x;
-        public float y;
-        public float size;
-    }
+        public int id;
+        public Node next;
+        public Color color;
+        public Vector2 position;
+        public Renderer renderer;
 
-    private node[] hair = new node[5];
-
-    public player_hair(CharacterMovement obj)
-    {
-        for (var i = 0; i <= 4; i++)
-            hair[i] = new node() { x = obj.Speed.x, y = obj.Speed.y, size = E.max(1, E.min(2, 3 - i)) };
-    }
-
-    public void draw_hair(CharacterMovement obj, int facing, int djump)
-    {
-        var c = (djump == 1 ? 8 : (djump == 2 ? (7 + E.flr((G.frames / 3) % 2) * 4) : 12));
-        var last = new Vector2(obj.x + 4 - facing * 2, obj.y + (E.btn(G.k_down) ? 4 : 3));
-        foreach (var h in hair)
+        public Node(int id, Vector2 position)
         {
-            h.x += (last.x - h.x) / 1.5f;
-            h.y += (last.y + 0.5f - h.y) / 1.5f;
-            E.circfill(h.x, h.y, h.size, c);
-            last = new Vector2(h.x, h.y);
+            this.id = id;
+            this.position = position;
         }
+
+        public Node(Vector2 position, Node next)
+        {
+            this.position = position;
+            this.next = next;
+        }
+
+        public Node(Vector2 position, Renderer renderer, Color color, Node next)
+        {
+            this.position = position;
+            this.renderer = renderer;
+            this.color = color;
+            this.next = next;
+        }
+    }
+
+    [SerializeField]
+    private Node _head, _tail;
+
+    // 尾节点指向首节点
+    // 遍历节点, 更新其Position值
+
+    private void Create(int id, Vector2 position)
+    {
+        _head = _tail = new Node(id, position);
+    }
+
+    private void Add(int id, Vector2 position)
+    {
+        _tail = _tail.next = new Node(id, position);
+    }
+
+    private bool MoveNext(ref Node node)
+    {
+        node = node.next;
+        return node != null;
+    }
+
+    public void SetPosition(Vector2 position)
+    {
+        _head.position = position;
+    }
+    public Vector2 GetPosition()
+    {
+        return _head.position;
+    }
+
+    // 创建一个环形链表
+    public void Initialize(Vector2 position)
+    {
+        Create(0, position);
+        for (int i = 1; i < 6; i++)
+        {
+            Add(i, position);
+        }
+        _tail.next = _head;
+    }
+
+    // 更新并返回位置
+    public Vector2 Update(Vector2 position, System.Action callback)
+    {
+        SetPosition(position);
+        if (MoveNext(ref _head))
+            callback.Invoke();
+        return _head.position;  // 头发飘动方向反了, 赋值应该由近及远(越迟更新的(坐标新)离角色最近)
     }
 }

@@ -19,8 +19,8 @@ public class CharacterController : MonoBehaviour
     {
         _movement.UpdateInput();
         _animation.UpdateAnimation(_movement);
-        //_hairFlow.UpdateHairFlow(_movement);
-        StartCoroutine(_hairFlow.UpdateHairFlow2(_movement));
+        _hairFlow.UpdateHairFlow(_movement);
+        //StartCoroutine(_hairFlow.UpdateHairFlow2(_movement));
     }
 
     private void FixedUpdate()

@@ -16,8 +16,8 @@ public class CameraFollow : MonoBehaviour
     {
         get
         {
-            var boundWidth = _screenHalfWidth * 0.618f;
-            var boundHeight = _screenHalfHeight * 0.618f;
+            var boundWidth = _screenHalfWidth * 0.309f;
+            var boundHeight = _screenHalfHeight * 0.309f;
             var cameraPostion = transform.position;
             var targetPosition = _targetTransform.position;
             float differenceTargetX = cameraPostion.x - targetPosition.x;
@@ -69,8 +69,8 @@ public class CameraFollow : MonoBehaviour
     private void DrawBoundBox()
     {
         var center = transform.position;
-        var min = new Vector3(center.x - _screenHalfWidth * 0.618f, center.y - _screenHalfHeight * 0.618f);
-        var max = new Vector3(center.x + _screenHalfWidth * 0.618f, center.y + _screenHalfHeight * 0.618f);
+        var min = new Vector3(center.x - _screenHalfWidth * 0.309f, center.y - _screenHalfHeight * 0.309f);
+        var max = new Vector3(center.x + _screenHalfWidth * 0.309f, center.y + _screenHalfHeight * 0.309f);
         _lineRenderer.positionCount = 5;
         _lineRenderer.SetPosition(0, new Vector3(max.x, min.y, -0.1f));
         _lineRenderer.SetPosition(1, new Vector3(max.x, max.y, -0.1f));
@@ -81,9 +81,9 @@ public class CameraFollow : MonoBehaviour
 
     public void LateUpdate()
     {
-        DrawBoundBox();
+        //DrawBoundBox();
         //transform.position = Vector3.Lerp(transform.position, CameraTargetPosition, _followSpeed * Time.deltaTime);
         //transform.position = Vector3.Slerp(transform.position, CameraTargetPosition, _followSpeed * Time.deltaTime);
-        transform.position = Vector3.SmoothDamp(transform.position, CameraTargetPosition, ref currentVelocity, Time.deltaTime, _followSpeed);
+        transform.position = Vector3.SmoothDamp(transform.position, CameraTargetPosition, ref currentVelocity, Time.smoothDeltaTime, _followSpeed);
     }
 }

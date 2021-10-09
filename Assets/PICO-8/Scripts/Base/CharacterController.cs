@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#define ENABLE_DEBUG
+using UnityEngine;
 
 public class CharacterController : MonoBehaviour
 {
@@ -19,7 +20,7 @@ public class CharacterController : MonoBehaviour
     {
         _movement.UpdateInput();
         _animation.UpdateAnimation(_movement);
-        _hairFlow.UpdateHairFlow(_movement);
+        //_hairFlow.UpdateHairFlow(_movement);
     }
 
     private void FixedUpdate()

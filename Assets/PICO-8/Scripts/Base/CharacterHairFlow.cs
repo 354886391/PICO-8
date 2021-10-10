@@ -46,10 +46,10 @@ public class CharacterHairFlow : MonoBehaviour
 
     public void SetXScale(int x)
     {
-        foreach (var renderer in _hairRenderers)
-        {
-            renderer.transform.localScale = new Vector3(x, 1, 1);
-        }
+        //foreach (var renderer in _hairRenderers)
+        //{
+        //    renderer.transform.localScale = new Vector3(x, 1, 1);
+        //}
     }
 
     public void UpdateHairFlow(CharacterMovement movement)
@@ -76,6 +76,11 @@ public class CharacterHairFlow : MonoBehaviour
         {
             ResetPlace();
         }
+    }
+
+    public void UpdateHairFlow2(CharacterMovement movement)
+    {
+
     }
 
     private void SetHairColor(Color color)

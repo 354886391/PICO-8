@@ -20,7 +20,7 @@ public class CharacterController : MonoBehaviour
     {
         _movement.UpdateInput();
         _animation.UpdateAnimation(_movement);
-        //_hairFlow.UpdateHairFlow(_movement);
+        _hairFlow.UpdateHairFlow(_movement);
     }
 
     private void FixedUpdate()

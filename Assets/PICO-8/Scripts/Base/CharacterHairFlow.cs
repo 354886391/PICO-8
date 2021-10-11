@@ -22,6 +22,10 @@ public class CharacterHairFlow : MonoBehaviour
         {
             _positionList.Add(TargetTrans.localPosition);
         }
+        for (int i = 0; i < _positionCount; i++)
+        {
+            _hairPositions.Add(TargetTrans.localPosition);
+        }
     }
 
     private void AddMovementEvent()
@@ -78,9 +82,21 @@ public class CharacterHairFlow : MonoBehaviour
         }
     }
 
+    private List<Vector3> _hairPositions = new List<Vector3>();
+
     public void UpdateHairFlow2(CharacterMovement movement)
     {
-
+        var end = _positionCount - 1;
+        var currentPos = TargetTrans.localPosition;
+        for (int i = 0; i < _positionCount - 1; i++)
+        {
+            _hairPositions[i] = _hairPositions[i + 1];
+        }
+        //_hairPositions[0] = currentPos;
+        //for (int i = 0; i < _hairRenderers.Count; i++)
+        //{
+        //    _hairRenderers[i].transform.localPosition = _hairPositions[i];
+        //}
     }
 
     private void SetHairColor(Color color)
@@ -105,5 +121,82 @@ public class CharacterHairFlow : MonoBehaviour
     {
         SetHairColor(_normalRed);
     }
+}
+
+public class hair
+{
+    public class Node
+    {
+        public int id;
+        public Color color;
+        public Vector3 position;
+        public Node prev;
+        public Node next;
+
+        public Node() { }
+
+        public Node(int id, Color color, Vector3 position, Node prev, Node next)
+        {
+            this.id = id;
+            this.color = color;
+            this.position = position;
+            this.prev = prev;
+            this.next = next;
+        }
+    }
+
+    public Node _head, _tail;
+
+    public Node _forward, _inversion;
+
+    public void Init(int count)
+    {
+        _forward = _head;
+        _inversion = _head;
+        Create(new Node());
+        for (int i = 0; i < count; i++)
+        {
+            Add(new Node());
+        }
+        _tail.next = _head;
+        _head.prev = _tail;
+    }
+
+    public void Create(Node node)
+    {
+        _head = _tail = node;
+    }
+
+    public void Add(Node node)
+    {
+        node.prev = _tail;
+        _tail.next = node;
+    }
+
+    public void MoveNext()
+    {
+        _forward = _forward.next;
+    }
+
+    public void MovePrev()
+    {
+        _inversion = _inversion.prev;
+    }
+
+    public void Test()
+    {
+        for (int i = 0; i < 20; i++)
+        {
+            Console.LogFormat("id {0}", _forward.id);
+            MoveNext();
+        }
+
+        for (int i = 0; i < 20; i++)
+        {
+            Console.LogFormat("id {0}", _inversion.id);
+            MovePrev();
+        }
+    }
+
 }
 

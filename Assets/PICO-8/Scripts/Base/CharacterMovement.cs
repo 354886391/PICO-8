@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define NO_ENABLE_DEBUG
+using System;
 using UnityEngine;
 
 public class CharacterMovement : MonoBehaviour

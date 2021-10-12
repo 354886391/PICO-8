@@ -1,4 +1,4 @@
-﻿#define ENABLE_DEBUG
+﻿#define NO_ENABLE_DEBUG
 using UnityEngine;
 
 public class CharacterController : MonoBehaviour

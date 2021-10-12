@@ -1,5 +1,4 @@
-﻿using DG.Tweening;
-using System.Collections;
+﻿#define NO_ENABLE_DEBUG
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -46,21 +45,17 @@ public class CharacterHairFlow : MonoBehaviour
 
     public void UpdateHairFlow(CharacterMovement movement)
     {
-        // 当前帧位置
-        Vector2 currentPos = PlayerTrans.localPosition;
-        // 更新历史位置列表(每帧更新1次，最多保留n帧之前的位置)
+
+        var facing = movement.Facing;
+        Vector3 offset = new Vector3(facing * 0.325f, 0, 0);
+        Vector2 currentPos = PlayerTrans.localPosition - offset;
         _hairPositions.RemoveAt(0);
         _hairPositions.Add(currentPos);
-        // 依次设置每个头发的位置
-        // 每隔deltaIndex，将下一个历史位置设置给下一个头发
-        float deltaIndex = (float)_hairCount / _hairRenderers.Count;
-        for (int j = 0; j < _hairCount; j++)
+        for (int i = 0; i < _hairCount; i++)
         {
-            // 1 ~ m_PositionList.Count
-            int index = Mathf.CeilToInt((j + 1) * deltaIndex);
-            SpriteRenderer renderer = _hairRenderers[_hairRenderers.Count - j - 1];
-            // 头发的顺序为从大到小，位置的顺序为从远（旧）到近（新）
-            renderer.transform.localScale = new Vector3(-movement.Facing, 1, 1);
+            var index = Mathf.CeilToInt((i + 1) * 0.75f);
+            var renderer = _hairRenderers[_hairCount - i];
+            renderer.transform.localScale = new Vector3(-facing, 1, 1);
             renderer.transform.localPosition = _hairPositions[index - 1];
         }
     }

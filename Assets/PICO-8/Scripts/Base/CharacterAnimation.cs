@@ -1,5 +1,6 @@
-﻿using UnityEngine;
+﻿#define NO_ENABLE_DEBUG
 using DG.Tweening;
+using UnityEngine;
 
 public class CharacterAnimation : MonoBehaviour
 {
@@ -64,7 +65,7 @@ public class CharacterAnimation : MonoBehaviour
         {
             _animator.Play(climb);
         }
-        
+
     }
 
     [ContextMenu("TakeoffBounce")]

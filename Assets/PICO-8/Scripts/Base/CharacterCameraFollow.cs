@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#define NO_ENABLE_DEBUG
+using UnityEngine;
 
 public class CharacterCameraFollow : MonoBehaviour
 {

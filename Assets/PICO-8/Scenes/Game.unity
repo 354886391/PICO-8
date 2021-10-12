@@ -1000,7 +1000,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16e4aa05b268d42449d8dab7fa4cad10, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _targetTransform: {fileID: 126606793}
+  PlayerTrans: {fileID: 2125235279}
   _followSpeed: 10
 --- !u!20 &519420031
 Camera:
@@ -5132,25 +5132,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 115d76f19d525094d86f9ab5950697f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TargetTrans: {fileID: 2125235279}
-  hair:
-    _head:
-      id: 0
-      color: {r: 0, g: 0, b: 0, a: 0}
-      position: {x: 0, y: 0, z: 0}
-    _tail:
-      id: 0
-      color: {r: 0, g: 0, b: 0, a: 0}
-      position: {x: 0, y: 0, z: 0}
-    _forward:
-      id: 0
-      color: {r: 0, g: 0, b: 0, a: 0}
-      position: {x: 0, y: 0, z: 0}
-    _inversion:
-      id: 0
-      color: {r: 0, g: 0, b: 0, a: 0}
-      position: {x: 0, y: 0, z: 0}
+  PlayerTrans: {fileID: 2125235279}
+  _hairPositions: []
   _hairRenderers:
+  - {fileID: 1936604954}
   - {fileID: 381862235}
   - {fileID: 1247300373}
   - {fileID: 1953548500}
@@ -5729,6 +5714,7 @@ MonoBehaviour:
   _movement: {fileID: 2125235274}
   _animation: {fileID: 2125235273}
   _hairFlow: {fileID: 1936604955}
+  _cameraFollow: {fileID: 519420030}
 --- !u!50 &2125235277
 Rigidbody2D:
   serializedVersion: 4

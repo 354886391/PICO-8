@@ -5,11 +5,10 @@ using UnityEngine;
 
 public class CharacterHairFlow : MonoBehaviour
 {
-    public Transform TargetTrans;   // player
-    public Hair hair = new Hair();
-    private int _positionCount = 6;
-    private List<Vector3> _hairPositions = new List<Vector3>();
-    private List<Vector3> _positionList = new List<Vector3>();    // 6
+    public Transform PlayerTrans;   // player
+    private int _hairCount = 6;
+    [SerializeField]
+    private List<Vector3> _hairPositions = new List<Vector3>();    // 6
     [SerializeField]
     private List<SpriteRenderer> _hairRenderers = new List<SpriteRenderer>();    // 6
 
@@ -19,15 +18,10 @@ public class CharacterHairFlow : MonoBehaviour
     private void Start()
     {
         AddMovementEvent();
-        for (int i = 0; i < _positionCount; i++)
+        for (int i = 0; i < _hairCount; i++)
         {
-            _positionList.Add(TargetTrans.localPosition);
+            _hairPositions.Add(PlayerTrans.localPosition);
         }
-        for (int i = 0; i < _positionCount; i++)
-        {
-            _hairPositions.Add(TargetTrans.localPosition);
-        }
-        hair.Init(_positionCount, _normalRed, TargetTrans.localPosition);
     }
 
     private void AddMovementEvent()
@@ -39,67 +33,35 @@ public class CharacterHairFlow : MonoBehaviour
 
     public void ResetPlace()
     {
-        _positionList.Clear();
-        for (int i = 0; i < _positionCount; i++)
+        _hairPositions.Clear();
+        for (int i = 0; i < _hairCount; i++)
         {
-            _positionList.Add(TargetTrans.localPosition);
+            _hairPositions.Add(PlayerTrans.localPosition);
         }
         foreach (var item in _hairRenderers)
         {
-            item.transform.localPosition = TargetTrans.localPosition;
+            item.transform.localPosition = PlayerTrans.localPosition;
         }
-    }
-
-    public void SetXScale(int x)
-    {
-        //foreach (var renderer in _hairRenderers)
-        //{
-        //    renderer.transform.localScale = new Vector3(x, 1, 1);
-        //}
     }
 
     public void UpdateHairFlow(CharacterMovement movement)
     {
-        // 调整HairFlow的朝向
-        SetXScale(movement.Facing);
         // 当前帧位置
-        Vector2 currentPos = TargetTrans.localPosition;
+        Vector2 currentPos = PlayerTrans.localPosition;
         // 更新历史位置列表(每帧更新1次，最多保留n帧之前的位置)
-        _positionList.RemoveAt(0);
-        _positionList.Add(currentPos);
+        _hairPositions.RemoveAt(0);
+        _hairPositions.Add(currentPos);
         // 依次设置每个头发的位置
         // 每隔deltaIndex，将下一个历史位置设置给下一个头发
-        float deltaIndex = (float)_positionCount / _hairRenderers.Count;
-        for (int j = 0; j < _hairRenderers.Count; j++)
+        float deltaIndex = (float)_hairCount / _hairRenderers.Count;
+        for (int j = 0; j < _hairCount; j++)
         {
-            // 0 ~ m_PositionList.Count
-            int index = Mathf.CeilToInt((j + 1) * deltaIndex) - 1;
-            Console.LogFormat("index {0}", index);
+            // 1 ~ m_PositionList.Count
+            int index = Mathf.CeilToInt((j + 1) * deltaIndex);
+            SpriteRenderer renderer = _hairRenderers[_hairRenderers.Count - j - 1];
             // 头发的顺序为从大到小，位置的顺序为从远（旧）到近（新）
-            _hairRenderers[_hairRenderers.Count - j - 1].transform.localPosition = _positionList[index];
-        }
-        if (movement.Speed == Vector2.zero)
-        {
-            ResetPlace();
-        }
-    }
-
-    
-    
-
-    public void UpdateHairFlow2(CharacterMovement movement)
-    {
-        hair._forward.position = TargetTrans.localPosition;
-        for (int i = 0; i < _positionCount; i++)
-        {
-            hair._inversion.position = hair._inversion.prev.position;
-            hair.MoveNext();
-        }
-
-        foreach (var item in _hairRenderers)
-        {
-            item.transform.localScale = new Vector3(-movement.Facing, 1, 1);
-            item.transform.localPosition = hair.GetPosition(hair._inversion);
+            renderer.transform.localScale = new Vector3(-movement.Facing, 1, 1);
+            renderer.transform.localPosition = _hairPositions[index - 1];
         }
     }
 

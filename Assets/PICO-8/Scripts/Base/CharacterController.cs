@@ -9,6 +9,8 @@ public class CharacterController : MonoBehaviour
     private CharacterAnimation _animation;
     [SerializeField]
     private CharacterHairFlow _hairFlow;
+    [SerializeField]
+    private CharacterCameraFollow _cameraFollow;
 
     private void Awake()
     {
@@ -20,13 +22,17 @@ public class CharacterController : MonoBehaviour
     {
         _movement.UpdateInput();
         _animation.UpdateAnimation(_movement);
-        //_hairFlow.UpdateHairFlow(_movement);
-        _hairFlow.UpdateHairFlow2(_movement);
+        _hairFlow.UpdateHairFlow(_movement);
     }
 
     private void FixedUpdate()
     {
         _movement.Move(Time.fixedDeltaTime);
+    }
+
+    private void LateUpdate()
+    {
+        _cameraFollow.UpdateFollow(Time.smoothDeltaTime);
     }
 
 }

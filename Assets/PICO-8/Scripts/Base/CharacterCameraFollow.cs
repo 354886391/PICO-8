@@ -1,14 +1,13 @@
 ﻿using UnityEngine;
 
-public class CameraFollow : MonoBehaviour
+public class CharacterCameraFollow : MonoBehaviour
 {
+    public Transform PlayerTrans;
     [SerializeField]
-    private Transform _targetTransform;
-    [SerializeField]
-    private float _followSpeed = 12.0f;
+    private float _followSpeed = 10.0f;
 
-    private float _screenHalfWidth;     // half
-    private float _screenHalfHeight;    // half
+    private float _boundWidth;
+    private float _boundHeight;
     private Vector3 currentVelocity;
     private LineRenderer _lineRenderer;
 
@@ -16,25 +15,23 @@ public class CameraFollow : MonoBehaviour
     {
         get
         {
-            var boundWidth = _screenHalfWidth * 0.309f;
-            var boundHeight = _screenHalfHeight * 0.309f;
             var cameraPostion = transform.position;
-            var targetPosition = _targetTransform.position;
+            var targetPosition = PlayerTrans.position;
             float differenceTargetX = cameraPostion.x - targetPosition.x;
             float differenceTargetY = cameraPostion.y - targetPosition.y;
-            if (Mathf.Abs(differenceTargetX) > boundWidth)
+            if (Mathf.Abs(differenceTargetX) > _boundWidth)
             {
                 if (differenceTargetX > 0)
-                    cameraPostion -= boundWidth * Vector3.right;
+                    cameraPostion -= _boundWidth * Vector3.right;
                 else if (differenceTargetX < 0)
-                    cameraPostion += boundWidth * Vector3.right;
+                    cameraPostion += _boundWidth * Vector3.right;
             }
-            if (Mathf.Abs(differenceTargetY) > boundHeight)
+            if (Mathf.Abs(differenceTargetY) > _boundHeight)
             {
                 if (differenceTargetY > 0)
-                    cameraPostion -= boundHeight * Vector3.up;
+                    cameraPostion -= _boundHeight * Vector3.up;
                 else
-                    cameraPostion += boundHeight * Vector3.up;
+                    cameraPostion += _boundHeight * Vector3.up;
             }
             return cameraPostion;
         }
@@ -49,8 +46,8 @@ public class CameraFollow : MonoBehaviour
     private void GetScreenSize()
     {
         var renderingRate = (float)Display.main.renderingWidth / Display.main.renderingHeight;
-        _screenHalfHeight = Camera.main.orthographicSize;
-        _screenHalfWidth = _screenHalfHeight * renderingRate;
+        _boundWidth = Camera.main.orthographicSize * renderingRate * 0.309f;
+        _boundHeight = Camera.main.orthographicSize * 0.309f;
         //Console.LogFormat("Width {0}, height {1}, Rate {2}", _screenHalfWidth, _screenHalfHeight, renderingRate);
     }
 
@@ -59,7 +56,7 @@ public class CameraFollow : MonoBehaviour
         var center = transform.position;
         var go = new GameObject("BoundBox");
         go.transform.SetParent(transform);
-        go.transform.position = new Vector3(center.x - _screenHalfWidth, center.y - _screenHalfHeight);
+        go.transform.localPosition = Vector3.zero;
         _lineRenderer = go.AddComponent<LineRenderer>();
         _lineRenderer.startWidth = 0.1f;
         _lineRenderer.endWidth = 0.1f;
@@ -69,8 +66,8 @@ public class CameraFollow : MonoBehaviour
     private void DrawBoundBox()
     {
         var center = transform.position;
-        var min = new Vector3(center.x - _screenHalfWidth * 0.309f, center.y - _screenHalfHeight * 0.309f);
-        var max = new Vector3(center.x + _screenHalfWidth * 0.309f, center.y + _screenHalfHeight * 0.309f);
+        var min = new Vector3(center.x - _boundWidth, center.y - _boundHeight);
+        var max = new Vector3(center.x + _boundWidth, center.y + _boundHeight);
         _lineRenderer.positionCount = 5;
         _lineRenderer.SetPosition(0, new Vector3(max.x, min.y, -0.1f));
         _lineRenderer.SetPosition(1, new Vector3(max.x, max.y, -0.1f));
@@ -79,11 +76,13 @@ public class CameraFollow : MonoBehaviour
         _lineRenderer.SetPosition(4, new Vector3(max.x, min.y, -0.1f));
     }
 
-    public void LateUpdate()
+    public void UpdateFollow(float deltaTime)
     {
-        //DrawBoundBox();
+        DrawBoundBox();
         //transform.position = Vector3.Lerp(transform.position, CameraTargetPosition, _followSpeed * Time.deltaTime);
         //transform.position = Vector3.Slerp(transform.position, CameraTargetPosition, _followSpeed * Time.deltaTime);
-        transform.position = Vector3.SmoothDamp(transform.position, CameraTargetPosition, ref currentVelocity, Time.smoothDeltaTime, _followSpeed);
+        transform.position = Vector3.SmoothDamp(transform.position, CameraTargetPosition, ref currentVelocity, deltaTime, _followSpeed);
     }
+
+
 }

@@ -136,7 +136,7 @@ public class CharacterAnimation : MonoBehaviour
     private void LandingHandler(CharacterMovement movement)
     {
         LandingBounce();
-        Console.LogFormat("Landing speed {0}", movement.Speed);
+        //Console.LogFormat("Landing speed {0}", movement.Speed);
     }
 
 }

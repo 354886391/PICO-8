@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CharacterAnimation : MonoBehaviour
 {
+    private int born;
     private int idle;
     private int run;
     private int jump;
@@ -22,6 +23,7 @@ public class CharacterAnimation : MonoBehaviour
 
     private void Start()
     {
+        born = Animator.StringToHash("Born");
         idle = Animator.StringToHash("Idle");
         run = Animator.StringToHash("Run");
         jump = Animator.StringToHash("Jump");
@@ -66,6 +68,11 @@ public class CharacterAnimation : MonoBehaviour
             _animator.Play(climb);
         }
 
+    }
+
+    public void AnimateBorn()
+    {
+        _animator.Play(born);
     }
 
     [ContextMenu("TakeoffBounce")]

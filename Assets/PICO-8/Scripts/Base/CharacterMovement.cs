@@ -69,10 +69,12 @@ public class CharacterMovement : MonoBehaviour
     #endregion
 
     #region Vars
+    [SerializeField] private bool _canMove;
     [SerializeField] private bool _onGround;
     [SerializeField] private bool _wasOnGround;
     [SerializeField] private bool _againstWall;
     [SerializeField] private bool _isFreezing;
+    [SerializeField] private int _facing;
     [SerializeField] private float _maxFall;
     [SerializeField] private Vector2 _speed;
 
@@ -141,14 +143,24 @@ public class CharacterMovement : MonoBehaviour
 
     public float MoveY { get; set; }
 
-    public int Facing { get; set; }
-
     public float Stamina { get; set; }
 
     public Vector2 Speed
     {
         get { return _speed; }
         set { _speed = value; }
+    }
+
+    public bool CanMove
+    {
+        get { return _canMove; }
+        set { _canMove = value; }
+    }
+
+    public int Facing
+    {
+        get { return _facing; }
+        set { _facing = value; }
     }
 
     /// <summary>
@@ -290,26 +302,35 @@ public class CharacterMovement : MonoBehaviour
         get { return !_onGround && _speed.y < MinOffset; }
     }
 
-    public void Move(float deltaTime)
+    public void AutoSetCanMove(float delay, Action callback)
     {
-        ComputeRayOrigin();
-        ApplyFacing();
-        DetectGround(deltaTime);
-        DetectWall(deltaTime);
-        ApplyGravity(deltaTime);
-        CooldownUpdate(deltaTime);
+        _canMove = false;
+        Utility.DelayCall(delay, () => { _canMove = true; callback?.Invoke(); });
+    }
 
-        Moving(deltaTime);
-        JumpBegin();
-        MidAirJumpBegin();
-        JumpUpdate(deltaTime);
-        DashBegin();
-        DashUpdate(deltaTime);
-        ClimbBegin();
-        ClimbUpdate(deltaTime);
-        LandingUpdate();
-        CorrectionAndMove(deltaTime);
-        _wasOnGround = _onGround;
+    public void UpdateMove(float deltaTime)
+    {
+        if (_canMove)
+        {
+            ComputeRayOrigin();
+            ApplyFacing();
+            DetectGround(deltaTime);
+            DetectWall(deltaTime);
+            ApplyGravity(deltaTime);
+            CooldownUpdate(deltaTime);
+
+            Moving(deltaTime);
+            JumpBegin();
+            MidAirJumpBegin();
+            JumpUpdate(deltaTime);
+            DashBegin();
+            DashUpdate(deltaTime);
+            ClimbBegin();
+            ClimbUpdate(deltaTime);
+            LandingUpdate();
+            CorrectionAndMove(deltaTime);
+            _wasOnGround = _onGround;
+        }
     }
 
     /// <summary>
@@ -334,8 +355,8 @@ public class CharacterMovement : MonoBehaviour
     private void DetectWall(float deltaTime)
     {
         _againstWall = false;
-        var origin = Facing < 0 ? _rayOrigin.bottomLeft : _rayOrigin.bottomRight;
-        var direction = Vector2.right * Facing;
+        var origin = _facing < 0 ? _rayOrigin.bottomLeft : _rayOrigin.bottomRight;
+        var direction = Vector2.right * _facing;
         var distance = Mathf.Abs(_speed.x * deltaTime) + SkinWidth * 2f;
         for (int i = 0; i < VerticalRaysCount; i++)
         {
@@ -349,7 +370,7 @@ public class CharacterMovement : MonoBehaviour
     private void ApplyGravity(float deltaTime)
     {
         // Slide if it is against a wall and moving towards it
-        if (_againstWall && MoveX == Facing)
+        if (_againstWall && MoveX == _facing)
         {
             _maxFall = Mathf.MoveTowards(_maxFall, ClimbSlipSpeed, SlideAccel * deltaTime);
         }
@@ -366,11 +387,11 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
-    public void ApplyFacing()
+    private void ApplyFacing()
     {
-        if (MoveX != 0) Facing = (int)MoveX;
+        if (MoveX != 0) _facing = (int)MoveX;
         Vector3 scale = transform.localScale;
-        if (scale.x == Facing) return;
+        if (scale.x == _facing) return;
         transform.localScale = new Vector3(-scale.x, scale.y, scale.z);
         //Console.LogFormat("scale.x {0},  _facing {1}", scale.x, Facing);
     }
@@ -491,7 +512,7 @@ public class CharacterMovement : MonoBehaviour
     {
         if (MoveX == 0 && MoveY == 0)
         {
-            _dashDir = new Vector2(Facing, 0);
+            _dashDir = new Vector2(_facing, 0);
         }
         else if (MoveX != 0 && MoveY == 0)
         {
@@ -742,9 +763,15 @@ public class CharacterMovement : MonoBehaviour
         //Console.LogWarning("timeScale " + Time.timeScale + "deltaTime " + Time.deltaTime);
     }
 
+    public void SetPosition(Vector3 position)
+    {
+        transform.position = position;
+    }
+
     private void Awake()
     {
-        Facing = 1;
+        _facing = 1;
+        _canMove = true;
         _canJump = true;
         _canDash = true;
         _canClimb = true;

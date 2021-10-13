@@ -45,9 +45,8 @@ public class CharacterHairFlow : MonoBehaviour
 
     public void UpdateHairFlow(CharacterMovement movement)
     {
-
         var facing = movement.Facing;
-        Vector3 offset = new Vector3(facing * 0.325f, 0, 0);
+        Vector3 offset = new Vector3(facing * 0.25f, 0, 0);
         Vector2 currentPos = PlayerTrans.localPosition - offset;
         _hairPositions.RemoveAt(0);
         _hairPositions.Add(currentPos);
@@ -58,6 +57,20 @@ public class CharacterHairFlow : MonoBehaviour
             renderer.transform.localScale = new Vector3(-facing, 1, 1);
             renderer.transform.localPosition = _hairPositions[index - 1];
         }
+    }
+
+    private void SetVisable(bool visable)
+    {
+        foreach (var item in _hairRenderers)
+        {
+            item.enabled = visable;
+        }
+    }
+
+    public void AutoHideHairFlow(float time)
+    {
+        SetVisable(false);
+        Utility.DelayCall(time, () => { SetVisable(true); ResetPlace(); });
     }
 
     private void SetHairColor(Color color)

@@ -116,6 +116,7 @@ public class CharacterMovement : MonoBehaviour
 
     private float _verticalRaysInterval;
     private float _horizontalRaysInterval;
+    private Vector3 _originPosition;
 
     [SerializeField] private RayOrigin _rayOrigin;
     [SerializeField] private LayerMask _groundMask;
@@ -768,6 +769,11 @@ public class CharacterMovement : MonoBehaviour
         transform.position = position;
     }
 
+    public void SetOriginPosition()
+    {
+        transform.position = _originPosition;
+    }
+
     private void Awake()
     {
         _facing = 1;
@@ -775,6 +781,7 @@ public class CharacterMovement : MonoBehaviour
         _canJump = true;
         _canDash = true;
         _canClimb = true;
+        _originPosition = transform.position;
         _groundMask = LayerMask.GetMask("Ground");
         _rigidbody = GetComponent<Rigidbody2D>();
         _boxCollider = GetComponent<BoxCollider2D>();

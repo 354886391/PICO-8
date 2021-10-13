@@ -14,7 +14,6 @@ public class CharacterController : MonoBehaviour
     [SerializeField]
     private CharacterCameraFollow _cameraFollow;
 
-    private Vector3 _originPosition;
 
     private void Awake()
     {
@@ -25,7 +24,6 @@ public class CharacterController : MonoBehaviour
     private void Start()
     {
         _health.Initialize(OnDeathbed);
-        _originPosition = transform.localPosition;
     }
 
     private void Restart()
@@ -33,8 +31,8 @@ public class CharacterController : MonoBehaviour
         _hairFlow.AutoHideHairFlow(0.5f);
         _movement.AutoSetCanMove(0.5f, null);
         
-        _movement.SetPosition(_originPosition);
-        _cameraFollow.SetPosition(_originPosition);
+        _movement.SetOriginPosition();
+        _cameraFollow.SetOriginPosition();
         _animation.AnimateBorn();
         _health.Restart();
     }

@@ -19,7 +19,7 @@ public class CharacterHairFlow : MonoBehaviour
         AddMovementEvent();
         for (int i = 0; i < _hairCount; i++)
         {
-            _hairPositions.Add(PlayerTrans.localPosition);
+            _hairPositions.Add(PlayerTrans.position);
         }
     }
 
@@ -35,11 +35,11 @@ public class CharacterHairFlow : MonoBehaviour
         _hairPositions.Clear();
         for (int i = 0; i < _hairCount; i++)
         {
-            _hairPositions.Add(PlayerTrans.localPosition);
+            _hairPositions.Add(PlayerTrans.position);
         }
         foreach (var item in _hairRenderers)
         {
-            item.transform.localPosition = PlayerTrans.localPosition;
+            item.transform.position = PlayerTrans.position;
         }
     }
 
@@ -47,7 +47,7 @@ public class CharacterHairFlow : MonoBehaviour
     {
         var facing = movement.Facing;
         Vector3 offset = new Vector3(facing * 0.25f, 0, 0);
-        Vector2 currentPos = PlayerTrans.localPosition - offset;
+        Vector2 currentPos = PlayerTrans.position - offset;
         _hairPositions.RemoveAt(0);
         _hairPositions.Add(currentPos);
         for (int i = 0; i < _hairCount; i++)

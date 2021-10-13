@@ -1,4 +1,5 @@
 ﻿#define ENABLE_DEBUG
+using System;
 using UnityEngine;
 
 public class CharacterHealth : MonoBehaviour
@@ -6,26 +7,25 @@ public class CharacterHealth : MonoBehaviour
     public const int TotalHealth = 100;
 
     private int _currentHealth;
-    
-    private System.Action _onDeathbed;
+    private Action _onDeathbed;
 
     public void Start()
     {
-        
+
         foreach (var item in FindObjectsOfType<SpinDamage>())
         {
             item.HurtEnterEvent += DectionHurt;
         }
     }
 
-    public void Initialize(System.Action callback)
+    public void Initialize(Action callback)
     {
-        _onDeathbed = callback;      
+        _onDeathbed = callback;
     }
 
     public void Restart()
     {
-        _currentHealth = TotalHealth;        
+        _currentHealth = TotalHealth;
         Console.LogError("Character death");
     }
 

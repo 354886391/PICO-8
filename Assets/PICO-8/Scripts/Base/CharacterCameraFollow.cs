@@ -9,8 +9,10 @@ public class CharacterCameraFollow : MonoBehaviour
 
     private float _boundWidth;
     private float _boundHeight;
-    private Vector3 currentVelocity;
+    private Vector3 _currentVelocity;
+    private Vector3 _originPosition;
     private LineRenderer _lineRenderer;
+
 
     private Vector3 CameraTargetPosition
     {
@@ -42,6 +44,7 @@ public class CharacterCameraFollow : MonoBehaviour
     {
         GetScreenSize();
         InitLineRenderer();
+        _originPosition = transform.position;
     }
 
     private void GetScreenSize()
@@ -82,11 +85,16 @@ public class CharacterCameraFollow : MonoBehaviour
         DrawBoundBox();
         //transform.position = Vector3.Lerp(transform.position, CameraTargetPosition, _followSpeed * Time.deltaTime);
         //transform.position = Vector3.Slerp(transform.position, CameraTargetPosition, _followSpeed * Time.deltaTime);
-        transform.position = Vector3.SmoothDamp(transform.position, CameraTargetPosition, ref currentVelocity, deltaTime, _followSpeed);
+        transform.position = Vector3.SmoothDamp(transform.position, CameraTargetPosition, ref _currentVelocity, deltaTime, _followSpeed);
     }
 
     public void SetPosition(Vector3 position)
     {
         transform.position = position;
+    }
+
+    public void SetOriginPosition()
+    {
+        transform.position = _originPosition;
     }
 }

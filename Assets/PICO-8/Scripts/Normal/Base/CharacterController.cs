@@ -27,9 +27,9 @@ public class CharacterController : MonoBehaviour
 
     private void Restart()
     {
-        Movement.AutoCanMove(0.2f);
-        HairFlow.AutoHideHairFlow(0.22f);
-        Utility.DelayCall(0.20f, () =>
+        Movement.AutoCanMove(0.333f);
+        HairFlow.AutoHideHairFlow(0.35f);
+        Utility.DelayCall(0.35f, () =>
         {          
             Movement.SetOriginPosition();
             Movement.BornAndJump();

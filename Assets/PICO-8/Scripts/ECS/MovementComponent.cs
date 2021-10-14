@@ -52,18 +52,4 @@ public class MovementComponent : IComponent
     #endregion
     #endregion
 
-    public override void AddComponent()
-    {
-        base.AddComponent();
-    }
-
-    public override MovementComponent GetComponent<MovementComponent>()
-    {
-        return base.GetComponent<MovementComponent>();
-    }
-
-    public override bool HasComponent<MovementComponent>()
-    {
-        return base.HasComponent<MovementComponent>();
-    }
 }

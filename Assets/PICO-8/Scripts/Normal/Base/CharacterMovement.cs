@@ -173,7 +173,7 @@ public class CharacterMovement : MonoBehaviour
     public bool WasOnGround
     {
         get { return _wasOnGround; }
-        set => _wasOnGround = value;
+        set { _wasOnGround = value; }
     }
 
     public bool HitCeiling { get; set; }

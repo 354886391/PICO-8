@@ -789,7 +789,7 @@ public class CharacterMovement : MonoBehaviour
         Utility.MoveTo(transform, new Vector3(-6f, -4f, 0), 0.5f, false, DG.Tweening.Ease.OutCubic);
     }
 
-    private void Awake()
+    private void Start()
     {
         _facing = 1;
         _canMove = true;

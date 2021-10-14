@@ -6,8 +6,11 @@ public class CharacterHealth : MonoBehaviour
 {
     public const int TotalHealth = 100;
 
+    private bool _isDeading;
     private int _currentHealth;
     private Action _onDeathbed;
+
+    public bool IsDeading { get { return _isDeading; } }
 
     public void Start()
     {
@@ -25,6 +28,7 @@ public class CharacterHealth : MonoBehaviour
 
     public void Restart()
     {
+        _isDeading = false;
         _currentHealth = TotalHealth;
         Console.LogError("Character death");
     }
@@ -34,6 +38,7 @@ public class CharacterHealth : MonoBehaviour
         BeingHurt(damage);
         if (IsDeath())
         {
+            _isDeading = true;
             _onDeathbed?.Invoke();
         }
     }
@@ -47,4 +52,5 @@ public class CharacterHealth : MonoBehaviour
     {
         return _currentHealth <= 0;
     }
+
 }

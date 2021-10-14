@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CharacterAnimation : MonoBehaviour
 {
-    private int born;
+    private int dead;
     private int idle;
     private int run;
     private int jump;
@@ -23,9 +23,10 @@ public class CharacterAnimation : MonoBehaviour
 
     private void Start()
     {
-        born = Animator.StringToHash("Born");
+        dead = Animator.StringToHash("Dead");
         idle = Animator.StringToHash("Idle");
         run = Animator.StringToHash("Run");
+        climb = Animator.StringToHash("Climb");
         jump = Animator.StringToHash("Jump");
         lookUp = Animator.StringToHash("LookUp");
         lookDown = Animator.StringToHash("LookDown");
@@ -40,39 +41,37 @@ public class CharacterAnimation : MonoBehaviour
     }
 
     /// <param name="movement"></param>
-    public void UpdateAnimation(CharacterMovement movement)
+    public void UpdateAnimation(CharacterController controller)
     {
-        var moveX = movement.MoveX;
-        var moveY = movement.MoveY;
-        if (movement.OnGround)
+        var health = controller.Health;
+        var movement = controller.Movement;
+        if (health.IsDeading)
         {
-            if (moveX == 0 && moveY == 0)
+            _animator.Play(dead);
+        }
+        else if (movement.IsClimbing)
+        {
+            _animator.Play(climb);
+        }
+        else if (movement.OnGround)
+        {
+            if (movement.MoveX == 0 && movement.MoveY == 0)
             {
                 _animator.Play(idle);
             }
-            else if (moveX != 0)
+            else if (movement.MoveX != 0)
             {
                 _animator.Play(run);
             }
-            else if (moveY != 0)
+            else if (movement.MoveY != 0)
             {
-                _animator.Play(moveY > 0 ? lookUp : lookDown);
+                _animator.Play(movement.MoveY > 0 ? lookUp : lookDown);
             }
         }
         else if (movement.IsJumping || movement.IsDashing || movement.IsFalling)
         {
             _animator.Play(jump);
         }
-        if (movement.IsClimbing)
-        {
-            _animator.Play(climb);
-        }
-
-    }
-
-    public void AnimateBorn()
-    {
-        _animator.Play(born);
     }
 
     [ContextMenu("TakeoffBounce")]

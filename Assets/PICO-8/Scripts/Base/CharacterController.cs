@@ -4,37 +4,37 @@ using UnityEngine;
 public class CharacterController : MonoBehaviour
 {
     [SerializeField]
-    private CharacterHealth _health;
+    public CharacterHealth Health;
     [SerializeField]
-    private CharacterMovement _movement;
+    public CharacterMovement Movement;
     [SerializeField]
-    private CharacterAnimation _animation;
+    public CharacterAnimation Animation;
     [SerializeField]
-    private CharacterHairFlow _hairFlow;
+    public CharacterHairFlow HairFlow;
     [SerializeField]
-    private CharacterCameraFollow _cameraFollow;
-
+    public CharacterCameraFollow CameraFollow;
 
     private void Awake()
     {
-        Application.targetFrameRate = 60;
         Time.fixedDeltaTime = 0.02f;
+        Application.targetFrameRate = 60;     
     }
 
     private void Start()
     {
-        _health.Initialize(OnDeathbed);
+        Health.Initialize(OnDeathbed);
     }
 
     private void Restart()
     {
-        _hairFlow.AutoHideHairFlow(0.5f);
-        _movement.AutoSetCanMove(0.5f, null);
-        
-        _movement.SetOriginPosition();
-        _cameraFollow.SetOriginPosition();
-        _animation.AnimateBorn();
-        _health.Restart();
+        Movement.AutoCanMove(0.2f);
+        HairFlow.AutoHideHairFlow(0.21f);
+        Utility.DelayCall(0.20f, () =>
+        {          
+            Movement.SetOriginPosition();
+            Movement.BornAndJump();
+            Health.Restart();
+        });
     }
 
     private void OnDeathbed()
@@ -44,19 +44,19 @@ public class CharacterController : MonoBehaviour
 
     private void Update()
     {
-        _movement.UpdateInput();
-        _animation.UpdateAnimation(_movement);
-        _hairFlow.UpdateHairFlow(_movement);
+        Movement.UpdateInput();
+        Animation.UpdateAnimation(this);
+        HairFlow.UpdateHairFlow(Movement);
     }
 
     private void FixedUpdate()
     {
-        _movement.UpdateMove(Time.fixedDeltaTime);
+        Movement.UpdateMove(Time.fixedDeltaTime);
     }
 
     private void LateUpdate()
     {
-        _cameraFollow.UpdateFollow(Time.smoothDeltaTime);
+        CameraFollow.UpdateFollow(Time.smoothDeltaTime);
     }
 
 }

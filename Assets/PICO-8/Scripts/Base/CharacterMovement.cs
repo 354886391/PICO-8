@@ -29,6 +29,7 @@ public class CharacterMovement : MonoBehaviour
 
     #region Jump
     public const float JumpHBoost = 4f;
+    public const float JumpWBoost = 6f;
     public const float JumpSpeed = 10.5f;
     public const float JumpTime = 0.2f;
     public const float JumpToleranceTime = 0.15f;
@@ -54,12 +55,6 @@ public class CharacterMovement : MonoBehaviour
     private const float ClimbAccel = 90f;
     private const float SlideAccel = 90f;
     private const float ClimbGrabYMult = .2f;
-    private const float ClimbNoMoveTime = .1f;
-    private const float ClimbTiredThreshold = 2f;
-    private const float ClimbMaxStamina = 110;
-    private const float ClimbUpCost = 100 / 2.2f;
-    private const float ClimbStillCost = 100 / 10f;
-    private const float ClimbJumpCost = 110 / 4f;
     #endregion
 
     public const float SkinWidth = 0.02f;
@@ -116,7 +111,6 @@ public class CharacterMovement : MonoBehaviour
 
     private float _verticalRaysInterval;
     private float _horizontalRaysInterval;
-    private Vector3 _originPosition;
 
     [SerializeField] private RayOrigin _rayOrigin;
     [SerializeField] private LayerMask _groundMask;
@@ -303,12 +297,6 @@ public class CharacterMovement : MonoBehaviour
         get { return !_onGround && _speed.y < MinOffset; }
     }
 
-    public void AutoSetCanMove(float delay, Action callback)
-    {
-        _canMove = false;
-        Utility.DelayCall(delay, () => { _canMove = true; callback?.Invoke(); });
-    }
-
     public void UpdateMove(float deltaTime)
     {
         if (_canMove)
@@ -328,6 +316,7 @@ public class CharacterMovement : MonoBehaviour
             DashUpdate(deltaTime);
             ClimbBegin();
             ClimbUpdate(deltaTime);
+            ClimbJumpBegin();
             LandingUpdate();
             CorrectionAndMove(deltaTime);
             _wasOnGround = _onGround;
@@ -593,6 +582,21 @@ public class CharacterMovement : MonoBehaviour
         //Console.LogFormat("ClimbBegin {0}", _speed);
     }
 
+    private void ClimbJumpBegin()
+    {
+        if (!_isClimbing) return;
+        if (!_jump || !_canJump) return;
+        if (_jumpHeldDownTimer > JumpToleranceTime) return;
+        _canJump = false;
+        _isJumping = true;
+        _canJumpUpdate = true;
+        _speed.x += JumpWBoost * MoveX;
+        _speed.y = JumpSpeed;
+        //事件回调
+        JumpBeginEvent?.Invoke(this);
+        //Console.LogFormat("JumpBegin {0}", _speed.y);
+    }
+
     /// <summary>
     /// 在撞到墙时, 按住 Z键即应该转抓住墙壁, 不需同时按住方向键
     /// 抓住墙壁时, 松开Z键开始下落, 若未降到地面再次按下Z键应再次抓住墙壁
@@ -771,7 +775,18 @@ public class CharacterMovement : MonoBehaviour
 
     public void SetOriginPosition()
     {
-        transform.position = _originPosition;
+        transform.position = new Vector3(-6f, -7.5f, 0);
+    }
+
+    public void AutoCanMove(float delay)
+    {
+        _canMove = false;
+        Utility.DelayCall(delay, () => _canMove = true);
+    }
+
+    public void BornAndJump()
+    {
+        Utility.MoveTo(transform, new Vector3(-6f, -4f, 0), 0.5f, false, DG.Tweening.Ease.OutCubic);
     }
 
     private void Awake()
@@ -781,7 +796,6 @@ public class CharacterMovement : MonoBehaviour
         _canJump = true;
         _canDash = true;
         _canClimb = true;
-        _originPosition = transform.position;
         _groundMask = LayerMask.GetMask("Ground");
         _rigidbody = GetComponent<Rigidbody2D>();
         _boxCollider = GetComponent<BoxCollider2D>();

@@ -55,7 +55,7 @@ public class CharacterHairFlow : MonoBehaviour
             var index = Mathf.CeilToInt((i + 1) * 0.75f);
             var renderer = _hairRenderers[_hairCount - i];
             renderer.transform.localScale = new Vector3(-facing, 1, 1);
-            renderer.transform.localPosition = _hairPositions[index - 1];
+            renderer.transform.localPosition = _hairPositions[index];
         }
     }
 

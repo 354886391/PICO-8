@@ -28,6 +28,11 @@ public static class Utility
         return DOVirtual.DelayedCall(delay, () => callback(), true);
     }
 
+    public static Tween MoveTo(Transform transform, Vector3 endValue, float duration, bool snapping = false, Ease ease = Ease.Linear)
+    {
+        return transform.DOMove(endValue, duration, false).SetEase(ease);
+    }
+
     public static void Animate(this SpriteRenderer renderer, Sprite[] sequence, float fps, Sprite tailSprite = null, System.Action callback = null)
     {
         if (sequence != null && sequence.Length > 0)

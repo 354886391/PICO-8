@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public enum Facings
 {
@@ -8,13 +6,13 @@ public enum Facings
     Right = 1,
 }
 
-public class MoveComponent
+public class MoveComponent : IComponent
 {
     public bool CanMove;
     public bool Freezing;
     public bool OnGround;
     public bool WasOnGround;
-    public bool AgainstWall;   
+    public bool AgainstWall;
 
     public Facings Facing;
     public Vector2 MoveSpeed;

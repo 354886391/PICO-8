@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface ISystem
+public class ECSUtility
 {
-
-    void OnCreate();
-
-    void OnUpdate();
+    
 }

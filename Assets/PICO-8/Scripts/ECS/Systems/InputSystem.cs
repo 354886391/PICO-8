@@ -4,20 +4,22 @@ public class InputSystem : ISystem
 {
     public void OnCreate()
     {
-        
+
     }
 
     public void OnUpdate()
     {
-        UpdateKey();
+
     }
 
-    private void UpdateKey()
+    private void UpdateKey(InputEntity inputEntity)
     {
-        InputEntity.Input.MoveX = Input.GetAxisRaw("Horizontal");
-        InputEntity.Input.MoveY = Input.GetAxisRaw("Vertical");
-        InputEntity.Input.Jump = Input.GetKey(KeyCode.C);
-        InputEntity.Input.Dash = Input.GetKey(KeyCode.X);
-        InputEntity.Input.Climb = Input.GetKey(KeyCode.Z);
+        var input = inputEntity.Input;
+
+        input.MoveX = Input.GetAxisRaw("Horizontal");
+        input.MoveY = Input.GetAxisRaw("Vertical");
+        input.Jump = Input.GetKey(KeyCode.C);
+        input.Dash = Input.GetKey(KeyCode.X);
+        input.Climb = Input.GetKey(KeyCode.Z);
     }
 }

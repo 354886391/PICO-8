@@ -24,11 +24,11 @@ public class MoveSystem : ISystem
         // 当X轴速度超过最大速度且速度方向与移动方向一致时减速
         if (Mathf.Abs(speed.x) > maxRun && Mathf.Sign(speed.x) == input.MoveX)
         {
-            speed.x = Mathf.MoveTowards(speed.x, maxRun * input.MoveX, runReduce * mult * deltaTime);
+            speed.x = ECSUtility.Approach(speed.x, maxRun * input.MoveX, runReduce * mult * deltaTime);
         }
         else
         {
-            speed.x = Mathf.MoveTowards(speed.x, maxRun * input.MoveX, runAccel * mult * deltaTime);
+            speed.x = ECSUtility.Approach(speed.x, maxRun * input.MoveX, runAccel * mult * deltaTime);
         }
     }
 }

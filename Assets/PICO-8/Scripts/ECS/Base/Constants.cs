@@ -1,4 +1,8 @@
-﻿class Constants
+﻿
+/// <summary>
+/// 静态常量
+/// </summary>
+class Constants
 {
     #region Move
     public const float MaxRun = 9f;

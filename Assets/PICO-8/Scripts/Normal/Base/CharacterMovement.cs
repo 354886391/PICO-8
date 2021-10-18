@@ -1,4 +1,4 @@
-﻿#define NO_ENABLE_DEBUG
+﻿#define ENABLE_DEBUG
 using System;
 using UnityEngine;
 
@@ -396,10 +396,12 @@ public class CharacterMovement : MonoBehaviour
         if (Mathf.Abs(_speed.x) > MaxRun && Mathf.Sign(_speed.x) == MoveX)
         {
             _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunReduce * mult * deltaTime);  //Reduce back from beyond the max speed
+            Console.Log("Move speed RunReduce");
         }
         else
         {
             _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunAccel * mult * deltaTime);   //Approach the max speed
+            Console.Log("Move speed RunAccel");
         }
         //Console.LogFormat("Move speed X {0:F3}", _speed.x);
     }

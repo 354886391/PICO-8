@@ -12,10 +12,8 @@ public class InputSystem : ISystem
 
     }
 
-    private void UpdateKey(InputEntity inputEntity)
+    private void UpdateKey(ref InputComponent input)
     {
-        var input = inputEntity.Input;
-
         input.MoveX = Input.GetAxisRaw("Horizontal");
         input.MoveY = Input.GetAxisRaw("Vertical");
         input.Jump = Input.GetKey(KeyCode.C);

@@ -20,5 +20,5 @@ public class RaycastComponent : IComponent
     public Rigidbody2D Rigidbody;
     public BoxCollider2D BoxCollider;
     public RaycastHit2D RaycastGround;
-    public RaycastHit2D RaycastCeiling;
+    public RaycastHit2D RaycastWall;
 }

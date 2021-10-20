@@ -12,7 +12,7 @@ public class InputSystem : ISystem
 
     }
 
-    private void UpdateKey(ref InputComponent input)
+    private void SetInput(ref InputComponent input)
     {
         input.MoveX = Input.GetAxisRaw("Horizontal");
         input.MoveY = Input.GetAxisRaw("Vertical");

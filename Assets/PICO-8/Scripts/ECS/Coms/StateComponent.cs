@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public enum eState
+public enum States
 {
     None,
     Idle,
@@ -19,7 +19,7 @@ public class StateComponent : IComponent
     public bool WasOnGround;    // 上一帧是否在地面
     public bool AgainstWall;    // 当前帧是否贴墙壁
 
-    public eState State;        // 当前状态
+    public States State;        // 当前状态
     public Vector2 Speed;       // 移动速度   
     public Facings Facing;      // 角色面部朝向
     public Vector2 Movement;    // 位移

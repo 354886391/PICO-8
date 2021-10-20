@@ -12,9 +12,9 @@ public class RunSystem : ISystem
         throw new System.NotImplementedException();
     }
 
-    private void Run(StateComponent state, in InputComponent input, float deltaTime)
+    public void Run(StateComponent state, in InputComponent input, float deltaTime)
     {
-        var mult = state.OnGround ? 1.0f : 0.6f;
+        var mult = state.OnGround ? Constants.GroundMult : Constants.AirMult;
         // 当X轴速度超过最大速度且速度方向与移动方向一致时减速到最大速度
         if (Mathf.Abs(state.Speed.x) > Constants.MaxRun && Mathf.Sign(state.Speed.x) == input.MoveX)
         {

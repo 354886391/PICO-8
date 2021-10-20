@@ -528,7 +528,8 @@ public class CharacterMovement : MonoBehaviour
         _canDash = false;
         _isDashing = true;
         _canDashUpdate = true;
-        CamputeDashDir();
+        _dashDir = new Vector2(Facing, MoveY);
+        //CamputeDashDir();
         DashBeginEvent?.Invoke(this);
         //Console.LogFormat("DashBegin {0}", _speed);
     }

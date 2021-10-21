@@ -9,20 +9,20 @@ public class RunSystem : ISystem
 
     public void OnUpdate()
     {
-        throw new System.NotImplementedException();
+        RunUpdate(null, null, null, 0);
     }
 
-    public void Run(StateComponent state, in InputComponent input, float deltaTime)
+    private void RunUpdate(StateComponent state, RunComponent run, in InputComponent input, float deltaTime)
     {
-        var mult = state.OnGround ? Constants.GroundMult : Constants.AirMult;
+        var mult = state.OnGround ? run.GroundMult : run.AirMult;
         // 当X轴速度超过最大速度且速度方向与移动方向一致时减速到最大速度
-        if (Mathf.Abs(state.Speed.x) > Constants.MaxRun && Mathf.Sign(state.Speed.x) == input.MoveX)
+        if (Mathf.Abs(state.Speed.x) > run.MaxRun && Mathf.Sign(state.Speed.x) == input.MoveX)
         {
-            state.Speed.x = ECSUtility.Approach(state.Speed.x, Constants.MaxRun * input.MoveX, Constants.RunReduce * mult * deltaTime);
+            state.Speed.x = ECSUtility.Approach(state.Speed.x, run.MaxRun * input.MoveX, run.RunReduce * mult * deltaTime);
         }
         else
         {
-            state.Speed.x = ECSUtility.Approach(state.Speed.x, Constants.MaxRun * input.MoveX, Constants.RunAccel * mult * deltaTime);
+            state.Speed.x = ECSUtility.Approach(state.Speed.x, run.MaxRun * input.MoveX, run.RunAccel * mult * deltaTime);
         }
     }
 }

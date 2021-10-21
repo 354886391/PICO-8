@@ -1,5 +1,11 @@
 ﻿using UnityEngine;
 
+public enum Facings
+{
+    Left = -1,
+    Right = 1,
+}
+
 public enum States
 {
     None,
@@ -9,7 +15,6 @@ public enum States
     Dash,
     Climb,
     WallClimb,
-
 }
 
 public class StateComponent : IComponent

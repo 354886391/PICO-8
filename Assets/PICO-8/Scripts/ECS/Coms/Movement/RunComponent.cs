@@ -1,12 +1,14 @@
 ﻿using UnityEngine;
 
-public enum Facings
-{
-    Left = -1,
-    Right = 1,
-}
-
 public class RunComponent : IComponent
 {
-    public const float MaxRun = 9f;  
+    public readonly float MaxRun = 9f;
+    public readonly float MaxFall = -16f;
+    public readonly float FallAccel = 30f;
+    public readonly float RunAccel = 100f;
+    public readonly float RunReduce = 40f;
+    public readonly float Gravity = 90f;
+    public readonly float HalfGravThreshold = 4f;
+    public readonly float GroundMult = 1.0f;
+    public readonly float AirMult = 0.65f;
 }

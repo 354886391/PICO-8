@@ -2,7 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CharacterSystem : MonoBehaviour
+public class CharacterSystem : ISystem
 {
-    
+    public void OnCreate()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnUpdate()
+    {
+        throw new System.NotImplementedException();
+    }
 }

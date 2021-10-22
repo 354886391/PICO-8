@@ -3,7 +3,6 @@
 public class RaycastSystem : ISystem
 {
 
-
     public void OnCreate()
     {
         throw new System.NotImplementedException();
@@ -11,16 +10,18 @@ public class RaycastSystem : ISystem
 
     public void OnUpdate()
     {
-        throw new System.NotImplementedException();
+        DetectGround(null, null, 0);
+        DetectWall(null, null, 0);
     }
 
     public void DetectGround(StateComponent state, RaycastComponent ground, float deltaTime)
     {
         state.OnGround = false;
-        var goingUp = state.Movement.y > Constants.MinOffset;
+        var movement = state.Speed * deltaTime;
+        var goingUp = movement.y > Constants.MinOffset;
         var rayOrigin = goingUp ? ground.RayOrigin.topLeft : ground.RayOrigin.bottomLeft;
         var direction = goingUp ? Vector2.up : Vector2.down;
-        var distance = Mathf.Abs(state.Movement.y) + Constants.SkinWidth * 2f;
+        var distance = Mathf.Abs(movement.y) + Constants.SkinWidth * 2f;
         for (int i = 0; i < ground.HRaysCount; i++)
         {
             var origin = new Vector2(rayOrigin.x + ground.HRaysInterval * i, rayOrigin.y);
@@ -34,10 +35,11 @@ public class RaycastSystem : ISystem
     public void DetectWall(StateComponent state, RaycastComponent wall, float deltaTime)
     {
         state.AgainstWall = false;
-        var goingRight = state.Movement.x > Constants.MinOffset;
+        var movement = state.Speed * deltaTime;
+        var goingRight = movement.x > Constants.MinOffset;
         var rayOrigin = goingRight ? wall.RayOrigin.bottomRight : wall.RayOrigin.bottomLeft;
         var direction = goingRight ? Vector2.right : Vector2.left;
-        var distance = Mathf.Abs(state.Movement.x) + Constants.SkinWidth * 2f;
+        var distance = Mathf.Abs(movement.x) + Constants.SkinWidth * 2f;
         for (int i = 0; i < wall.VRaysCount; i++)
         {
             var origin = new Vector2(rayOrigin.x, rayOrigin.y + wall.VRaysInterval * i);

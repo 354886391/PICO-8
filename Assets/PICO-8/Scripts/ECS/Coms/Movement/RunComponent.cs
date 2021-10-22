@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-public class RunComponent : IComponent
+﻿public class RunComponent : IComponent
 {
     public readonly float MaxRun = 9f;
     public readonly float MaxFall = -16f;

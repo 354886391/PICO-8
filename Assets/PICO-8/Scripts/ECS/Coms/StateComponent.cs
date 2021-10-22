@@ -27,5 +27,5 @@ public class StateComponent : IComponent
     public States State;        // 当前状态
     public Vector2 Speed;       // 移动速度   
     public Facings Facing;      // 角色面部朝向
-    public Vector2 Movement;    // 位移
+    //public Vector2 Movement;    // 位移
 }

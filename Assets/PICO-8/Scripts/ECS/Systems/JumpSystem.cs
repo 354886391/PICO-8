@@ -4,20 +4,20 @@ using UnityEngine;
 
 public class JumpSystem : MonoBehaviour
 {
-    public void OnCreate(JumpComponent jump)
+    public void OnCreate( JumpComponent jump)
     {
         jump = new JumpComponent();
     }
 
-    public void OnUpdate(StateComponent state, JumpComponent jump, InputComponent input, float deltaTime)
+    public void OnUpdate( StateComponent state,  JumpComponent jump,  InputComponent input, float deltaTime)
     {
-        JumpUpdate(state, jump, input, deltaTime);
+        JumpUpdate( state,  jump,  input, deltaTime);
     }
 
-    private void JumpUpdate(StateComponent state, JumpComponent jump, InputComponent input, float deltaTime)
+    private void JumpUpdate( StateComponent state,  JumpComponent jump,  InputComponent input, float deltaTime)
     {
-        JumpBegin(state, jump, input);
-        MidAirJumpBegin(state, jump, input);
+        JumpBegin( state,  jump,  input);
+        MidAirJumpBegin( state,  jump,  input);
         if (!jump.CanUpdate) return;
         if (input.Jump && jump.JumpTimer < jump.JumpTime)
         {
@@ -27,12 +27,12 @@ public class JumpSystem : MonoBehaviour
         }
         else
         {
-            JumpEnd(jump);
+            JumpEnd( jump);
         }
 
     }
 
-    private void JumpBegin(StateComponent state, JumpComponent jump, InputComponent input)
+    private void JumpBegin( StateComponent state,  JumpComponent jump,  InputComponent input)
     {
         if (!state.OnGround) return;
         if (!input.Jump || !jump.CanJump) return;
@@ -46,7 +46,7 @@ public class JumpSystem : MonoBehaviour
         }
     }
 
-    private void MidAirJumpBegin(StateComponent state, JumpComponent jump, InputComponent input)
+    private void MidAirJumpBegin( StateComponent state,  JumpComponent jump,  InputComponent input)
     {
         if (state.OnGround) return;
         if (!input.Jump || !jump.CanJump) return;
@@ -62,7 +62,7 @@ public class JumpSystem : MonoBehaviour
         }
     }
 
-    private void JumpEnd(JumpComponent jump)
+    private void JumpEnd( JumpComponent jump)
     {
         jump.JumpTimer = 0.0f;
         jump.IsJumping = false;
@@ -71,7 +71,7 @@ public class JumpSystem : MonoBehaviour
     }
 
 
-    private void JumpLand(StateComponent state, JumpComponent jump)
+    private void JumpLand( StateComponent state,  JumpComponent jump)
     {
         if (state.OnGround && !state.WasOnGround)
         {

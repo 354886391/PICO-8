@@ -2,18 +2,18 @@
 
 public class MoveSystem : MonoBehaviour
 {
-    public void OnCreate(MoveComponent move)
+    public void OnCreate( MoveComponent move)
     {
         move = new MoveComponent();
     }
 
-    public void OnUpdate(StateComponent state, MoveComponent move, InputComponent input, float deltaTime)
+    public void OnUpdate( StateComponent state,  MoveComponent move,  InputComponent input, float deltaTime)
     {
-        RunUpdate(state, move, input, deltaTime);
-        GravityUpdate(state, move, input, deltaTime);
+        RunUpdate( state,  move,  input, deltaTime);
+        GravityUpdate( state,  move,  input, deltaTime);
     }
 
-    private void RunUpdate(StateComponent state, MoveComponent run, in InputComponent input, float deltaTime)
+    private void RunUpdate( StateComponent state,  MoveComponent run,  InputComponent input, float deltaTime)
     {
         var mult = state.OnGround ? run.GroundMult : run.AirMult;
         // 当X轴速度超过最大速度且速度方向与移动方向一致时减速到最大速度
@@ -27,7 +27,7 @@ public class MoveSystem : MonoBehaviour
         }
     }
 
-    private void GravityUpdate(StateComponent state, MoveComponent move, in InputComponent input, float deltaTime)
+    private void GravityUpdate( StateComponent state,  MoveComponent move,  InputComponent input, float deltaTime)
     {
         var maxFall = move.MaxFall;
         //if (state.AgainstWall && input.MoveX == (int)state.Facing)

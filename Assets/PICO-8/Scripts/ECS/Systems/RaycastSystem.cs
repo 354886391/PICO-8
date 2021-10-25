@@ -7,21 +7,21 @@ public class RaycastSystem : MonoBehaviour
     public Rigidbody2D Rigidbody;
     public BoxCollider2D BoxCollider;
 
-    public void OnCreate(RaycastComponent raycast)
+    public void OnCreate( RaycastComponent raycast)
     {
         raycast = new RaycastComponent();
-        ComputeRayBounds(raycast);
-        ComputeRaysInterval(raycast);
+        ComputeRayBounds( raycast);
+        ComputeRaysInterval( raycast);
     }
 
-    public void OnUpdate(StateComponent state, RaycastComponent raycast, float deltaTime)
+    public void OnUpdate( StateComponent state,  RaycastComponent raycast, float deltaTime)
     {
-        ComputeRayBounds(raycast);
-        DetectGround(state, raycast, deltaTime);
-        DetectWall(state, raycast, deltaTime);
+        ComputeRayBounds( raycast);
+        DetectGround( state,  raycast, deltaTime);
+        DetectWall( state,  raycast, deltaTime);
     }
 
-    private void ComputeRayBounds(RaycastComponent raycast)
+    private void ComputeRayBounds( RaycastComponent raycast)
     {
         var bounds = BoxCollider.bounds;
         bounds.Expand(Constants.SkinWidth * -2f);
@@ -30,13 +30,13 @@ public class RaycastSystem : MonoBehaviour
         raycast.Origin.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
     }
 
-    private void ComputeRaysInterval(RaycastComponent raycast)
+    private void ComputeRaysInterval( RaycastComponent raycast)
     {
         raycast.HRaysInterval = (raycast.Origin.bottomRight.x - raycast.Origin.bottomLeft.x) / (Constants.HRaysCount - 1);
         raycast.VRaysInterval = (raycast.Origin.topLeft.y - raycast.Origin.bottomLeft.y) / (Constants.VRaysCount - 1);
     }
 
-    public void DetectGround(StateComponent state, RaycastComponent ground, float deltaTime)
+    public void DetectGround( StateComponent state,  RaycastComponent ground, float deltaTime)
     {
         state.OnGround = false;
         var movement = state.Speed * deltaTime;
@@ -54,7 +54,7 @@ public class RaycastSystem : MonoBehaviour
         }
     }
 
-    public void DetectWall(StateComponent state, RaycastComponent wall, float deltaTime)
+    public void DetectWall( StateComponent state,  RaycastComponent wall, float deltaTime)
     {
         state.AgainstWall = false;
         var movement = state.Speed * deltaTime;

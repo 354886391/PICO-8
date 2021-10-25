@@ -2,17 +2,17 @@
 
 public class InputSystem : MonoBehaviour
 {
-    public void OnCreate(InputComponent input)
+    public void OnCreate( InputComponent input)
     {
         input = new InputComponent();
     }
 
-    public void OnUpdate(InputComponent input)
+    public void OnUpdate( InputComponent input)
     {
-        InputUpdate(input);
+        InputUpdate( input);
     }
 
-    private void InputUpdate(InputComponent input)
+    private void InputUpdate( InputComponent input)
     {
         input.MoveX = Input.GetAxisRaw("Horizontal");
         input.MoveY = Input.GetAxisRaw("Vertical");

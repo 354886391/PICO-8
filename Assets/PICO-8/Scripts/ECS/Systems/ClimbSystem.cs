@@ -2,19 +2,19 @@
 
 public class ClimbSystem : MonoBehaviour
 {
-    public void OnCreate(ClimbComponent climb)
+    public void OnCreate( ClimbComponent climb)
     {
         climb = new ClimbComponent();
     }
 
-    public void OnUpdate(StateComponent state, ClimbComponent climb, InputComponent input, float deltaTime)
+    public void OnUpdate( StateComponent state,  ClimbComponent climb,  InputComponent input, float deltaTime)
     {
-        ClimbUpdate(state, climb, input, deltaTime);
+        ClimbUpdate( state,  climb,  input, deltaTime);
     }
 
-    private void ClimbUpdate(StateComponent state, ClimbComponent climb, InputComponent input, float deltaTime)
+    private void ClimbUpdate( StateComponent state,  ClimbComponent climb,  InputComponent input, float deltaTime)
     {
-        ClimbBegin(state, climb, input);
+        ClimbBegin( state,  climb,  input);
         if (!state.AgainstWall) return;
         if (!climb.CanUpdate) return;
         if (input.Climb && climb.ClimbTimer < climb.ClimbTime)
@@ -34,11 +34,11 @@ public class ClimbSystem : MonoBehaviour
         }
         else
         {
-            ClimbEnd(climb);
+            ClimbEnd( climb);
         }
     }
 
-    private void ClimbBegin(StateComponent state, ClimbComponent climb, InputComponent input)
+    private void ClimbBegin( StateComponent state,  ClimbComponent climb,  InputComponent input)
     {
         if (climb.IsCooldown) return;
         if (!state.AgainstWall) return;
@@ -54,7 +54,7 @@ public class ClimbSystem : MonoBehaviour
         }
     }
 
-    private void ClimbEnd(ClimbComponent climb)
+    private void ClimbEnd( ClimbComponent climb)
     {
         climb.ClimbTimer = 0.0f;
         climb.IsClimbing = false;
@@ -63,7 +63,7 @@ public class ClimbSystem : MonoBehaviour
         climb.EndEvent?.Invoke();
     }
 
-    private void ClimbLand(StateComponent state, ClimbComponent climb)
+    private void ClimbLand( StateComponent state,  ClimbComponent climb)
     {
 
     }

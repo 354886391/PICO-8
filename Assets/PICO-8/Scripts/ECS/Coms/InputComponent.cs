@@ -1,4 +1,4 @@
-﻿public class InputComponent : IComponent
+﻿public class InputComponent : Singleton<InputComponent>, IComponent
 {
 
     public bool Jump { get; set; }

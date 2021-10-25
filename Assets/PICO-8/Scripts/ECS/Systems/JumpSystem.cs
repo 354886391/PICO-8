@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class JumpSystem : ISystem
+public class JumpSystem : MonoBehaviour
 {
-    public void OnCreate()
+    public void OnCreate(JumpComponent jump)
     {
-        throw new System.NotImplementedException();
+        jump = new JumpComponent();
     }
 
-    public void OnUpdate()
+    public void OnUpdate(StateComponent state, JumpComponent jump, InputComponent input, float deltaTime)
     {
-        JumpUpdate(null, null, null, 0);
+        JumpUpdate(state, jump, input, deltaTime);
     }
 
     private void JumpUpdate(StateComponent state, JumpComponent jump, InputComponent input, float deltaTime)
@@ -23,7 +23,7 @@ public class JumpSystem : ISystem
         {
             state.Speed.y = jump.Speed;
             jump.JumpTimer = Mathf.Min(jump.JumpTimer + deltaTime, jump.JumpTime);
-            jump.EndEvent?.Invoke();
+            jump.UpdateEvent?.Invoke();
         }
         else
         {
@@ -65,6 +65,7 @@ public class JumpSystem : ISystem
     private void JumpEnd(JumpComponent jump)
     {
         jump.JumpTimer = 0.0f;
+        jump.IsJumping = false;
         jump.CanUpdate = false;
         jump.EndEvent?.Invoke();
     }

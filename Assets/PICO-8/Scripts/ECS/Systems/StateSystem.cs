@@ -1,17 +1,24 @@
-﻿public class StateSystem : ISystem
+﻿using UnityEngine;
+
+public class StateSystem : MonoBehaviour
 {
-    public void OnCreate()
+    public void OnCreate(StateComponent state)
     {
-        throw new System.NotImplementedException();
+        state = new StateComponent();
     }
 
-    public void OnUpdate()
+    public void OnUpdate(StateComponent state, RaycastComponent raycast, InputComponent input)
     {
-        throw new System.NotImplementedException();
+        StateUpate(state, raycast, input);
     }
 
-    private void StateUpate(StateEntity state)
+    private void StateUpate(StateComponent state, RaycastComponent raycast, InputComponent input)
     {
-        
+        FacingUpdate(state, input);
+    }
+
+    private void FacingUpdate(StateComponent state, InputComponent input)
+    {
+        if (input.MoveX != 0) state.Facing = (Facings)input.MoveX;
     }
 }

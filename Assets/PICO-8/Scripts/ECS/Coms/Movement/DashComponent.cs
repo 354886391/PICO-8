@@ -9,21 +9,21 @@ public class DashComponent : IComponent
     public readonly float ToleranceTime = 0.15f;
     public readonly float CooldownTime = 0.2f;
 
-    public bool CanDash { get; set; }
-    public bool IsDashing { get; set; }
-    public bool CanUpdate { get; set; }
-    public bool IsCooldown { get; set; }
-    public bool IsFreezing { get; set; }
+    public bool CanDash;   
+    public bool IsDashing;
+    public bool CanUpdate;
+    public bool IsCooldown;
+    public bool IsFreezing;
 
-    public float DashTimer { get; set; }
-    public float HeldDownTimer { get; set; }
-    public float CooldownTimer { get; set; }
+    public float DashTimer;
+    public float HeldDownTimer;
+    public float CooldownTimer;
 
     public Vector2 Direction;
     public Vector2 BeforeSpeed;
 
-    public UnityAction BeginEvent { get; set; }
-    public UnityAction UpdateEvent { get; set; }
-    public UnityAction EndEvent { get; set; }
-    public UnityAction LandEvent { get; set; }
+    public UnityAction BeginEvent;
+    public UnityAction UpdateEvent;
+    public UnityAction EndEvent;
+    public UnityAction LandEvent;
 }

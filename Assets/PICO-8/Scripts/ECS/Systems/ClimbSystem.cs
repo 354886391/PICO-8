@@ -1,15 +1,15 @@
 ﻿using UnityEngine;
 
-public class ClimbSystem : MonoBehaviour
+public class ClimbSystem : ISystem
 {
-    public void OnCreate(ClimbComponent climb)
+    public void OnCreate()
     {
-        climb = new ClimbComponent();
+        throw new System.NotImplementedException();
     }
 
-    public void OnUpdate(StateComponent state, ClimbComponent climb, InputComponent input, float deltaTime)
+    public void OnUpdate()
     {
-        ClimbUpdate(state, climb, input, deltaTime);
+        ClimbUpdate(null, null, null, 0);
     }
 
     private void ClimbUpdate(StateComponent state, ClimbComponent climb, InputComponent input, float deltaTime)
@@ -30,7 +30,6 @@ public class ClimbSystem : MonoBehaviour
             }
             state.Speed.y = ECSUtility.Approach(state.Speed.y, target, climb.ClimbAccel * deltaTime);
             climb.ClimbTimer = Mathf.Min(climb.ClimbTimer + deltaTime, climb.ClimbTime);
-            climb.UpdateEvent?.Invoke();
         }
         else
         {
@@ -57,7 +56,6 @@ public class ClimbSystem : MonoBehaviour
     private void ClimbEnd(ClimbComponent climb)
     {
         climb.ClimbTimer = 0.0f;
-        climb.IsClimbing = false;
         climb.CanUpdate = false;
         climb.IsCooldown = true;
         climb.EndEvent?.Invoke();

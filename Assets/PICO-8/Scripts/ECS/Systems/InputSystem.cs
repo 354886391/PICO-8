@@ -1,18 +1,18 @@
 ﻿using UnityEngine;
 
-public class InputSystem : MonoBehaviour
+public class InputSystem : ISystem
 {
-    public void OnCreate(InputComponent input)
+    public void OnCreate()
     {
-        input = new InputComponent();
+
     }
 
-    public void OnUpdate(InputComponent input)
+    public void OnUpdate()
     {
-        InputUpdate(input);
+
     }
 
-    private void InputUpdate(InputComponent input)
+    private void SetInput(ref InputComponent input)
     {
         input.MoveX = Input.GetAxisRaw("Horizontal");
         input.MoveY = Input.GetAxisRaw("Vertical");

@@ -9,17 +9,17 @@ public class JumpComponent : IComponent
     public readonly float ToleranceTime = 0.15f;
     public readonly int MaxMidAirJump = 1;   // 0 or 1
 
-    public bool CanJump { get; set; }
-    public bool IsJumping { get; set; }
-    public bool CanUpdate { get; set; }
+    public bool CanJump;
+    public bool IsJumping;  
+    public bool CanUpdate;
 
-    public int MidAirJumps { get; set; }
-    public float JumpTimer { get; set; }
-    public float HeldDownTimer { get; set; }
+    public int MidAirJumps;
+    public float JumpTimer;
+    public float HeldDownTimer;
 
-    public UnityAction BeginEvent { get; set; }
-    public UnityAction UpdateEvent { get; set; }
-    public UnityAction EndEvent { get; set; }
-    public UnityAction LandEvent { get; set; }
-    public UnityAction MidAirBeginEvent { get; set; }
+    public UnityAction BeginEvent;
+    public UnityAction UpdateEvent;
+    public UnityAction EndEvent;   
+    public UnityAction LandEvent;
+    public UnityAction MidAirBeginEvent;
 }

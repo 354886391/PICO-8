@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DashSystem : MonoBehaviour
+public class DashSystem : ISystem
 {
-    public void OnCreate(DashComponent dash)
+    public void OnCreate()
     {
-        dash = new DashComponent();
+        throw new System.NotImplementedException();
     }
 
-    public void OnUpdate(StateComponent state, DashComponent dash, InputComponent input, float deltaTime)
+    public void OnUpdate()
     {
-        DashUpdate(state, dash, input, deltaTime);
+        DashUpdate(null, null, null, 0.0f);
     }
 
     private void DashUpdate(StateComponent state, DashComponent dash, InputComponent input, float deltaTime)
@@ -57,7 +57,6 @@ public class DashSystem : MonoBehaviour
     {
         dash.DashTimer = 0.0f;
         dash.IsCooldown = true;
-        dash.IsDashing = false;
         dash.CanUpdate = false;
         dash.EndEvent?.Invoke();
     }

@@ -13,20 +13,21 @@ public class ClimbComponent : IComponent
     public readonly float GrabYMult = .2f;
 
 
-    public bool IsClimbing { get; set; }
-    public bool CanClimb { get; set; }
-    public bool CanUpdate { get; set; }
-    public bool IsCooldown { get; set; }
+    public bool Climb;
+    public bool IsClimbing;
+    public bool CanClimb;
+    public bool CanUpdate;
+    public bool IsCooldown;
 
-    public float ClimbTimer { get; set; }
-    public float HeldDownTimer { get; set; }
-    public float CooldownTimer { get; set; }
-    public float WallSlideTimer { get; set; }
-    public float NoMoveTimer { get; set; }
+    public float ClimbTimer;
+    public float HeldDownTimer;
+    public float CooldownTimer;
+    public float WallSlideTimer;
+    public float NoMoveTimer;
 
-    public UnityAction BeginEvent { get; set; }
-    public UnityAction UpdateEvent { get; set; }
-    public UnityAction EndEvent { get; set; }
-    public UnityAction LandEvent { get; set; }
+    public UnityAction BeginEvent;
+    public UnityAction UpdateEvent;
+    public UnityAction EndEvent;
+    public UnityAction LandEvent;
 
 }

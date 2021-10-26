@@ -1,22 +1,20 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class DashSystem : MonoBehaviour
 {
-    public void OnCreate(ref DashComponent dash)
+    public void OnCreate(DashComponent dash)
     {
         dash = new DashComponent();
     }
 
-    public void OnUpdate( StateComponent state,  DashComponent dash,  InputComponent input, float deltaTime)
+    public void OnUpdate(StateComponent state, DashComponent dash, InputComponent input, float deltaTime)
     {
-        DashUpdate( state,  dash,  input, deltaTime);
+        DashUpdate(state, dash, input, deltaTime);
     }
 
-    private void DashUpdate( StateComponent state,  DashComponent dash,  InputComponent input, float deltaTime)
+    private void DashUpdate(StateComponent state, DashComponent dash, InputComponent input, float deltaTime)
     {
-        DashBegin( state,  dash,  input);
+        DashBegin(state, dash, input);
         if (!dash.CanUpdate) return;
         if (dash.DashTimer < dash.DashTime)
         {
@@ -35,11 +33,11 @@ public class DashSystem : MonoBehaviour
         }
         else
         {
-            DashEnd( dash);
+            DashEnd(dash);
         }
     }
 
-    private void DashBegin( StateComponent state,  DashComponent dash,  InputComponent input)
+    private void DashBegin(StateComponent state, DashComponent dash, InputComponent input)
     {
         if (dash.IsCooldown) return;
         if (!input.Dash || !input.CanDash) return;
@@ -53,7 +51,7 @@ public class DashSystem : MonoBehaviour
         }
     }
 
-    private void DashEnd( DashComponent dash)
+    private void DashEnd(DashComponent dash)
     {
         dash.DashTimer = 0.0f;
         dash.IsCooldown = true;
@@ -62,7 +60,7 @@ public class DashSystem : MonoBehaviour
         dash.EndEvent?.Invoke();
     }
 
-    private void DashLand( StateComponent state,  DashComponent dash)
+    private void DashLand(StateComponent state, DashComponent dash)
     {
         if (state.OnGround && !state.WasOnGround)
         {

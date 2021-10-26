@@ -3,29 +3,25 @@ using UnityEngine;
 
 public class InputSystem : MonoBehaviour
 {
-    public void OnCreate(ref InputComponent input)
+    public void OnCreate(InputComponent input)
     {
         input = new InputComponent();
     }
 
-    public void OnUpdate(InputComponent input)
+    public void OnUpdate(InputComponent input, float deltaTime)
     {
-        InputUpdate(input);
+        InputUpdate(input, deltaTime);
     }
 
-    private void InputUpdate(InputComponent input)
+    private void InputUpdate(InputComponent input, float deltaTime)
     {
+        input.DeltaTime = deltaTime;
         input.MoveX = Input.GetAxisRaw("Horizontal");
         input.MoveY = Input.GetAxisRaw("Vertical");
         input.Jump = Input.GetKey(KeyCode.C);
         input.Dash = Input.GetKey(KeyCode.X);
         input.Climb = Input.GetKey(KeyCode.Z);
         UnitTest(input);
-    }
-
-    private void ComputeJump(JumpComponent jump, InputComponent input)
-    {
-
     }
 
     private void UnitTest(InputComponent input)

@@ -1,4 +1,5 @@
-﻿
+﻿using UnityEngine;
+
 [System.Serializable]
 public class DashComponent : IComponent
 {
@@ -18,8 +19,8 @@ public class DashComponent : IComponent
     public float HeldDownTimer;
     public float CooldownTimer;
 
-    public UnityEngine.Vector2 Direction;
-    public UnityEngine.Vector2 BeforeSpeed;
+    public Vector2 Direction;
+    public Vector2 BeforeSpeed;
 
     public System.Action BeginEvent;
     public System.Action UpdateEvent;

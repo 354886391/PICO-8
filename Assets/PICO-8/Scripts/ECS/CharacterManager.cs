@@ -1,10 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CharacterManager : MonoBehaviour
 {
-
     public InputComponent inputComponent;
     public RaycastComponent raycastComponent;
     public StateComponent stateComponent;
@@ -24,24 +21,25 @@ public class CharacterManager : MonoBehaviour
 
     private void Start()
     {
-        input.OnCreate(ref inputComponent);
-        raycast.OnCreate(ref raycastComponent);
-        state.OnCreate(ref stateComponent);
-        move.OnCreate(ref moveComponent);
-        jump.OnCreate(ref jumpComponent);
-        dash.OnCreate(ref dashComponent);
-        climb.OnCreate(ref climbComponent);
+        input.OnCreate(inputComponent);
+        state.OnCreate(stateComponent);
+        raycast.OnCreate(raycastComponent);
+        move.OnCreate(moveComponent);
+        jump.OnCreate(jumpComponent);
+        dash.OnCreate(dashComponent);
+        climb.OnCreate(climbComponent);
     }
 
     private void Update()
     {
-        input.OnUpdate(inputComponent);
-        state.OnUpdate(stateComponent, raycastComponent, inputComponent);
+        input.OnUpdate(inputComponent, Time.deltaTime);
+        state.OnUpdate(stateComponent, inputComponent);
         raycast.OnUpdate(stateComponent, raycastComponent, Time.deltaTime);
         move.OnUpdate(stateComponent, moveComponent, inputComponent, Time.deltaTime);
         jump.OnUpdate(stateComponent, jumpComponent, inputComponent, Time.deltaTime);
         dash.OnUpdate(stateComponent, dashComponent, inputComponent, Time.deltaTime);
         climb.OnUpdate(stateComponent, climbComponent, inputComponent, Time.deltaTime);
+        state.MoveToPosition(stateComponent, Time.deltaTime);
     }
 
 }

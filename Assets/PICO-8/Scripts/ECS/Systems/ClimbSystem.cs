@@ -2,7 +2,7 @@
 
 public class ClimbSystem : MonoBehaviour
 {
-    public void OnCreate(ref ClimbComponent climb)
+    public void OnCreate( ClimbComponent climb)
     {
         climb = new ClimbComponent();
     }

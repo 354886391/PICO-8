@@ -1,5 +1,4 @@
-﻿
-[System.Serializable]
+﻿[System.Serializable]
 public class JumpComponent : IComponent
 {
     public readonly float HBoost = 4f;

@@ -2,41 +2,37 @@
 
 public class RaycastSystem : MonoBehaviour
 {
-    public LayerMask GroundMask;    // 单项平台的检测
-    public LayerMask PlatformMask;   // 双向平台的检测
-    public Rigidbody2D Rigidbody;
-    public BoxCollider2D BoxCollider;
 
-    public void OnCreate(ref RaycastComponent raycast)
+    public void OnCreate(RaycastComponent raycast)
     {
         raycast = new RaycastComponent();
-        ComputeRayBounds( raycast);
-        ComputeRaysInterval( raycast);
+        ComputeRayBounds(raycast);
+        ComputeRaysInterval(raycast);
     }
 
-    public void OnUpdate( StateComponent state,  RaycastComponent raycast, float deltaTime)
+    public void OnUpdate(StateComponent state, RaycastComponent raycast, float deltaTime)
     {
-        ComputeRayBounds( raycast);
-        DetectGround( state,  raycast, deltaTime);
-        DetectWall( state,  raycast, deltaTime);
+        ComputeRayBounds(raycast);
+        DetectGround(state, raycast, deltaTime);
+        DetectWall(state, raycast, deltaTime);
     }
 
-    private void ComputeRayBounds( RaycastComponent raycast)
+    private void ComputeRayBounds(RaycastComponent raycast)
     {
-        var bounds = BoxCollider.bounds;
+        var bounds = state.BoxCollider.bounds;
         bounds.Expand(Constants.SkinWidth * -2f);
         raycast.Origin.topLeft = new Vector2(bounds.min.x, bounds.max.y);
         raycast.Origin.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
         raycast.Origin.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
     }
 
-    private void ComputeRaysInterval( RaycastComponent raycast)
+    private void ComputeRaysInterval(RaycastComponent raycast)
     {
         raycast.HRaysInterval = (raycast.Origin.bottomRight.x - raycast.Origin.bottomLeft.x) / (raycast.HRaysCount - 1);
         raycast.VRaysInterval = (raycast.Origin.topLeft.y - raycast.Origin.bottomLeft.y) / (raycast.VRaysCount - 1);
     }
 
-    public void DetectGround( StateComponent state,  RaycastComponent ground, float deltaTime)
+    public void DetectGround(StateComponent state, RaycastComponent ground, float deltaTime)
     {
         state.OnGround = false;
         var movement = state.Speed * deltaTime;
@@ -47,14 +43,14 @@ public class RaycastSystem : MonoBehaviour
         for (int i = 0; i < ground.HRaysCount; i++)
         {
             var origin = new Vector2(rayOrigin.x + ground.HRaysInterval * i, rayOrigin.y);
-            var layMask = goingUp ? GroundMask : (LayerMask)(GroundMask | PlatformMask);
+            var layMask = goingUp ? ground.GroundMask : (LayerMask)(ground.GroundMask | ground.PlatformMask);
             ground.RaycastGround = Physics2D.Raycast(origin, direction, distance, layMask);    // 向上检测单向平台 向下检测单双向平台
             Console.DrawRay(origin, direction * distance, Color.red);
             if (ground.RaycastGround) { state.OnGround = true; break; }
         }
     }
 
-    public void DetectWall( StateComponent state,  RaycastComponent wall, float deltaTime)
+    public void DetectWall(StateComponent state, RaycastComponent wall, float deltaTime)
     {
         state.AgainstWall = false;
         var movement = state.Speed * deltaTime;
@@ -65,7 +61,7 @@ public class RaycastSystem : MonoBehaviour
         for (int i = 0; i < wall.VRaysCount; i++)
         {
             var origin = new Vector2(rayOrigin.x, rayOrigin.y + wall.VRaysInterval * i);
-            wall.RaycastWall = Physics2D.Raycast(origin, direction, distance, GroundMask);
+            wall.RaycastWall = Physics2D.Raycast(origin, direction, distance, wall.GroundMask);
             Console.DrawRay(origin, direction * distance, Color.yellow);
             if (wall.RaycastWall) { state.AgainstWall = true; break; }
         }

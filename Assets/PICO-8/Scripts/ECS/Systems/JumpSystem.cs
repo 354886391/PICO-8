@@ -5,7 +5,7 @@ using UnityEngine;
 public class JumpSystem : MonoBehaviour
 {
 
-    public void OnCreate(ref JumpComponent jump)
+    public void OnCreate( JumpComponent jump)
     {
         jump = new JumpComponent();
     }

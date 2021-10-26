@@ -1,20 +1,22 @@
-﻿
+﻿using Sirenix.OdinInspector;
+
 [System.Serializable]
 public class InputComponent : IComponent
 {
-    public float _deltaTime;
 
-    private bool _jump;                 // Press
-    private bool _dash;
-    private bool _climb;
+    private bool _jump = true;                 // Press
+    private bool _dash = true;
+    private bool _climb = true;
     private float _moveX;
     private float _moveY;
 
-    public bool CanJump;                // Release    
-    public bool CanDash;
-    public bool CanClimb;
-    public float HeldDownTimer;         // HoldTime
+    [ShowInInspector] public bool CanJump { get; set; }             // Release    
+    [ShowInInspector] public bool CanDash { get; set; }
+    [ShowInInspector] public bool CanClimb { get; set; }
+    [ShowInInspector] public float DeltaTime { get; set; }
+    [ShowInInspector] public float HeldDownTimer { get; set; }          // HoldTime
 
+    [ShowInInspector]
     public bool Jump
     {
         get { return _jump; }
@@ -28,11 +30,12 @@ public class InputComponent : IComponent
             _jump = value;
             if (_jump)
             {
-                HeldDownTimer += _deltaTime;
+                HeldDownTimer += DeltaTime;
             }
         }
     }
 
+    [ShowInInspector]
     public bool Dash
     {
         get { return _dash; }
@@ -46,11 +49,12 @@ public class InputComponent : IComponent
             _dash = value;
             if (_dash)
             {
-                HeldDownTimer += _deltaTime;
+                HeldDownTimer += DeltaTime;
             }
         }
     }
 
+    [ShowInInspector]
     public bool Climb
     {
         get { return _climb; }
@@ -64,17 +68,19 @@ public class InputComponent : IComponent
             _climb = value;
             if (_climb)
             {
-                HeldDownTimer += _deltaTime;
+                HeldDownTimer += DeltaTime;
             }
         }
     }
 
+    [ShowInInspector]
     public float MoveX
     {
         get => _moveX;
         set => _moveX = value;
     }
 
+    [ShowInInspector]
     public float MoveY
     {
         get => _moveY;

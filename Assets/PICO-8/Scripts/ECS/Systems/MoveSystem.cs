@@ -2,7 +2,7 @@
 
 public class MoveSystem : MonoBehaviour
 {
-    public void OnCreate( MoveComponent move)
+    public void OnCreate(ref MoveComponent move)
     {
         move = new MoveComponent();
     }

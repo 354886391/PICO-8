@@ -5,13 +5,13 @@ using UnityEngine;
 public class CharacterManager : MonoBehaviour
 {
 
-    public static InputComponent inputComponent;
-    public static RaycastComponent raycastComponent;
-    public static StateComponent stateComponent;
-    public static MoveComponent moveComponent;
-    public static JumpComponent jumpComponent;
-    public static DashComponent dashComponent;
-    public static ClimbComponent climbComponent;
+    public InputComponent inputComponent;
+    public RaycastComponent raycastComponent;
+    public StateComponent stateComponent;
+    public MoveComponent moveComponent;
+    public JumpComponent jumpComponent;
+    public DashComponent dashComponent;
+    public ClimbComponent climbComponent;
 
 
     [SerializeField] private InputSystem input;
@@ -24,24 +24,24 @@ public class CharacterManager : MonoBehaviour
 
     private void Start()
     {
-        input.OnCreate( inputComponent);
-        raycast.OnCreate( raycastComponent);
-        state.OnCreate( stateComponent);
-        move.OnCreate( moveComponent);
-        jump.OnCreate( jumpComponent);
-        dash.OnCreate( dashComponent);
-        climb.OnCreate( climbComponent);
+        input.OnCreate(ref inputComponent);
+        raycast.OnCreate(ref raycastComponent);
+        state.OnCreate(ref stateComponent);
+        move.OnCreate(ref moveComponent);
+        jump.OnCreate(ref jumpComponent);
+        dash.OnCreate(ref dashComponent);
+        climb.OnCreate(ref climbComponent);
     }
 
     private void Update()
     {
-        input.OnUpdate( inputComponent);
-        state.OnUpdate( stateComponent,  raycastComponent,  inputComponent);
-        raycast.OnUpdate( stateComponent,  raycastComponent, Time.deltaTime);
-        move.OnUpdate( stateComponent,  moveComponent,  inputComponent, Time.deltaTime);
-        jump.OnUpdate( stateComponent,  jumpComponent,  inputComponent, Time.deltaTime);
-        dash.OnUpdate( stateComponent,  dashComponent,  inputComponent, Time.deltaTime);
-        climb.OnUpdate( stateComponent,  climbComponent,  inputComponent, Time.deltaTime);
+        input.OnUpdate(inputComponent);
+        state.OnUpdate(stateComponent, raycastComponent, inputComponent);
+        raycast.OnUpdate(stateComponent, raycastComponent, Time.deltaTime);
+        move.OnUpdate(stateComponent, moveComponent, inputComponent, Time.deltaTime);
+        jump.OnUpdate(stateComponent, jumpComponent, inputComponent, Time.deltaTime);
+        dash.OnUpdate(stateComponent, dashComponent, inputComponent, Time.deltaTime);
+        climb.OnUpdate(stateComponent, climbComponent, inputComponent, Time.deltaTime);
     }
 
 }

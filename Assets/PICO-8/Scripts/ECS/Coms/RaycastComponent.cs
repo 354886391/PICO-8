@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-
+﻿
+[System.Serializable]
 public class RaycastComponent : IComponent
 {
     public float VRaysCount = 5;
@@ -12,6 +12,6 @@ public class RaycastComponent : IComponent
     //public LayerMask PlatformMask;   // 双向平台的检测
     //public Rigidbody2D Rigidbody;
     //public BoxCollider2D BoxCollider;
-    public RaycastHit2D RaycastGround { get; set; }
-    public RaycastHit2D RaycastWall { get; set; }
+    public UnityEngine.RaycastHit2D RaycastGround;
+    public UnityEngine.RaycastHit2D RaycastWall;
 }

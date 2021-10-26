@@ -2,7 +2,7 @@
 
 public class ClimbSystem : MonoBehaviour
 {
-    public void OnCreate( ClimbComponent climb)
+    public void OnCreate(ref ClimbComponent climb)
     {
         climb = new ClimbComponent();
     }
@@ -42,10 +42,10 @@ public class ClimbSystem : MonoBehaviour
     {
         if (climb.IsCooldown) return;
         if (!state.AgainstWall) return;
-        if (!input.Climb || !climb.CanClimb) return;
-        if (climb.HeldDownTimer < climb.ToleranceTime)
+        if (!input.Climb || !input.CanClimb) return;
+        if (input.HeldDownTimer < climb.ToleranceTime)
         {
-            climb.CanClimb = false;
+            input.CanClimb = false;
             climb.IsClimbing = true;
             climb.CanUpdate = true;
             state.Speed.x = 0;

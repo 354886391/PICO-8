@@ -7,7 +7,7 @@ public class RaycastSystem : MonoBehaviour
     public Rigidbody2D Rigidbody;
     public BoxCollider2D BoxCollider;
 
-    public void OnCreate( RaycastComponent raycast)
+    public void OnCreate(ref RaycastComponent raycast)
     {
         raycast = new RaycastComponent();
         ComputeRayBounds( raycast);
@@ -32,8 +32,8 @@ public class RaycastSystem : MonoBehaviour
 
     private void ComputeRaysInterval( RaycastComponent raycast)
     {
-        raycast.HRaysInterval = (raycast.Origin.bottomRight.x - raycast.Origin.bottomLeft.x) / (Constants.HRaysCount - 1);
-        raycast.VRaysInterval = (raycast.Origin.topLeft.y - raycast.Origin.bottomLeft.y) / (Constants.VRaysCount - 1);
+        raycast.HRaysInterval = (raycast.Origin.bottomRight.x - raycast.Origin.bottomLeft.x) / (raycast.HRaysCount - 1);
+        raycast.VRaysInterval = (raycast.Origin.topLeft.y - raycast.Origin.bottomLeft.y) / (raycast.VRaysCount - 1);
     }
 
     public void DetectGround( StateComponent state,  RaycastComponent ground, float deltaTime)

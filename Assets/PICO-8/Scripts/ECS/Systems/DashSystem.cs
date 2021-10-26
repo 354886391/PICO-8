@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DashSystem : MonoBehaviour
 {
-    public void OnCreate( DashComponent dash)
+    public void OnCreate(ref DashComponent dash)
     {
         dash = new DashComponent();
     }
@@ -42,10 +42,10 @@ public class DashSystem : MonoBehaviour
     private void DashBegin( StateComponent state,  DashComponent dash,  InputComponent input)
     {
         if (dash.IsCooldown) return;
-        if (!input.Dash || !dash.CanDash) return;
-        if (dash.HeldDownTimer < dash.ToleranceTime)
+        if (!input.Dash || !input.CanDash) return;
+        if (input.HeldDownTimer < dash.ToleranceTime)
         {
-            dash.CanDash = false;
+            input.CanDash = false;
             dash.IsDashing = true;
             dash.CanUpdate = true;
             dash.Direction = new Vector2((int)state.Facing, input.MoveY);

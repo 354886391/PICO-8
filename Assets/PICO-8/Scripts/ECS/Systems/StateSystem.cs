@@ -2,7 +2,7 @@
 
 public class StateSystem : MonoBehaviour
 {
-    public void OnCreate( StateComponent state)
+    public void OnCreate(ref StateComponent state)
     {
         state = new StateComponent();
     }

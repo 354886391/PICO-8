@@ -1,4 +1,5 @@
 ﻿using Sirenix.OdinInspector;
+using System;
 using UnityEngine;
 
 //public enum Facings
@@ -24,10 +25,11 @@ using UnityEngine;
 //    public Vector2 bottomRight;
 //}
 
-public class CharacterEntity
+public class CharacterEntity : ScriptableObject
 {
     #region State
     public bool CanMove;
+    public bool Freezing;
     public bool OnGround;
     public bool WasOnGround;    // 上一帧是否在地面
     public bool AgainstWall;    // 当前帧是否贴墙壁
@@ -47,7 +49,7 @@ public class CharacterEntity
     public float VRaysInterval;
     public float HRaysInterval;
 
-    public Bounds Origin;       // 角色边框坐标
+    public Bounds RayOrigin;       // 角色边框坐标
     public LayerMask GroundMask;    // 单项平台的检测
     public LayerMask PlatformMask;   // 双向平台的检测   
     public RaycastHit2D RaycastGround;
@@ -167,11 +169,11 @@ public class CharacterEntity
     public float JumpTimer;
     public float JumpHeldDownTimer;
 
-    public System.Action JumpBeginEvent;
-    public System.Action JumpUpdateEvent;
-    public System.Action JumpEndEvent;
-    public System.Action JumpLandEvent;
-    public System.Action JumpMidAirBeginEvent;
+    public Action JumpBeginEvent;
+    public Action JumpUpdateEvent;
+    public Action JumpEndEvent;
+    public Action JumpLandEvent;
+    public Action JumpMidAirBeginEvent;
     #endregion
 
     #region Dash
@@ -192,10 +194,10 @@ public class CharacterEntity
     public Vector2 DashDirection;
     public Vector2 DashBeforeSpeed;
 
-    public System.Action DashBeginEvent;
-    public System.Action DashUpdateEvent;
-    public System.Action DashEndEvent;
-    public System.Action DashLandEvent;
+    public Action DashBeginEvent;
+    public Action DashUpdateEvent;
+    public Action DashEndEvent;
+    public Action DashLandEvent;
     #endregion
 
     #region Climb
@@ -220,9 +222,9 @@ public class CharacterEntity
     public float ClimbWallSlideTimer;
     public float ClimbNoMoveTimer;
 
-    public System.Action ClimbBeginEvent;
-    public System.Action ClimbUpdateEvent;
-    public System.Action ClimbEndEvent;
-    public System.Action ClimbLandEvent;
+    public Action ClimbBeginEvent;
+    public Action ClimbUpdateEvent;
+    public Action ClimbEndEvent;
+    public Action ClimbLandEvent;
     #endregion
 }

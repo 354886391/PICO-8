@@ -2,6 +2,7 @@
 
 public class RaycastSystem : MonoBehaviour
 {
+    public BoxCollider2D BoxCollider;
 
     public void OnCreate(RaycastComponent raycast)
     {
@@ -19,7 +20,7 @@ public class RaycastSystem : MonoBehaviour
 
     private void ComputeRayBounds(RaycastComponent raycast)
     {
-        var bounds = state.BoxCollider.bounds;
+        var bounds = BoxCollider.bounds;
         bounds.Expand(Constants.SkinWidth * -2f);
         raycast.Origin.topLeft = new Vector2(bounds.min.x, bounds.max.y);
         raycast.Origin.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);

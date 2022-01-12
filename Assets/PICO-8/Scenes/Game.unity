@@ -896,7 +896,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!212 &372105172
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1183,13 +1183,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f087866ece5792f4fa1f687e3a2d9c31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GroundMask:
-    serializedVersion: 2
-    m_Bits: 256
-  PlatformMask:
-    serializedVersion: 2
-    m_Bits: 256
-  Rigidbody: {fileID: 589691016}
   BoxCollider: {fileID: 589691015}
 --- !u!61 &589691015
 BoxCollider2D:
@@ -1254,7 +1247,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &612767406
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3675,6 +3668,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46f22fef7a54eca45907babe8606e237, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  BoxCollider: {fileID: 0}
 --- !u!1 &1104228842
 GameObject:
   m_ObjectHideFlags: 0
@@ -5563,7 +5557,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1304336522
 Transform:
   m_ObjectHideFlags: 0
@@ -5979,7 +5973,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1514217283
 Transform:
   m_ObjectHideFlags: 0
@@ -6157,7 +6151,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1526557443
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6170,6 +6164,53 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24037a2310e011e40903f8c30666aa24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  raycastComponent:
+    VRaysCount: 5
+    HRaysCount: 5
+    VRaysInterval: 0
+    HRaysInterval: 0
+    GroundMask:
+      serializedVersion: 2
+      m_Bits: 0
+    PlatformMask:
+      serializedVersion: 2
+      m_Bits: 0
+  stateComponent:
+    CanMove: 0
+    OnGround: 0
+    WasOnGround: 0
+    AgainstWall: 0
+    State: 0
+    Facing: 0
+    Speed: {x: 0, y: 0}
+    Rigidbody: {fileID: 0}
+    BoxCollider: {fileID: 0}
+  jumpComponent:
+    IsJumping: 0
+    CanUpdate: 0
+    IsCooldown: 0
+    MidAirJumps: 0
+    JumpTimer: 0
+    HeldDownTimer: 0
+  dashComponent:
+    IsDashing: 0
+    CanUpdate: 0
+    IsCooldown: 0
+    IsFreezing: 0
+    DashTimer: 0
+    HeldDownTimer: 0
+    CooldownTimer: 0
+    Direction: {x: 0, y: 0}
+    BeforeSpeed: {x: 0, y: 0}
+  climbComponent:
+    IsClimbing: 0
+    CanUpdate: 0
+    IsCooldown: 0
+    ClimbTimer: 0
+    HeldDownTimer: 0
+    CooldownTimer: 0
+    WallSlideTimer: 0
+    NoMoveTimer: 0
   input: {fileID: 1873994779}
   raycast: {fileID: 589691014}
   state: {fileID: 831884423}
@@ -8398,7 +8439,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!156049354 &2119312216
 Grid:
   m_ObjectHideFlags: 0
@@ -8450,7 +8491,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &2125235273
 MonoBehaviour:
   m_ObjectHideFlags: 0

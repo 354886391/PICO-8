@@ -23,16 +23,16 @@ namespace Sirenix.OdinValidator.Editor
     [Serializable]
     public class SceneValidationProfile : ValidationProfile
     {
-        [ToggleLeft]
+        [OdinInspector.ToggleLeft]
         public bool IncludeScenesFromBuildOptions;
 
-        [ToggleLeft]
+        [OdinInspector.ToggleLeft]
         public bool IncludeOpenScenes;
 
-        [ToggleLeft]
+        [OdinInspector.ToggleLeft]
         public bool IncludeAssetDependencies;
 
-        [FilePath]
+        [OdinInspector.FilePath]
         [ListDrawerSettings(Expanded = true)]
         [PropertyTooltip("Reference folders containing scenes or individual scenes.")]
         public string[] ScenePaths = new string[0], ExcludeScenePaths = new string[0];

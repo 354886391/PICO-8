@@ -1,0 +1,353 @@
+Using pre-set license
+Built from '2020.2/staging' branch; Version is '2020.2.7f1 (c53830e277f1) revision 12924976'; Using compiler version '192528614'; Build Type 'Release'
+OS: 'Windows 10 Pro; OS build 22623.891; Version 2009; 64bit' Language: 'zh' Physical Memory: 8006 MB
+BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1, IsPro: 0
+
+ COMMAND LINE ARGUMENTS:
+C:\Program Files\Unity 2020\Editor\Unity.exe
+-adb2
+-batchMode
+-noUpm
+-name
+AssetImportWorker0
+-projectPath
+D:/MyProjects/GitHubProject/PICO-8
+-logFile
+Logs/AssetImportWorker0.log
+-srvPort
+53803
+Successfully changed project path to: D:/MyProjects/GitHubProject/PICO-8
+D:/MyProjects/GitHubProject/PICO-8
+Using Asset Import Pipeline V2.
+Refreshing native plugins compatible for Editor in 56.21 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Initialize engine version: 2020.2.7f1 (c53830e277f1)
+[Subsystems] Discovering subsystems at path C:/Program Files/Unity 2020/Editor/Data/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path D:/MyProjects/GitHubProject/PICO-8/Assets
+GfxDevice: creating device client; threaded=0
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.1]
+    Renderer: NVIDIA GeForce MX150 (ID=0x1d12)
+    Vendor:   
+    VRAM:     1983 MB
+    Driver:   30.0.15.1169
+Initialize mono
+Mono path[0] = 'C:/Program Files/Unity 2020/Editor/Data/Managed'
+Mono path[1] = 'C:/Program Files/Unity 2020/Editor/Data/MonoBleedingEdge/lib/mono/unityjit'
+Mono config path = 'C:/Program Files/Unity 2020/Editor/Data/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56412
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: C:/Program Files/Unity 2020/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
+Registered in 0.001831 seconds.
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 40.07 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  2.371 seconds
+Platform modules already initialized, skipping
+Registering precompiled user dll's ...
+Registered in 0.011301 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 0.50 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  1.768 seconds
+Platform modules already initialized, skipping
+========================================================================
+Worker process is ready to serve import requests
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.09 seconds
+Refreshing native plugins compatible for Editor in 0.89 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 1504 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 68.8 MB.
+System memory in use after: 68.8 MB.
+
+Unloading 47 unused Assets to reduce memory usage. Loaded Objects now: 1974.
+Total: 19.707900 ms (FindLiveObjects: 0.410300 ms CreateObjectMapping: 0.139400 ms MarkObjects: 19.069700 ms  DeleteObjects: 0.086600 ms)
+
+========================================================================
+Received Import Request.
+  path: Assets/PICO-8/Animations/Player/LookDown.anim
+  artifactKey: Guid(90dc692382e4f3347ab54080f30afb2e) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8/Animations/Player/LookDown.anim using Guid(90dc692382e4f3347ab54080f30afb2e) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '13ec196007851b29b00a8cc85b88ff53') in 0.066335 seconds
+  Import took 0.070225 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000336 seconds.
+  path: Assets/PICO-8/Animations/Player/Run.anim
+  artifactKey: Guid(4f4dbfbfec43e154eb50a68ebc340f1a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8/Animations/Player/Run.anim using Guid(4f4dbfbfec43e154eb50a68ebc340f1a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '1ed2734597b21063e7b869b550b49f5b') in 0.004086 seconds
+  Import took 0.007338 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000308 seconds.
+  path: Assets/PICO-8/Animations/Player
+  artifactKey: Guid(2bf0f90856103184fa4eaff6a53cb87a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8/Animations/Player using Guid(2bf0f90856103184fa4eaff6a53cb87a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '87194897663f96572ecb073db6a7ab6f') in 0.003006 seconds
+  Import took 0.006867 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000336 seconds.
+  path: Assets/PICO-8/Animations/Player/Idle.anim
+  artifactKey: Guid(12ab7a890c52b5c4bb40bd8f8ba9959c) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8/Animations/Player/Idle.anim using Guid(12ab7a890c52b5c4bb40bd8f8ba9959c) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '431542d2e86a44ea8544bd9dc48e4e3d') in 0.003592 seconds
+  Import took 0.006496 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000336 seconds.
+  path: Assets/PICO-8/Animations/Player/Dead.anim
+  artifactKey: Guid(5f3e6140b741ce54c8d3bbde78aa05c6) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8/Animations/Player/Dead.anim using Guid(5f3e6140b741ce54c8d3bbde78aa05c6) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '17aab0efb03d5d8881049d2e3086ccec') in 0.004533 seconds
+  Import took 0.008902 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000452 seconds.
+  path: Assets/PICO-8/Animations/Player/Climb.anim
+  artifactKey: Guid(a9f7eaddc7710b341b0addf65f1cb2e3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8/Animations/Player/Climb.anim using Guid(a9f7eaddc7710b341b0addf65f1cb2e3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '6f9cf16bec88946822624be0ef61bed6') in 0.004045 seconds
+  Import took 0.007776 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000336 seconds.
+  path: Assets/PICO-8/Animations/Player/LookUp.anim
+  artifactKey: Guid(37c85bf854e839649bcfc98f1a8e562a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8/Animations/Player/LookUp.anim using Guid(37c85bf854e839649bcfc98f1a8e562a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '7b6b8bc10cec532ae944c7f963697f56') in 0.004664 seconds
+  Import took 0.008082 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000556 seconds.
+  path: Assets/PICO-8/Animations/Player/Player.controller
+  artifactKey: Guid(712aa8f64a44da840892fbe231b2c3f8) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8/Animations/Player/Player.controller using Guid(712aa8f64a44da840892fbe231b2c3f8) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '4d30cf47d62da598a57cfbe52919fe43') in 0.016142 seconds
+  Import took 0.021052 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000392 seconds.
+  path: Assets/PICO-8/Animations/Player/Jump.anim
+  artifactKey: Guid(518ac0933da4c9d49a8cb3e81ab63af9) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8/Animations/Player/Jump.anim using Guid(518ac0933da4c9d49a8cb3e81ab63af9) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'e4e051708bf3421f7db2d3d9ee854a8e') in 0.003553 seconds
+  Import took 0.006539 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 2.386560 seconds.
+  path: Assets/Plugins
+  artifactKey: Guid(cacf466197fdbff4e82aa1834f8e6314) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Plugins using Guid(cacf466197fdbff4e82aa1834f8e6314) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'd093772e5d113a9244588d93d8b4e5ea') in 0.003234 seconds
+  Import took 0.006735 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 6.327685 seconds.
+  path: Assets/PICO-8/Animations
+  artifactKey: Guid(264e95a72c93cdd43a0415bcb7f50da3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8/Animations using Guid(264e95a72c93cdd43a0415bcb7f50da3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'eada213daad67a7c57a7de10dc64db0d') in 0.003264 seconds
+  Import took 0.006515 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 2.592253 seconds.
+  path: Assets/PICO-8/Graphics
+  artifactKey: Guid(c8439d4dfee58974ba3f99c70ba7f7b3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8/Graphics using Guid(c8439d4dfee58974ba3f99c70ba7f7b3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'db24aaf88270d22bd58f707be25273d7') in 0.003258 seconds
+  Import took 0.006378 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 4.014847 seconds.
+  path: Assets/PICO-8/Materials
+  artifactKey: Guid(d1f9fa55f5c16bc4c9ef61bacd877ad5) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8/Materials using Guid(d1f9fa55f5c16bc4c9ef61bacd877ad5) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'ddd8fcc4a1f21dcbee12bd4da690ad28') in 0.003246 seconds
+  Import took 0.006776 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 2.947020 seconds.
+  path: Assets/PICO-8/Prefabs
+  artifactKey: Guid(fe54ff9e0fe72a941ab620d8eb039860) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8/Prefabs using Guid(fe54ff9e0fe72a941ab620d8eb039860) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '3f41fc943dc6f41c746de37eef12dc66') in 0.003452 seconds
+  Import took 0.007254 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 5.019160 seconds.
+  path: Assets/PICO-8/Scenes
+  artifactKey: Guid(90687be9a41fc1645bbb4c21c6743247) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8/Scenes using Guid(90687be9a41fc1645bbb4c21c6743247) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '37362a837d9ca1ee70533cb75cf27c4f') in 0.003815 seconds
+  Import took 0.007530 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 2.982810 seconds.
+  path: Assets/PICO-8/Scripts
+  artifactKey: Guid(3f6fad6d62b7cd54085e7d2eaee7bad6) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8/Scripts using Guid(3f6fad6d62b7cd54085e7d2eaee7bad6) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '4aa404155bfdd14f167ee2d42e7eecce') in 0.003698 seconds
+  Import took 0.007115 seconds .
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.012544 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 0.57 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  1.572 seconds
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.73 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 1497 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 83.1 MB.
+System memory in use after: 83.2 MB.
+
+Unloading 38 unused Assets to reduce memory usage. Loaded Objects now: 1977.
+Total: 26.516100 ms (FindLiveObjects: 0.380600 ms CreateObjectMapping: 0.174200 ms MarkObjects: 25.904200 ms  DeleteObjects: 0.054100 ms)
+
+========================================================================
+Received Import Request.
+  Time since last request: 9.366233 seconds.
+  path: Assets/PICO-8/TileMaps
+  artifactKey: Guid(dc576ef5e76a7df45a44d1347b922fbf) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8/TileMaps using Guid(dc576ef5e76a7df45a44d1347b922fbf) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'b50e1ac3cc1488de451f29811361cdd7') in 0.006557 seconds
+  Import took 0.012543 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.319273 seconds.
+  path: Assets/PICO-8
+  artifactKey: Guid(afff4259d6d0e0747b5ef845825de332) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/PICO-8 using Guid(afff4259d6d0e0747b5ef845825de332) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '337692469b860e6e21f5004ed2f9df0a') in 0.003324 seconds
+  Import took 0.007084 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 10.677570 seconds.
+  path: Assets/StreamingAssets
+  artifactKey: Guid(8528dfeaac8a76d41bb3b8c3969927b8) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/StreamingAssets using Guid(8528dfeaac8a76d41bb3b8c3969927b8) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'ac5e16d6dd2bbb77c04f2413398fd13c') in 0.003426 seconds
+  Import took 0.007472 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 4.774455 seconds.
+  path: Assets/InstanceTest.cs
+  artifactKey: Guid(fd8c8de8cd2fed545ad35070fead166a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/InstanceTest.cs using Guid(fd8c8de8cd2fed545ad35070fead166a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'a014cb66251261c63753a28c1e7ae80c') in 0.017023 seconds
+  Import took 0.019917 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.028740 seconds.
+  path: Assets/InstanceTest.cs
+  artifactKey: Guid(fd8c8de8cd2fed545ad35070fead166a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/InstanceTest.cs using Guid(fd8c8de8cd2fed545ad35070fead166a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'a014cb66251261c63753a28c1e7ae80c') in 0.003018 seconds
+  Import took 0.006664 seconds .
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.010983 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 0.58 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Invoked RoslynAnalysisRunner static constructor.
+RoslynAnalysisRunner will not be running.
+RoslynAnalysisRunner has terminated.
+Mono: successfully reloaded assembly
+- Completed reload, in  1.558 seconds
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.63 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 1496 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 83.1 MB.
+System memory in use after: 83.2 MB.
+
+Unloading 38 unused Assets to reduce memory usage. Loaded Objects now: 1980.
+Total: 21.243400 ms (FindLiveObjects: 0.320500 ms CreateObjectMapping: 0.109300 ms MarkObjects: 20.784100 ms  DeleteObjects: 0.027500 ms)
+
+========================================================================
+Received Import Request.
+  Time since last request: 34.667470 seconds.
+  path: Assets/Readme.txt
+  artifactKey: Guid(274e733db1fca85478892f4afda3b83a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Readme.txt using Guid(274e733db1fca85478892f4afda3b83a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '315ec0e63b82f52e911e85741ca81dcd') in 0.091410 seconds
+  Import took 0.096356 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 9.258343 seconds.
+  path: Assets/Demigiant
+  artifactKey: Guid(3b8c7a7bdf5df7b4aa65de377c4dbacd) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Demigiant using Guid(3b8c7a7bdf5df7b4aa65de377c4dbacd) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '6fbbbdcb900cf3225fc474c2e82f6c17') in 0.003554 seconds
+  Import took 0.006989 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 2.421871 seconds.
+  path: Assets/Demigiant/DemiLib
+  artifactKey: Guid(f6a27513f1252724d9ca97bfc494b0f0) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Demigiant/DemiLib using Guid(f6a27513f1252724d9ca97bfc494b0f0) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'ecdcfb04c5f2a85c47b5d759f918be88') in 0.003287 seconds
+  Import took 0.006686 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.432837 seconds.
+  path: Assets/Demigiant/DOTween
+  artifactKey: Guid(0baec038f6e78d04c9f0bc4e8380c310) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Demigiant/DOTween using Guid(0baec038f6e78d04c9f0bc4e8380c310) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '0b21f4858914d8d2b30af4752840cf92') in 0.003767 seconds
+  Import took 0.007013 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 5.407736 seconds.
+  path: Assets/Plugins/Sirenix
+  artifactKey: Guid(cc2e7b1ea0317144f9bcce0103878749) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Plugins/Sirenix using Guid(cc2e7b1ea0317144f9bcce0103878749) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'e2524c57495abb491b93546bfabdf6b3') in 0.003992 seconds
+  Import took 0.007420 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 3.299807 seconds.
+  path: Assets/Plugins/Sirenix/Odin Validator/Editor/Scripts/Profiles
+  artifactKey: Guid(f1cf66f2020c257498c3d22e24535b59) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Plugins/Sirenix/Odin Validator/Editor/Scripts/Profiles using Guid(f1cf66f2020c257498c3d22e24535b59) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'f0a08f7e3fe63ee0ab96dcc100216803') in 0.003484 seconds
+  Import took 0.006953 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 3.175021 seconds.
+  path: Assets/Plugins/Sirenix/Readme.txt
+  artifactKey: Guid(e957a9e8b4f4bce4b8a34e504a8c39d7) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Plugins/Sirenix/Readme.txt using Guid(e957a9e8b4f4bce4b8a34e504a8c39d7) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '65714b269326cb88a030c21588a4f4fe') in 0.003483 seconds
+  Import took 0.006247 seconds .
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000988 seconds.
+  path: Assets/Plugins/Sirenix/Readme.txt
+  artifactKey: Guid(e957a9e8b4f4bce4b8a34e504a8c39d7) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Plugins/Sirenix/Readme.txt using Guid(e957a9e8b4f4bce4b8a34e504a8c39d7) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '65714b269326cb88a030c21588a4f4fe') in 0.003945 seconds
+  Import took 0.007043 seconds .
+
+AssetImportWorkerClient::OnTransportError - code=2 error=End of file

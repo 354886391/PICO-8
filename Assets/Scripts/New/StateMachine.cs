@@ -8,13 +8,13 @@ public class StateMachine : MonoBehaviour
     private Action[] begins;
     private Func<int>[] updates;
     private Func<IEnumerator>[] coroutines;
-    private Coroutine currentCoroutine;
+    private StateCoroutine currentCoroutine;
 
     private int currentState;
     private int previousState;
 
-    public bool locked;
-    public bool changedStates;
+    public bool Locked;
+    public bool ChangedStates;
 
     public int State
     {
@@ -24,11 +24,11 @@ public class StateMachine : MonoBehaviour
         }
         set
         {
-            if (locked || currentState == value)
+            if (Locked || currentState == value)
             {
                 return;
             }
-            changedStates = true;
+            ChangedStates = true;
             previousState = currentState;
             currentState = value;
             if (previousState != -1 && ends[previousState] != null)
@@ -57,7 +57,7 @@ public class StateMachine : MonoBehaviour
         begins = new Action[maxStates];
         updates = new Func<int>[maxStates];
         coroutines = new Func<IEnumerator>[maxStates];
-        currentCoroutine = new Coroutine();
+        currentCoroutine = new StateCoroutine();
         currentCoroutine.RemoveOnComplete = false;
     }
 
@@ -71,14 +71,15 @@ public class StateMachine : MonoBehaviour
 
     public void Update()
     {
-        changedStates = false;
-        if (this.updates[currentState] != null)
-            this.State = this.updates[currentState]();
-        //if (!this.currentCoroutine.Active)
-        //    return;
-        this.currentCoroutine.Update();
-        if (this.changedStates || !this.currentCoroutine.Finished)
-            return;
+        ChangedStates = false;
+        if (currentState != -1 && updates[currentState] != null)
+        {
+            State = updates[currentState]();
+        }
+        if (currentCoroutine.Active)
+        {
+            currentCoroutine.Update();
+        }
     }
 
     public static implicit operator int(StateMachine state)

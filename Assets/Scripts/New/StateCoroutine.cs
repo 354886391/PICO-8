@@ -2,13 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
+[Serializable]
 public class StateCoroutine
 {
 
     public bool RemoveOnComplete;
     public bool UseFixedDeltaTime;
-    public Action OnRemovedCallback;
 
     private bool ended;
     private float waitTimer;
@@ -83,10 +84,10 @@ public class StateCoroutine
                         {
                             Active = false;
                             Finished = true;
+                            Debug.LogWarning("RemoveOnComplete: " + RemoveOnComplete);
                             if (RemoveOnComplete)
-                            {
+                            {                         
                                 RemoveSelf();
-                                OnRemovedCallback?.Invoke();
                             }
                         }
                     }
@@ -125,7 +126,7 @@ public class StateCoroutine
 
     public void RemoveSelf()
     {
-
+        Debug.LogWarning("RemoveSelf");
     }
 }
 

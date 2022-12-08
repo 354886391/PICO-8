@@ -2,7 +2,8 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class StateMachine : MonoBehaviour
+[Serializable]
+public class StateMachine
 {
     private Action[] ends;
     private Action[] begins;
@@ -58,7 +59,7 @@ public class StateMachine : MonoBehaviour
         updates = new Func<int>[maxStates];
         coroutines = new Func<IEnumerator>[maxStates];
         currentCoroutine = new StateCoroutine();
-        currentCoroutine.RemoveOnComplete = false;
+        //currentCoroutine.RemoveOnComplete = false;
     }
 
     public void SetCallbacks(int state, Func<int> onUpdate, Func<IEnumerator> coroutine = null, Action begin = null, Action end = null)

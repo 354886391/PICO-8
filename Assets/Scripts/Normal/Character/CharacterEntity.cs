@@ -2,29 +2,6 @@
 using System;
 using UnityEngine;
 
-//public enum Facings
-//{
-//    Left = -1,
-//    Right = 1,
-//}
-//public enum States
-//{
-//    None,
-//    Idle,
-//    Move,
-//    Jump,
-//    Dash,
-//    Climb,
-//    WallClimb,
-//}
-
-//public struct Bounds
-//{
-//    public Vector2 topLeft;
-//    public Vector2 bottomLeft;
-//    public Vector2 bottomRight;
-//}
-
 public class CharacterEntity : ScriptableObject
 {
     #region State

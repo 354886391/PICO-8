@@ -58,8 +58,7 @@ public class StateMachine
         begins = new Action[maxStates];
         updates = new Func<int>[maxStates];
         coroutines = new Func<IEnumerator>[maxStates];
-        currentCoroutine = new StateCoroutine();
-        //currentCoroutine.RemoveOnComplete = false;
+        currentCoroutine = new StateCoroutine(false);
     }
 
     public void SetCallbacks(int state, Func<int> onUpdate, Func<IEnumerator> coroutine = null, Action begin = null, Action end = null)

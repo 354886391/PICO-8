@@ -4,18 +4,6 @@ using UnityEngine;
 
 public class CharacterMovement : MonoBehaviour
 {
-
-    #region Structs
-    [System.Serializable]
-    public struct RayOrigin
-    {
-        public Vector2 topLeft;
-        public Vector2 bottomLeft;
-        public Vector2 bottomRight;
-    }
-
-    #endregion
-
     #region Constants
     public const float MaxRun = 9f;
     public const float MaxFall = -16f;
@@ -112,10 +100,9 @@ public class CharacterMovement : MonoBehaviour
     private float _verticalRaysInterval;
     private float _horizontalRaysInterval;
 
-    [SerializeField] private RayOrigin _rayOrigin;
-    [SerializeField] private LayerMask _groundMask;
     [SerializeField] private Rigidbody2D _rigidbody;
-    [SerializeField] private BoxCollider2D _boxCollider;
+    [SerializeField] private BodyDetection _bodyDetection;
+
 
     public static event Action<CharacterMovement> JumpBeginEvent;
     public static event Action<CharacterMovement> MidAirJumpBeginEvent;
@@ -301,7 +288,6 @@ public class CharacterMovement : MonoBehaviour
     {
         if (_canMove)
         {
-            ComputeRayOrigin();
             ApplyFacing();
             DetectGround(deltaTime);
             DetectWall(deltaTime);
@@ -329,32 +315,12 @@ public class CharacterMovement : MonoBehaviour
     /// <param name="deltaTime"></param>
     private void DetectGround(float deltaTime)
     {
-        _onGround = false;
-        var origin = _rayOrigin.bottomLeft;
-        var direction = Vector2.down;
-        var distance = Mathf.Abs(_speed.y * deltaTime) + SkinWidth * 2f;
-        for (int i = 0; i < HorizontalRaysCount; i++)
-        {
-            var rayOrigin = new Vector2(origin.x + _horizontalRaysInterval * i, origin.y);
-            var raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
-            Console.DrawRay(rayOrigin, direction * distance, Color.red);
-            if (raycastHit) { _onGround = true; break; }
-        }
+
     }
 
     private void DetectWall(float deltaTime)
     {
-        _againstWall = false;
-        var origin = _facing < 0 ? _rayOrigin.bottomLeft : _rayOrigin.bottomRight;
-        var direction = Vector2.right * _facing;
-        var distance = Mathf.Abs(_speed.x * deltaTime) + SkinWidth * 2f;
-        for (int i = 0; i < VerticalRaysCount; i++)
-        {
-            var rayOrigin = new Vector2(origin.x, origin.y + _verticalRaysInterval * i);
-            var raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
-            Console.DrawRay(rayOrigin, direction * distance, Color.red);
-            if (raycastHit) { _againstWall = true; break; }
-        }
+
     }
 
     private void ApplyGravity(float deltaTime)
@@ -664,101 +630,16 @@ public class CharacterMovement : MonoBehaviour
     private void CorrectionAndMove(float deltaTime)
     {
         var deltaMovement = _speed * deltaTime;
-        if (deltaMovement.x != 0.0f)
-        {
-            FixedHorizontally(ref deltaMovement);
-        }
-        if (deltaMovement.y != 0.0f)
-        {
-            FixedVertically(ref deltaMovement);
-        }
+
         _speed = deltaMovement / deltaTime;
         if (Mathf.Abs(_speed.x) < MinOffset) _speed.x = 0.0f;
         if (Mathf.Abs(_speed.y) < MinOffset) _speed.y = 0.0f;
         MoveToPosition(deltaMovement);
     }
 
-    /// <summary>
-    /// 水平修正
-    /// </summary>
-    private RaycastHit2D FixedHorizontally(ref Vector2 deltaMovement)
-    {
-        var isGoingRight = deltaMovement.x > MinOffset;
-        var origin = isGoingRight ? _rayOrigin.bottomRight : _rayOrigin.bottomLeft;
-        var direction = isGoingRight ? Vector2.right : Vector2.left;
-        var distance = Mathf.Abs(deltaMovement.x) + SkinWidth;
-        var raycastHit = new RaycastHit2D();
-        for (int i = 0; i < VerticalRaysCount; i++)
-        {
-            var rayOrigin = new Vector2(origin.x, origin.y + _verticalRaysInterval * i);
-            raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
-            //Console.DrawRay(rayOrigin, direction * distance, Color.blue);
-            if (raycastHit)
-            {
-
-                if (isGoingRight)
-                {
-                    deltaMovement.x = raycastHit.distance - SkinWidth;   // 右方
-                }
-                else
-                {
-                    deltaMovement.x = SkinWidth - raycastHit.distance;   // 左方
-                }
-                //if (Mathf.Abs(deltaMovement.x) < MinOffset) return raycastHit;
-            }
-        }
-        return raycastHit;
-    }
-
-    /// <summary>
-    /// 竖直修正
-    /// </summary>
-    private RaycastHit2D FixedVertically(ref Vector2 deltaMovement)
-    {
-        var isGoingUp = deltaMovement.y > MinOffset;
-        var origin = isGoingUp ? _rayOrigin.topLeft : _rayOrigin.bottomLeft;
-        var direction = isGoingUp ? Vector2.up : Vector2.down;
-        var distance = Mathf.Abs(deltaMovement.y) + SkinWidth;
-        var raycastHit = new RaycastHit2D();
-        for (int i = 0; i < HorizontalRaysCount; i++)
-        {
-            var rayOrigin = new Vector2(origin.x + _horizontalRaysInterval * i, origin.y);
-            raycastHit = Physics2D.Raycast(rayOrigin, direction, distance, _groundMask);
-            //Console.DrawRay(rayOrigin, direction * distance, Color.red);
-            if (raycastHit)
-            {
-                if (isGoingUp)
-                {
-                    deltaMovement.y = raycastHit.distance - SkinWidth;   // 上方
-                }
-                else
-                {
-                    deltaMovement.y = SkinWidth - raycastHit.distance;   // 下方
-                }
-                //if (Mathf.Abs(deltaMovement.y) < MinOffset) return raycastHit;
-            }
-        }
-        return raycastHit;
-    }
-
     private void MoveToPosition(Vector2 deltaMovement)
     {
         _rigidbody.MovePosition(_rigidbody.position + deltaMovement);
-    }
-
-    private void ComputeRayOrigin()
-    {
-        var bounds = _boxCollider.bounds;
-        bounds.Expand(-SkinWidth * 2f);
-        _rayOrigin.topLeft = new Vector2(bounds.min.x, bounds.max.y);
-        _rayOrigin.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
-        _rayOrigin.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
-    }
-
-    private void ComputeRaysInterval()
-    {
-        _horizontalRaysInterval = (_rayOrigin.bottomRight.x - _rayOrigin.bottomLeft.x) / (HorizontalRaysCount - 1);
-        _verticalRaysInterval = (_rayOrigin.topLeft.y - _rayOrigin.bottomLeft.y) / (VerticalRaysCount - 1);
     }
 
     public void UpdateInput()
@@ -799,10 +680,7 @@ public class CharacterMovement : MonoBehaviour
         _canJump = true;
         _canDash = true;
         _canClimb = true;
-        _groundMask = LayerMask.GetMask("Ground");
         _rigidbody = GetComponent<Rigidbody2D>();
-        _boxCollider = GetComponent<BoxCollider2D>();
-        ComputeRayOrigin();
-        ComputeRaysInterval();
+        _bodyDetection = GetComponent<BodyDetection>();
     }
 }

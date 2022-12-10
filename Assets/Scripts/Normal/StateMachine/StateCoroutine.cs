@@ -84,7 +84,6 @@ public class StateCoroutine
                         {
                             Active = false;
                             Finished = true;
-                            Debug.LogWarning("RemoveOnComplete: " + RemoveOnComplete);
                             if (RemoveOnComplete)
                             {                         
                                 RemoveSelf();

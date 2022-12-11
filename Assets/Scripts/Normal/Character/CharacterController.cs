@@ -27,7 +27,6 @@ public class CharacterController : MonoBehaviour
 
     private void Restart()
     {
-        Movement.AutoCanMove(0.333f);
         HairFlow.AutoHideHairFlow(0.35f);
         Utility.DelayCall(0.35f, () =>
         {          

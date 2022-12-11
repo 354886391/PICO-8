@@ -2,6 +2,9 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// 发呆, 移动, 跳, 冲刺, 爬墙
+/// </summary>
 public class CharacterMovement : MonoBehaviour
 {
     #region Constants
@@ -52,10 +55,9 @@ public class CharacterMovement : MonoBehaviour
     #endregion
 
     #region Vars
-    [SerializeField] private bool _canMove;
     [SerializeField] private bool _onGround;
     [SerializeField] private bool _wasOnGround;
-    [SerializeField] private bool _againstWall;
+    [SerializeField] private bool _hitWall;
     [SerializeField] private bool _isFreezing;
     [SerializeField] private int _facing;
     [SerializeField] private float _maxFall;
@@ -125,24 +127,16 @@ public class CharacterMovement : MonoBehaviour
 
     public float MoveY { get; set; }
 
-    public float Stamina { get; set; }
+    public int Facing
+    {
+        get { return _facing; }
+        set { _facing = value; }
+    }
 
     public Vector2 Speed
     {
         get { return _speed; }
         set { _speed = value; }
-    }
-
-    public bool CanMove
-    {
-        get { return _canMove; }
-        set { _canMove = value; }
-    }
-
-    public int Facing
-    {
-        get { return _facing; }
-        set { _facing = value; }
     }
 
     /// <summary>
@@ -165,10 +159,10 @@ public class CharacterMovement : MonoBehaviour
 
     public bool HitCeiling { get; set; }
 
-    public bool AgainstWall
+    public bool HitWall
     {
-        get { return _againstWall; }
-        set { _againstWall = value; }
+        get { return _hitWall; }
+        set { _hitWall = value; }
     }
 
     /// <summary>
@@ -286,15 +280,13 @@ public class CharacterMovement : MonoBehaviour
 
     public void UpdateMove(float deltaTime)
     {
-        if (_canMove)
-        {
             ApplyFacing();
             DetectGround(deltaTime);
             DetectWall(deltaTime);
             ApplyGravity(deltaTime);
             CooldownUpdate(deltaTime);
 
-            Moving(deltaTime);
+            Run(deltaTime);
             JumpBegin();
             MidAirJumpBegin();
             JumpUpdate(deltaTime);
@@ -305,8 +297,7 @@ public class CharacterMovement : MonoBehaviour
             ClimbJumpBegin();
             LandingUpdate();
             CorrectionAndMove(deltaTime);
-            _wasOnGround = _onGround;
-        }
+            _wasOnGround = _onGround;     
     }
 
     /// <summary>
@@ -326,7 +317,7 @@ public class CharacterMovement : MonoBehaviour
     private void ApplyGravity(float deltaTime)
     {
         // Slide if it is against a wall and moving towards it
-        if (_againstWall && MoveX == _facing)
+        if (_hitWall && MoveX == _facing)
         {
             _maxFall = Mathf.MoveTowards(_maxFall, ClimbSlipSpeed, SlideAccel * deltaTime);
         }
@@ -356,20 +347,17 @@ public class CharacterMovement : MonoBehaviour
     /// 参考 Celeste 机制研究(https://www.cnblogs.com/tmzbot/p/12318561.html) 调整游戏数值
     /// </summary>
     /// <param name="deltaTime"></param>
-    private void Moving(float deltaTime)
+    private void Run(float deltaTime)
     {
         float mult = _onGround ? 1.0f : 0.65f;
         if (Mathf.Abs(_speed.x) > MaxRun && Mathf.Sign(_speed.x) == MoveX)
         {
             _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunReduce * mult * deltaTime);  //Reduce back from beyond the max speed
-            Console.Log("Move speed RunReduce");
         }
         else
         {
             _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunAccel * mult * deltaTime);   //Approach the max speed
-            Console.Log("Move speed RunAccel");
         }
-        //Console.LogFormat("Move speed X {0:F3}", _speed.x);
     }
 
     private void JumpBegin()
@@ -384,7 +372,6 @@ public class CharacterMovement : MonoBehaviour
         _speed.y = JumpSpeed;
         //事件回调
         JumpBeginEvent?.Invoke(this);
-        //Console.LogFormat("JumpBegin {0}", _speed.y);
     }
 
     private void MidAirJumpBegin()
@@ -399,7 +386,6 @@ public class CharacterMovement : MonoBehaviour
         _isJumping = true;
         _canJumpUpdate = true;
         MidAirJumpBeginEvent?.Invoke(this);
-        //Console.LogFormat("MidAirJumpBegin {0}", _speed.y);
     }
 
     private void JumpUpdate(float deltaTime)
@@ -538,7 +524,7 @@ public class CharacterMovement : MonoBehaviour
 
     private void ClimbBegin()
     {
-        if (!_againstWall) return;
+        if (!_hitWall) return;
         if (_isClimbCooldown) return;
         if (!_climb || !_canClimb) return;
         if (_climbHeldDownTimer > ClimbToleranceTime) return;
@@ -575,7 +561,7 @@ public class CharacterMovement : MonoBehaviour
     {
         if (_canClimbUpdate)
         {
-            if (_againstWall)
+            if (_hitWall)
             {
                 if (_climb)
                 {
@@ -662,12 +648,6 @@ public class CharacterMovement : MonoBehaviour
         transform.position = new Vector3(-6f, -7.5f, 0);
     }
 
-    public void AutoCanMove(float delay)
-    {
-        _canMove = false;
-        Utility.DelayCall(delay, () => _canMove = true);
-    }
-
     public void BornAndJump()
     {
         Utility.MoveTo(transform, new Vector3(-6f, -4f, 0), 0.5f, false, DG.Tweening.Ease.OutCubic);
@@ -676,7 +656,6 @@ public class CharacterMovement : MonoBehaviour
     private void Start()
     {
         _facing = 1;
-        _canMove = true;
         _canJump = true;
         _canDash = true;
         _canClimb = true;

@@ -1,27 +1,27 @@
-#define ENABLE_DEBUG
+ï»¿#define ENABLE_DEBUG
 using UnityEngine;
 
 /// <summary>
-/// ½ÇÉ«Åö×²
+/// è§’è‰²ç¢°æ’
 /// </summary>
 public class BodyDetection : MonoBehaviour
 {
 
-    public const float _skinWidth = 0.02f;  // Æ¤·ôºñ¶È
+    public const float _skinWidth = 0.02f;  // çš®è‚¤åšåº¦
 
-    private float _rayHSpacing;             // Ë®Æ½ÉäÏß¼ä¾à
-    private float _rayVSpacing;             // ÊúÖ±ÉäÏß¼ä¾à  
-    private Origin2D _rayOrigin;        // ÉäÏßÆğÊ¼µã
+    private float _rayHSpacing;             // æ°´å¹³å°„çº¿é—´è·
+    private float _rayVSpacing;             // ç«–ç›´å°„çº¿é—´è·  
+    private Origin2D _rayOrigin;        // å°„çº¿èµ·å§‹ç‚¹
 
-    private int _ignoreLayer = 2;       // ºöÂÔ²ã
+    private int _ignoreLayer = 2;       // å¿½ç•¥å±‚
     private int _cachedLayer;           // 
-    private LayerMask _detectLayer;     // ¼ì²â²ã
+    private LayerMask _detectLayer;     // æ£€æµ‹å±‚
 
     public int rayCount = 8;
     public CollisionInfo wallHit;
     public CollisionInfo groundHit;
 
-    private Collider2D _bodyCollider;   // ½ÇÉ«Åö×²Ìå
+    private Collider2D _bodyCollider;   // è§’è‰²ç¢°æ’ä½“
 
     private void Awake()
     {
@@ -31,14 +31,14 @@ public class BodyDetection : MonoBehaviour
 
     private void Start()
     {
-        ComputeRayOrigin();             // ¼ÆËãÉäÏßÆğµã
-        ComputeRaySpacing(rayCount - 1);    // ¼ÆËãÉäÏß¼ä¾à
+        ComputeRayOrigin();             // è®¡ç®—å°„çº¿èµ·ç‚¹
+        ComputeRaySpacing(rayCount - 1);    // è®¡ç®—å°„çº¿é—´è·
     }
 
     /// <summary>
-    /// ¼ì²âÅö×²
+    /// æ£€æµ‹ç¢°æ’
     /// </summary>
-    /// <param name="movement">ĞŞ¸Ä×î´óÉäÏß³¤¶È</param>
+    /// <param name="movement">ä¿®æ”¹æœ€å¤§å°„çº¿é•¿åº¦</param>
     public void DetectRaycast(ref Vector2 movement)
     {
         ResetHitInfo();
@@ -50,7 +50,7 @@ public class BodyDetection : MonoBehaviour
     }
 
     /// <summary>
-    /// ÉäÏß³¤¶È²»°üº¬Æ¤·ôºñ¶È
+    /// å°„çº¿é•¿åº¦ä¸åŒ…å«çš®è‚¤åšåº¦
     /// </summary>
     public bool Raycast(Vector2 origin, Vector2 direction, out RaycastHit2D hitInfo, float distance, LayerMask mask)
     {
@@ -61,7 +61,7 @@ public class BodyDetection : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼ì²âË®Æ½Åö×²
+    /// æ£€æµ‹æ°´å¹³ç¢°æ’
     /// </summary>
     public bool HorizontalHit(ref float movementX)
     {
@@ -93,7 +93,7 @@ public class BodyDetection : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼ì²âÉÏÏÂÅö×²
+    /// æ£€æµ‹ä¸Šä¸‹ç¢°æ’
     /// </summary>
     public bool VerticalHit(ref float movementY)
     {
@@ -176,7 +176,7 @@ public class BodyDetection : MonoBehaviour
 
 #region STRUCT
 /// <summary>
-/// ÉäÏßÆğµã
+/// å°„çº¿èµ·ç‚¹
 /// </summary>
 [System.Serializable]
 public struct Origin2D
@@ -194,7 +194,7 @@ public struct Origin2D
 
 
 /// <summary>
-/// Åö×²ĞÅÏ¢
+/// ç¢°æ’ä¿¡æ¯
 /// </summary>
 [System.Serializable]
 public struct CollisionInfo

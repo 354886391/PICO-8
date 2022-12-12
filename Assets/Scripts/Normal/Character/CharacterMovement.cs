@@ -1,5 +1,6 @@
 ﻿#define ENABLE_DEBUG
-using System;
+using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 using UnityEngine;
 
 /// <summary>
@@ -7,659 +8,416 @@ using UnityEngine;
 /// </summary>
 public class CharacterMovement : MonoBehaviour
 {
-    #region Constants
-    public const float MaxRun = 9f;
-    public const float MaxFall = -16f;
-    public const float FallAccel = 30f;
-    public const float RunAccel = 100f;
-    public const float RunReduce = 40f;
-
-    public const float Gravity = 90f;
-    public const float HalfGravThreshold = 4f;
-    public const float AirMult = 0.65f;
-
-    #region Jump
-    public const float JumpHBoost = 4f;
-    public const float JumpWBoost = 6f;
-    public const float JumpSpeed = 10.5f;
-    public const float JumpTime = 0.2f;
-    public const float JumpToleranceTime = 0.15f;
-
-    public const int MaxMidAirJump = 0;   // 0 or 1
+    #region CONSTANT
+    #region RUN
+    private const float MaxRun = 8.3f;
+    private const float MaxWalk = 6;
+    private const float RunAccel = 100;
+    private const float RunReduce = 40;
+    private const float AirMult = 0.65f;
     #endregion
 
-    #region Dash  
-    public const float DashSpeed = 24f;
-    public const float EndDashSpeed = 16f;
-    public const float DashTime = 0.15f;
-    public const float DashToleranceTime = 0.15f;
-    public const float DashCooldownTime = 0.2f;
+    #region GRAVITY
+    private const float MaxFall = -16;
+    private const float Gravity = 79;
+    private const float GravThreshold = 4;
     #endregion
 
-    #region Climb
-    private const float ClimbUpSpeed = 4.5f;
-    private const float ClimbDownSpeed = -6f;
-    private const float ClimbSlipSpeed = -3f;
-    private const float ClimbTime = 2.0f;
-    private const float ClimbToleranceTime = 0.15f;
-    private const float ClimbCooldownTime = 0.2f;
-    private const float ClimbAccel = 90f;
-    private const float SlideAccel = 90f;
-    private const float ClimbGrabYMult = .2f;
+    #region JUMP    // 跳跃
+    private const float JumpHBoost = 4;
+    private const float MaxJump = 16.65f;
+    private const float JumpTime = 0.2f;
+    private const float JumpToleranceTime = 0.15f;
+    private const float JumpCount = 2;
+    private const float JumpThreshold = 4;
+    private const float JumpEndMult = 0.35f;
     #endregion
 
-    public const float SkinWidth = 0.02f;
-    public const float MinOffset = 0.0001f;
-    public const float VerticalRaysCount = 5;
-    public const float HorizontalRaysCount = 5;
+    #region SLIDE   //滑落
+    private const float GrabWall = 0;
+    private const float MaxSlide = -8f;
     #endregion
 
-    #region Vars
-    [SerializeField] private bool _onGround;
-    [SerializeField] private bool _wasOnGround;
-    [SerializeField] private bool _hitWall;
-    [SerializeField] private bool _isFreezing;
-    [SerializeField] private int _facing;
-    [SerializeField] private float _maxFall;
-    [SerializeField] private Vector2 _speed;
-
-    #region Jump
-    [SerializeField] private bool _jump;
-    [SerializeField] private bool _isJumping;
-    [SerializeField] private bool _canJump;
-    [SerializeField] private bool _canJumpUpdate;
-    [SerializeField] private float _jumpTimer;
-    [SerializeField] private float _jumpHeldDownTimer;
-    [SerializeField] private int _midAirJumps;
+    #region DASH   // 冲刺
+    private const float DashHBoost = 4;
+    private const float MaxDash = 24;
+    private const float DashAccel = 160;
+    private const float DashReduce = 120;
+    private const float DashTime = 0.15f;
+    private const float DashToleranceTime = 0.15f;
+    private const float DashCooldownTime = 0.2f;
+    private const float DashTotalCount = 0;
+    private const float DashThreshold = 3;
+    #endregion
     #endregion
 
-    #region Dash    
-    [SerializeField] private bool _dash;
-    [SerializeField] private bool _isDashing;
-    [SerializeField] private bool _canDash;
-    [SerializeField] private bool _canDashUpdate;
-    [SerializeField] private bool _isDashCooldown;
-    [SerializeField] private float _dashTimer;
-    [SerializeField] private float _dashHeldDownTimer;
-    [SerializeField] private float _dashCooldownTimer;
-    [SerializeField] private Vector2 _dashDir;
-    [SerializeField] private Vector2 _beforeDashSpeed;
+    #region VAR
+
+
+    [TitleGroup("MOVE")]
+    public bool canMove;
+    [TitleGroup("MOVE")]
+    public Vector2 speed;           // 期望速度
+    [TitleGroup("MOVE")]
+    public Vector2 movement;        // 实际位移
+
+    // 在地面
+    [TitleGroup("MOVE"), ShowInInspector]
+    public bool isOnGround => detection ? detection.groundHit.isHit : false;
+
+    // 碰到墙
+    [TitleGroup("MOVE"), ShowInInspector]
+    public bool isGraspWall => detection ? detection.wallHit.isHit : false;
+
+    [TitleGroup("MOVE"), ShowInInspector]
+    public bool isAirborne => false;
+
+    [TitleGroup("MOVE"), ShowInInspector]
+    public bool isFacingRight => false;
+
+    #region JUMP
+    [ReadOnly]
+    [TitleGroup("JUMP")]
+    public bool canJump;    // 是否可以跳跃, 检测后立即置否
+    [ReadOnly]
+    public bool isRising;   // 跳跃的上升阶段(不包括滞空的前半段)
+    [ReadOnly]
+    public bool isJumping;  // 包括上升, 滞空和下降阶段   
+    [ReadOnly]
+    public bool isWallJumping;
+    [ReadOnly]
+    public bool isDoubleJumping;
+    [ReadOnly]
+    public bool isWallSliding;
+    [ReadOnly]
+    public int jumpSteps;
+    [ReadOnly]
+    public float jumpTimer;
     #endregion
 
-    #region Climb
-    [SerializeField] private bool _climb;
-    [SerializeField] private bool _isClimbing;
-    [SerializeField] private bool _canClimb;
-    [SerializeField] private bool _canClimbUpdate;
-    [SerializeField] private bool _isClimbCooldown;
-    [SerializeField] private float _climbTimer;
-    [SerializeField] private float _climbHeldDownTimer;
-    [SerializeField] private float _climbCooldownTimer;
-    [SerializeField] private float _wallSlideTimer;
-    [SerializeField] private float _climbNoMoveTimer;
+    #region DASH
+    [ReadOnly]
+    [TitleGroup("DASH")]
+    public bool canDash;
+    [ReadOnly]
+    public bool isDashing;
+    [ReadOnly]
+    public bool isDashRight;
+    [ReadOnly]
+    public int dashSteps;
+    [ReadOnly]
+    public float dashTimer;
+
+    private Vector2 dashBefore;      // 闪避前速度
+    private Vector2 dashDirection;   // dashing 时的方向
     #endregion
-
-    private float _verticalRaysInterval;
-    private float _horizontalRaysInterval;
-
-    [SerializeField] private Rigidbody2D _rigidbody;
-    [SerializeField] private BodyDetection _bodyDetection;
-
-
-    public static event Action<CharacterMovement> JumpBeginEvent;
-    public static event Action<CharacterMovement> MidAirJumpBeginEvent;
-    public static event Action<CharacterMovement> JumpUpdateEvent;
-    public static event Action<CharacterMovement> JumpEndEvent;
-
-    public static event Action<CharacterMovement> DashBeginEvent;
-    public static event Action<CharacterMovement> DashUpdateEvent;
-    public static event Action<CharacterMovement> DashEndEvent;
-
-    public static event Action<CharacterMovement> ClimbBeginEvent;
-    public static event Action<CharacterMovement> ClimbupdateEvent;
-    public static event Action<CharacterMovement> ClimbEndEvent;
-
-    public static event Action<CharacterMovement> LandingEvent;
 
     #endregion
 
-    public float MoveX { get; set; }
+    #region OTHER
+    private Rigidbody2D rigid2d;
+    private BodyDetection detection;
+    #endregion
 
-    public float MoveY { get; set; }
-
-    public int Facing
+    private void Awake()
     {
-        get { return _facing; }
-        set { _facing = value; }
+        canMove = true;
+        canJump = true;
+        canDash = true;
+
+        rigid2d = GetComponent<Rigidbody2D>();
+        detection = GetComponent<BodyDetection>();
     }
 
-    public Vector2 Speed
+    public void Move(CharacterInput input, float deltaTime)
     {
-        get { return _speed; }
-        set { _speed = value; }
+        // grounded
+        ApplyGravity(deltaTime);
+        RunUpdate(input, deltaTime);
+
+
+        // detect Ground/Wall
+        DetectCollision(deltaTime);
+        ApplyMovement();
     }
 
-    /// <summary>
-    /// 当前帧是否在地面
-    /// </summary>
-    public bool OnGround
+    public void DetectCollision(float deltaTime)
     {
-        get { return _onGround; }
-        set => _onGround = value;
+        movement = speed * deltaTime;
+        detection.DetectRaycast(ref movement);
+        speed = movement / deltaTime;
+        //Player.state.grounded = isOnGround;
+        //Player.state.touchingWall = isGraspWall;
     }
 
-    /// <summary>
-    /// 上一帧是否在地面
-    /// </summary>
-    public bool WasOnGround
+    private void ApplyMovement()
     {
-        get { return _wasOnGround; }
-        set { _wasOnGround = value; }
-    }
-
-    public bool HitCeiling { get; set; }
-
-    public bool HitWall
-    {
-        get { return _hitWall; }
-        set { _hitWall = value; }
-    }
-
-    /// <summary>
-    /// 按键响应
-    /// </summary>
-    public bool Jump
-    {
-        get { return _jump; }
-        set
+        if (canMove)
         {
-            if (_jump && !value)
-            {
-                _canJump = true;
-                _jumpHeldDownTimer = 0.0f;
-            }
-            _jump = value;
-            if (_jump)
-            {
-                _jumpHeldDownTimer += Time.deltaTime;
-            }
+            rigid2d.MovePosition(rigid2d.position + movement);
         }
-    }
-
-    /// <summary>
-    /// 仅上升阶段
-    /// </summary>
-    public bool IsJumping
-    {
-        get
-        {
-            if (_isJumping && _speed.y < MinOffset)
-            {
-                _isJumping = false;
-            }
-            return _isJumping;
-        }
-    }
-
-    /// <summary>
-    /// 按键响应
-    /// </summary>
-    public bool Dash
-    {
-        get { return _dash; }
-        set
-        {
-            if (_dash && !value)
-            {
-                _canDash = true;
-                _dashHeldDownTimer = 0.0f;
-            }
-            _dash = value;
-            if (_dash)
-            {
-                _dashHeldDownTimer += Time.deltaTime;
-            }
-        }
-    }
-
-    /// <summary>
-    /// 仅上升阶段
-    /// </summary>
-    public bool IsDashing
-    {
-        get
-        {
-            if (_isDashing && !_isFreezing && _speed.y < MinOffset)
-            {
-                _isDashing = false;
-            }
-            return _isDashing;
-        }
-    }
-
-    /// <summary>
-    /// 按键响应
-    /// </summary>
-    public bool Climb
-    {
-        get { return _climb; }
-        set
-        {
-            if (_climb && !value)
-            {
-                _canClimb = true;
-                _climbHeldDownTimer = 0.0f;
-            }
-            _climb = value;
-            if (_climb)
-            {
-                _climbHeldDownTimer += Time.deltaTime;
-            }
-        }
-    }
-
-    public bool IsClimbing
-    {
-        get
-        {
-            if (_isClimbing && !_canClimbUpdate)
-            {
-                _isClimbing = false;
-            }
-            return _isClimbing;
-        }
-    }
-
-    /// <summary>
-    /// 仅下降阶段
-    /// </summary>
-    public bool IsFalling
-    {
-        get { return !_onGround && _speed.y < MinOffset; }
-    }
-
-    public void UpdateMove(float deltaTime)
-    {
-            ApplyFacing();
-            DetectGround(deltaTime);
-            DetectWall(deltaTime);
-            ApplyGravity(deltaTime);
-            CooldownUpdate(deltaTime);
-
-            Run(deltaTime);
-            JumpBegin();
-            MidAirJumpBegin();
-            JumpUpdate(deltaTime);
-            DashBegin();
-            DashUpdate(deltaTime);
-            ClimbBegin();
-            ClimbUpdate(deltaTime);
-            ClimbJumpBegin();
-            LandingUpdate();
-            CorrectionAndMove(deltaTime);
-            _wasOnGround = _onGround;     
-    }
-
-    /// <summary>
-    /// 检测到地面时, 此时仍然距离地面有[0, skinWidth]的距离
-    /// </summary>
-    /// <param name="deltaTime"></param>
-    private void DetectGround(float deltaTime)
-    {
-
-    }
-
-    private void DetectWall(float deltaTime)
-    {
-
+        //Player.state.moving = movement != Vector2.zero;
     }
 
     private void ApplyGravity(float deltaTime)
     {
-        // Slide if it is against a wall and moving towards it
-        if (_hitWall && MoveX == _facing)
+        if (!isOnGround)
         {
-            _maxFall = Mathf.MoveTowards(_maxFall, ClimbSlipSpeed, SlideAccel * deltaTime);
+            var mult = (Mathf.Abs(speed.y) < GravThreshold) && (isJumping || isDoubleJumping) ? 0.5f : 1f;
+            speed.y = MathEx.Approach(speed.y, MaxFall, Gravity * mult * deltaTime);
         }
-        else
-        {
-            _maxFall = Mathf.MoveTowards(_maxFall, MaxFall, FallAccel * deltaTime);
-        }
-        if (!_onGround)
-        {
-            if (_isFreezing) return;
-            float mult = Mathf.Abs(_speed.y) < HalfGravThreshold && (IsJumping || IsDashing || IsFalling) ? 0.5f : 1.0f;
-            _speed.y = Mathf.MoveTowards(_speed.y, _maxFall, Gravity * mult * deltaTime);
-            //if (Mathf.Abs(_speed.y) > MinOffset) Console.LogFormat("ApplyGravity after speed Y {0:F3} OnGround {1}", _speed.y, _onGround);
-        }
+        //Player.state.airborne = isAirborne;
     }
 
-    private void ApplyFacing()
+    public void RunUpdate(CharacterInput input, float deltaTime)
     {
-        if (MoveX != 0) _facing = (int)MoveX;
-        Vector3 scale = transform.localScale;
-        if (scale.x == _facing) return;
-        transform.localScale = new Vector3(-scale.x, scale.y, scale.z);
-        //Console.LogFormat("scale.x {0},  _facing {1}", scale.x, Facing);
+        if (isDashing) return;
+        //Reduce back from beyond the max speed
+        //Approach the max speed
+        var mult = isOnGround ? 1 : AirMult;
+        var accel = (Mathf.Abs(speed.x) > MaxRun && Mathf.Sign(speed.x) == input.move.x) ? RunReduce : RunAccel;
+        speed.x = MathEx.Approach(speed.x, MaxRun * input.move.x, accel * mult * deltaTime);
     }
 
-    /// <summary>
-    /// 参考 Celeste 机制研究(https://www.cnblogs.com/tmzbot/p/12318561.html) 调整游戏数值
-    /// </summary>
-    /// <param name="deltaTime"></param>
-    private void Run(float deltaTime)
+    #region JUMP METHOD
+    public void JumpUpdate(CharacterInput input, float deltaTime)
     {
-        float mult = _onGround ? 1.0f : 0.65f;
-        if (Mathf.Abs(_speed.x) > MaxRun && Mathf.Sign(_speed.x) == MoveX)
+        JumpBegin(input);
+        WallJumpBegin(input);
+        DoubleJumpBegin(input);
+        if (isJumping || isWallJumping || isDoubleJumping)
         {
-            _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunReduce * mult * deltaTime);  //Reduce back from beyond the max speed
-        }
-        else
-        {
-            _speed.x = Mathf.MoveTowards(_speed.x, MaxRun * MoveX, RunAccel * mult * deltaTime);   //Approach the max speed
-        }
-    }
-
-    private void JumpBegin()
-    {
-        if (!_onGround) return;
-        if (!_jump || !_canJump) return;
-        if (_jumpHeldDownTimer > JumpToleranceTime) return;
-        _canJump = false;
-        _isJumping = true;
-        _canJumpUpdate = true;
-        _speed.x += JumpHBoost * MoveX;
-        _speed.y = JumpSpeed;
-        //事件回调
-        JumpBeginEvent?.Invoke(this);
-    }
-
-    private void MidAirJumpBegin()
-    {
-        if (_midAirJumps > 0 && _onGround)
-            _midAirJumps = 0;
-        if (_onGround) return;
-        if (!_jump || !_canJump) return;
-        if (_midAirJumps >= MaxMidAirJump) return;
-        _midAirJumps++;
-        _canJump = false;
-        _isJumping = true;
-        _canJumpUpdate = true;
-        MidAirJumpBeginEvent?.Invoke(this);
-    }
-
-    private void JumpUpdate(float deltaTime)
-    {
-        if (!_canJumpUpdate) return;
-        if (_jump && _jumpTimer < JumpTime)
-        {
-            _speed.y = JumpSpeed;
-            //var jumpProcess = _jumpTimer / JumpVarTime;
-            //_speed.y = Mathf.Lerp(JumpSpeed, 0.0f, jumpProcess);
-            _jumpTimer = Mathf.Min(_jumpTimer + deltaTime, JumpTime);
-            JumpUpdateEvent?.Invoke(this);
-            //Console.LogFormat("Jumping Timer {0}", _speed.y);
-        }
-        else
-        {
-            JumpEnd();
-        }
-    }
-
-    private void JumpEnd()
-    {
-        _jumpTimer = 0.0f;
-        _canJumpUpdate = false;
-        JumpEndEvent?.Invoke(this);
-        //Console.LogFormat("JumpEnd {0}", _speed);
-    }
-
-    /// <summary>
-    /// 仅在地面时更新冷却时间
-    /// </summary>
-    private void CooldownUpdate(float deltaTime)
-    {
-        if (!_onGround) return;
-        if (_isDashCooldown)
-        {
-            if (_dashCooldownTimer < DashCooldownTime)
+            if (isRising)                       // Rise
             {
-                _dashCooldownTimer = Mathf.Min(_dashCooldownTimer + deltaTime, DashCooldownTime);
+                JumpRising(input, deltaTime);
             }
-            else
+            else if (isOnGround)                // Fall/Slide
             {
-                _dashCooldownTimer = 0.0f;
-                _isDashCooldown = false;
+                JumpEnd(deltaTime);             // 起跳第一帧仍然在地面上(应当忽略)
             }
+            else                                //Land
+            {
+                JumpFalling(deltaTime);
+            }
+
+            if (!isOnGround && !isWallSliding && Mathf.Abs(speed.y) < JumpThreshold)  // Hover [-4, 4] 滞空状态 ^                
+            {
+                //Console.Log("Hover: ", new { color = "red", Speed = speed });
+            }
+            //Console.Log("JumpUpdate: ",
+            //    new { color = "red", OnGround = isOnGround },
+            //    new { color = "orange", _Jump = isJumping },
+            //    new { color = "yellow", _WallJump = isWallJumping },
+            //    new { color = "green", DoubleJumpState = jumpSteps > 1 },
+            //    new { color = "blue", Speed = speed });
+
+            //Player.state.jumping = isJumping;
+            //Player.state.wallJumping = isWallJumping;
+            //Player.state.doubleJumping = isDoubleJumping;
         }
-        if (_isClimbCooldown)
+
+        //Player.state.rising = isRising && isAirborne;
+        //Player.state.falling = !isRising && isAirborne;
+        //Player.state.wallSliding = isWallSliding && isAirborne;
+    }
+
+    private void JumpBegin(CharacterInput input)
+    {
+        // 仅在地面起跳
+        if (isAirborne) return;
+        if (canJump && input.jumpPress)
         {
-            if (_climbCooldownTimer < ClimbCooldownTime)
+            if (input.jumpPressTimer < JumpToleranceTime)
             {
-                _climbCooldownTimer = Mathf.Min(_climbCooldownTimer + deltaTime, ClimbCooldownTime);
-            }
-            else
-            {
-                _climbCooldownTimer = 0.0f;
-                _isClimbCooldown = false;
+                jumpSteps = 1;
+                canJump = false;
+                isRising = true;
+
+                isJumping = true;
+                isWallJumping = false;
+                isDoubleJumping = false;
+
+                speed.y = MaxJump;
+                speed.x += JumpHBoost * input.move.x;
+                GameConsole.Log("JumpBegin: ", new { color = "red", Speed = speed });
             }
         }
     }
 
     /// <summary>
-    /// Idle状态: Dash方向---Facing
-    /// MoveX输入状态(MoveY为0): Dash方向---MoveX
-    /// MoveY输入状态(MoveX为0): Dash方向---MoveY 1 SuperJump, -1 FastMaxFall
-    /// MoveX, MoveY同时输入状态: Dash方向: Angle(MoveX, MoveY)
+    /// 当第一次跳跃过程中,在空中撞到墙壁角色会粘到墙上并缓慢下落
+    /// 按住方向键, 按下跳跃键向反方向踢墙跳跃
     /// </summary>
-    private void CamputeDashDir()
+    /// <param name="input"></param>
+    private void WallJumpBegin(CharacterInput input)
     {
-        if (MoveX == 0 && MoveY == 0)
+        // 仅在空中起跳
+        if (!isAirborne) return;
+        if (!isGraspWall) return;
+        if (canJump && input.jumpPress)
         {
-            _dashDir = new Vector2(_facing, 0);
+            if (input.jumpPressTimer < JumpToleranceTime)
+            {
+                jumpSteps = 1;
+                canJump = false;
+                isRising = true;
+
+                isJumping = false;
+                isDoubleJumping = false;
+                isWallJumping = true;
+                speed.y = MaxJump;
+                speed.x = JumpHBoost * -input.move.x;   // 踢墙跳方向与X轴输入方向相反
+                // todo 停顿 4 帧(优化踢墙跳手感)
+                //Game.Freeze(0.03f);
+                GameConsole.Log("WallJumpBegin: ", new { color = "red", Speed = speed });
+            }
         }
-        else if (MoveX != 0 && MoveY == 0)
+    }
+
+    private void DoubleJumpBegin(CharacterInput input)
+    {
+        // 仅在空中起跳
+        if (!isAirborne) return;
+        if (isGraspWall) return;
+        if (jumpSteps >= JumpCount) return;
+        if (canJump && input.jumpPress)
         {
-            _dashDir = new Vector2(MoveX, 0);
+            if (input.jumpPressTimer < JumpToleranceTime)
+            {
+                jumpSteps += 1;
+                canJump = false;
+                isRising = true;
+
+                isJumping = false;
+                isDoubleJumping = true;
+                isWallJumping = false;
+                speed.y = MaxJump;
+                speed.x = JumpHBoost * input.move.x;
+                // todo 停顿 4 帧(模仿蓄力起跳效果)
+                //Game.Freeze(0.03f);
+                GameConsole.Log("DoubleJumpBegin: ", new { color = "red", Speed = speed });
+            }
         }
-        else if (MoveX == 0 && MoveY != 0)
+    }
+
+    private void JumpRising(CharacterInput input, float deltaTime)
+    {
+        if (input.jumpPress && jumpTimer < JumpTime)
         {
-            _dashDir = new Vector2(0, MoveY);
+            speed.y = MaxJump;
+            speed.x = isWallJumping ? MaxRun * -input.move.x : speed.x;
+            jumpTimer = Mathf.Min(jumpTimer + deltaTime, JumpTime);
+            //GameConsole.Log("Rise: ", new { color = "yellow", _WallJump = isWallJumping }, new { color = "red", Speed = speed });
         }
         else
         {
-            _dashDir = new Vector2(MoveX, MoveY).normalized;
+            isRising = false;
         }
     }
 
-    private void DashBegin()
+    private void JumpFalling(float deltaTime)
     {
-        if (_isDashCooldown) return;
-        if (!_dash || !_canDash) return;
-        if (_dashHeldDownTimer > DashToleranceTime) return;
-        _canDash = false;
-        _isDashing = true;
-        _canDashUpdate = true;
-        _dashDir = new Vector2(Facing, MoveY);
-        //CamputeDashDir();
-        DashBeginEvent?.Invoke(this);
-        //Console.LogFormat("DashBegin {0}", _speed);
+        if (isGraspWall && isAirborne) // WallSlide
+        {
+            //isJumping = false;
+            //isDoubleJumping = false;
+            //isWallJumping = false;
+            isWallSliding = true;
+            WallSlide(deltaTime);
+        }
+        else                //Fall
+        {
+            isWallSliding = false;
+        }
     }
 
-    private void DashUpdate(float deltaTime)
+    private void WallSlide(float deltaTime)
     {
-        if (!_canDashUpdate) return;
-        if (_dashTimer < DashTime)
+        speed.y = MathEx.Approach(speed.y, MaxSlide, Gravity * deltaTime);
+        //Console.Log("WallSlide: ", new { color = "yellow", WallSliding = isWallSliding }, new { color = "red", SpeedY = speed.y });
+    }
+
+    private void JumpEnd(float deltaTime)
+    {
+        jumpSteps = 0;
+        jumpTimer = 0;
+        isRising = false;
+        isJumping = false;
+        isWallJumping = false;
+        isDoubleJumping = false;
+        isWallSliding = false;
+        speed.x *= JumpEndMult; // 落地后速度
+        //Game.Freeze(0.02f);
+        Debug.Log("JumpEnd speedY: " + speed);
+    }
+    #endregion
+
+    #region DASH METHOD
+    public void DashUpdate(CharacterInput input, float deltaTime)
+    {
+        DashBegin(input);
+        if (isDashing)
         {
-            if (_dashTimer > 0.05f)
+            // 冲刺
+            if (dashTimer < DashTime)
             {
-                _isFreezing = false;
-                _speed = DashSpeed * _dashDir;
-                //Console.LogFormat("<color=red>Dashing Timer</color>, Speed {0} isDashing {1}", _speed, _isDashing);
+                speed.y = -MathEx.MIN;
+                speed.x = MathEx.Approach(speed.x, MaxDash * dashDirection.x, DashAccel * deltaTime);
+                dashTimer = Mathf.Min(dashTimer + deltaTime, DashTime);
+                //Debug.Log("DashUpdate 冲刺: " + speed);
             }
             else
             {
-                _isFreezing = true;
-                _speed = Vector2.zero;
-                //Console.LogWarningFormat("<color=green>Freezing Timer</color>, Speed {0} isDashing {1}", _speed, _isDashing);
+                // 减速
+                speed.y = -MathEx.MIN;
+                speed.x = MathEx.Approach(speed.x, dashBefore.x, DashReduce * deltaTime);
+                //Debug.Log("DashUpdate 减速: " + speed);
             }
-            DashUpdateEvent?.Invoke(this);
-            _dashTimer = Mathf.Min(_dashTimer + deltaTime, DashTime);
+
+            // 碰墙或者速度减速到闪避前速度停止闪避
+            if (isGraspWall || Mathf.Abs(speed.x - dashBefore.x) < MathEx.MIN)
+            {
+                DashEnd();
+            }
         }
-        else
+    }
+
+    private void DashBegin(CharacterInput input)
+    {
+        if (canDash && input.dashPress)
         {
-            DashEnd();
+            if (input.dashPressTimer < DashToleranceTime)
+            {
+
+                dashSteps += 1;
+                canDash = false;
+                isRising = false;
+                isDashing = true;
+
+                isJumping = false;
+                isDoubleJumping = false;
+                isWallJumping = false;
+
+                dashBefore = speed;
+                dashDirection = new Vector2(MathEx.Sign(isFacingRight), 0);
+
+                speed.x = DashHBoost * input.move.x;
+                // todo 停顿 4 帧(模仿蓄力起跳效果)
+                //StartCoroutine(Game.FreezeHandle(0.03f));
+                //Game.Freeze(0.03f);
+                //Debug.Log("DashBegin: " + Player.state.grounded + " SpeedX: " + speed.x);
+            }
         }
     }
 
     private void DashEnd()
     {
-        _dashTimer = 0.0f;
-        _canDashUpdate = false;
-        _isDashCooldown = true;
-        _speed = EndDashSpeed * _dashDir;
-        DashEndEvent?.Invoke(this);
-        //Console.LogFormat("DashEnd {0}", _speed);
+        dashTimer = 0;
+        isDashing = false;
+        dashBefore = Vector2.zero;
+        dashDirection = Vector2.zero;
+        //Game.Freeze(0.02f);
+        Debug.Log("DashEnd speedX: " + speed);
     }
-
-    private void ClimbBegin()
-    {
-        if (!_hitWall) return;
-        if (_isClimbCooldown) return;
-        if (!_climb || !_canClimb) return;
-        if (_climbHeldDownTimer > ClimbToleranceTime) return;
-        _canClimb = false;
-        _isClimbing = true;
-        _canClimbUpdate = true;
-        _speed.x = 0;
-        _speed.y *= ClimbGrabYMult;
-        ClimbBeginEvent?.Invoke(this);
-        //Console.LogFormat("ClimbBegin {0}", _speed);
-    }
-
-    private void ClimbJumpBegin()
-    {
-        if (!_isClimbing) return;
-        if (!_jump || !_canJump) return;
-        if (_jumpHeldDownTimer > JumpToleranceTime) return;
-        _canJump = false;
-        _isJumping = true;
-        _canJumpUpdate = true;
-        _speed.x += JumpWBoost * MoveX;
-        _speed.y = JumpSpeed;
-        //事件回调
-        JumpBeginEvent?.Invoke(this);
-        //Console.LogFormat("JumpBegin {0}", _speed.y);
-    }
-
-    /// <summary>
-    /// 在撞到墙时, 按住 Z键即应该转抓住墙壁, 不需同时按住方向键
-    /// 抓住墙壁时, 松开Z键开始下落, 若未降到地面再次按下Z键应再次抓住墙壁
-    /// Todo: 向上攀爬时, 如果初速度不够, 则攀爬速度过慢
-    /// </summary>
-    private void ClimbUpdate(float deltaTime)
-    {
-        if (_canClimbUpdate)
-        {
-            if (_hitWall)
-            {
-                if (_climb)
-                {
-                    float target = 0;
-                    if (_climbTimer < ClimbTime)
-                    {
-                        if (MoveY > 0)
-                        {
-                            _speed.y = 3.0f;
-                            target = ClimbUpSpeed;
-                        }
-                        else if (MoveY < 0)
-                        {
-                            _speed.y = -4.0f;
-                            target = ClimbDownSpeed;
-                        }
-                        //_speed.y = target;
-                        _speed.y = Mathf.MoveTowards(_speed.y, target, ClimbAccel * deltaTime);
-                        _climbTimer = Mathf.Min(_climbTimer + deltaTime, ClimbTime);
-                        ClimbupdateEvent?.Invoke(this);
-                    }
-                    else ClimbEnd();   // Cooldown                 
-                }
-                else _canClimbUpdate = false;   // 松开Climb按键                    
-            }
-            else // 离开墙体
-            {
-                _climbTimer = 0.0f;
-                _canClimbUpdate = false;
-            }
-        }
-        if (_onGround && _climbTimer != 0) _climbTimer = 0.0f;
-    }
-
-    private void ClimbEnd()
-    {
-        _climbTimer = 0.0f;
-        _canClimbUpdate = false;
-        _isClimbCooldown = true;    // 仅在地面时更新
-        ClimbEndEvent?.Invoke(this);
-        //Console.LogFormat("ClimbEnd {0}", _speed);
-    }
-
-    public void LandingUpdate()
-    {
-        if (!_wasOnGround && _onGround)
-        {
-            LandingEvent?.Invoke(this);
-        }
-    }
-
-    private void CorrectionAndMove(float deltaTime)
-    {
-        var deltaMovement = _speed * deltaTime;
-
-        _speed = deltaMovement / deltaTime;
-        if (Mathf.Abs(_speed.x) < MinOffset) _speed.x = 0.0f;
-        if (Mathf.Abs(_speed.y) < MinOffset) _speed.y = 0.0f;
-        MoveToPosition(deltaMovement);
-    }
-
-    private void MoveToPosition(Vector2 deltaMovement)
-    {
-        _rigidbody.MovePosition(_rigidbody.position + deltaMovement);
-    }
-
-    public void UpdateInput()
-    {
-        MoveX = Input.GetAxisRaw("Horizontal");
-        MoveY = Input.GetAxisRaw("Vertical");
-        Jump = Input.GetKey(KeyCode.C);
-        Dash = Input.GetKey(KeyCode.X);
-        Climb = Input.GetKey(KeyCode.Z);
-        //Console.LogWarning("timeScale " + Time.timeScale + "deltaTime " + Time.deltaTime);
-    }
-
-    public void SetPosition(Vector3 position)
-    {
-        transform.position = position;
-    }
-
-    public void SetOriginPosition()
-    {
-        transform.position = new Vector3(-6f, -7.5f, 0);
-    }
-
-    public void BornAndJump()
-    {
-        Utility.MoveTo(transform, new Vector3(-6f, -4f, 0), 0.5f, false, DG.Tweening.Ease.OutCubic);
-    }
-
-    private void Start()
-    {
-        _facing = 1;
-        _canJump = true;
-        _canDash = true;
-        _canClimb = true;
-        _rigidbody = GetComponent<Rigidbody2D>();
-        _bodyDetection = GetComponent<BodyDetection>();
-    }
+    #endregion
 }

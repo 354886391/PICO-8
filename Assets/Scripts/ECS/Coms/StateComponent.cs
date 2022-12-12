@@ -40,5 +40,5 @@ public class StateComponent : IComponent
     public BoxCollider2D BoxCollider;
     public bool IsRising { get { return !OnGround && Speed.y > Constants.MinOffset; } }
     public bool IsFalling { get { return !OnGround && Speed.y < Constants.MinOffset; } }
-    //public Vector2 Movement;               // 位移
+    //public Vector2 _movement;               // 位移
 }

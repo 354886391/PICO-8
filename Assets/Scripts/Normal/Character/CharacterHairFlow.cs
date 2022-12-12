@@ -25,9 +25,9 @@ public class CharacterHairFlow : MonoBehaviour
 
     private void AddMovementEvent()
     {
-        CharacterMovement.DashBeginEvent += DashBeginHandler;
-        CharacterMovement.DashEndEvent += DashEndHandler;
-        CharacterMovement.LandingEvent += LandingHandler;
+        //CharacterMovement.DashBeginEvent += DashBeginHandler;
+        //CharacterMovement.DashEndEvent += DashEndHandler;
+        //CharacterMovement.LandingEvent += LandingHandler;
     }
 
     public void ResetPlace()
@@ -45,18 +45,18 @@ public class CharacterHairFlow : MonoBehaviour
 
     public void UpdateHairFlow(CharacterMovement movement)
     {
-        var facing = movement.Facing;
-        Vector3 offset = new Vector3(facing * 0.25f, 0, 0);
-        Vector2 currentPos = PlayerTrans.position - offset;
-        _hairPositions.RemoveAt(0);
-        _hairPositions.Add(currentPos);
-        for (int i = 0; i < _hairCount; i++)
-        {
-            var index = Mathf.CeilToInt((i + 1) * 0.75f);
-            var renderer = _hairRenderers[_hairCount - i];
-            renderer.transform.localScale = new Vector3(-facing, 1, 1);
-            renderer.transform.localPosition = _hairPositions[index];
-        }
+        //var facing = movement.Facing;
+        //Vector3 offset = new Vector3(facing * 0.25f, 0, 0);
+        //Vector2 currentPos = PlayerTrans.position - offset;
+        //_hairPositions.RemoveAt(0);
+        //_hairPositions.Add(currentPos);
+        //for (int i = 0; i < _hairCount; i++)
+        //{
+        //    var index = Mathf.CeilToInt((i + 1) * 0.75f);
+        //    var renderer = _hairRenderers[_hairCount - i];
+        //    renderer.transform.localScale = new Vector3(-facing, 1, 1);
+        //    renderer.transform.localPosition = _hairPositions[index];
+        //}
     }
 
     private void SetVisable(bool visable)
@@ -88,7 +88,7 @@ public class CharacterHairFlow : MonoBehaviour
 
     private void DashEndHandler(CharacterMovement movement)
     {
-        if (movement.OnGround) SetHairColor(_normalRed);
+        //if (movement.OnGround) SetHairColor(_normalRed);
     }
 
     private void LandingHandler(CharacterMovement movement)

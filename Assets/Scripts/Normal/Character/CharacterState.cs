@@ -28,32 +28,5 @@ internal class CharacterState
     public const int StCassetteFly = 17;
     public const int StAttract = 18;
     public const int StFlingBird = 19;
-
-
-    private StateMachine _machine;
-
-    public void Init()
-    {
-        _machine = new StateMachine(20);
-        _machine.SetCallbacks(StNormal, onUpdate: NormalUpdate, begin: NormalBegin);
-
-    }
-
-    public void Update()
-    {
-
-    }
-
-    private void NormalBegin()
-    {
-
-    }
-
-    private int NormalUpdate()
-    {
-        return -1;
-    }
-
-
 }
 

@@ -12,9 +12,9 @@ public class StateMachineTest : MonoBehaviour
     void Start()
     {
         machine = new StateMachine(3);
-        machine.SetCallbacks(0, onUpdate: IdleUpdate, begin: IdleBegin);
-        machine.SetCallbacks(1, onUpdate: RunUpdate, begin: RunBegin, coroutine: RunCoroutine);
-        machine.SetCallbacks(2, onUpdate: JumpUpdate, begin: JumpBegin);
+        machine.SetCallbacks(0, update: IdleUpdate, begin: IdleBegin);
+        machine.SetCallbacks(1, update: RunUpdate, begin: RunBegin, coroutine: RunCoroutine);
+        machine.SetCallbacks(2, update: JumpUpdate, begin: JumpBegin);
         machine.State = 0;
     }
 

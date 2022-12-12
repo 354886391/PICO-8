@@ -3,12 +3,17 @@ using UnityEngine;
 
 public class CharacterController : MonoBehaviour
 {
+
     [SerializeField]
-    public CharacterHealth Health;
+    public CharacterHealth _health;
     [SerializeField]
-    public CharacterMovement Movement;
+    public CharacterInput _input;
     [SerializeField]
-    public CharacterAnimation Animation;
+    public CharacterMovement _movement;
+    //[SerializeField]
+    //public CharacterAnimation Animation;
+    [SerializeField]
+    public StateMachine _machine;
     [SerializeField]
     public CharacterHairFlow HairFlow;
     [SerializeField]
@@ -16,46 +21,38 @@ public class CharacterController : MonoBehaviour
 
     private void Awake()
     {
-        Time.fixedDeltaTime = 0.02f;
-        Application.targetFrameRate = 60;     
+        Application.targetFrameRate = 60;
     }
 
     private void Start()
     {
-        Health.Initialize(OnDeathbed);
-    }
-
-    private void Restart()
-    {
-        HairFlow.AutoHideHairFlow(0.35f);
-        Utility.DelayCall(0.35f, () =>
-        {          
-            Movement.SetOriginPosition();
-            Movement.BornAndJump();
-            Health.Restart();
-        });
-    }
-
-    private void OnDeathbed()
-    {
-        Restart();
-    }
-
-    private void Update()
-    {
-        Movement.UpdateInput();
-        Animation.UpdateAnimation(this);
-        HairFlow.UpdateHairFlow(Movement);
+        _machine = new StateMachine(10);
+        _machine.SetCallbacks(CharacterState.StNormal, update: NormalUpdate, begin: NormalBegin);
     }
 
     private void FixedUpdate()
     {
-        Movement.UpdateMove(Time.fixedDeltaTime);
+        _movement.DetectCollision(Time.fixedDeltaTime); // 检测碰撞信息
+    }
+
+    private void Update()
+    {
+        _movement.RunUpdate(_input, Time.deltaTime);    // 移动
     }
 
     private void LateUpdate()
     {
-        CameraFollow.UpdateFollow(Time.smoothDeltaTime);
+
+    }
+
+    private void NormalBegin()
+    {
+
+    }
+
+    private int NormalUpdate()
+    {
+        return 0;
     }
 
 }

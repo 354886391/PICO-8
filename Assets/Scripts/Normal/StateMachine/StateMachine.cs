@@ -61,9 +61,9 @@ public class StateMachine
         currentCoroutine = new StateCoroutine(false);
     }
 
-    public void SetCallbacks(int state, Func<int> onUpdate, Func<IEnumerator> coroutine = null, Action begin = null, Action end = null)
+    public void SetCallbacks(int state, Func<int> update, Func<IEnumerator> coroutine = null, Action begin = null, Action end = null)
     {
-        updates[state] = onUpdate;
+        updates[state] = update;
         begins[state] = begin;
         ends[state] = end;
         coroutines[state] = coroutine;

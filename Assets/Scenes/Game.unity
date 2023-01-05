@@ -978,7 +978,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!212 &372105172
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1336,7 +1336,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &612767406
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9074,17 +9074,16 @@ GameObject:
   - component: {fileID: 2125235278}
   - component: {fileID: 2125235277}
   - component: {fileID: 2125235280}
+  - component: {fileID: 2125235273}
   - component: {fileID: 2125235275}
   - component: {fileID: 2125235274}
-  - component: {fileID: 2125235273}
-  - component: {fileID: 2125235276}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &2125235273
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9094,15 +9093,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 2125235272}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9e0cd3971231da64b8c0e994a0f8be6a, type: 3}
+  m_Script: {fileID: 11500000, guid: f7e17733210712740bd611232f2c46d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _animator: {fileID: 126606794}
-  _groupTransform: {fileID: 126606793}
-  _particleSprites:
-  - {fileID: 21300380, guid: 8bcbc88e56597164f8a12a06d2b2e444, type: 3}
-  - {fileID: 21300384, guid: 8bcbc88e56597164f8a12a06d2b2e444, type: 3}
-  - {fileID: 21300382, guid: 8bcbc88e56597164f8a12a06d2b2e444, type: 3}
+  _moveXPress: 0
+  _moveYPress: 0
+  _jumpPress: 0
+  _dashPress: 0
 --- !u!114 &2125235274
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9115,43 +9112,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34ddee103e663d24e9a5053d69e48809, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _canMove: 0
-  _onGround: 0
-  _wasOnGround: 0
-  _againstWall: 0
-  _isFreezing: 0
-  _facing: 0
-  _maxFall: 0
-  _speed: {x: 0, y: 0}
-  _jump: 0
-  _isJumping: 0
-  _canJump: 1
-  _canJumpUpdate: 0
-  _jumpTimer: 0
-  _jumpHeldDownTimer: 0
-  _midAirJumps: 0
-  _dash: 0
-  _isDashing: 0
-  _canDash: 1
-  _canDashUpdate: 0
-  _isDashCooldown: 0
-  _dashTimer: 0
-  _dashHeldDownTimer: 0
-  _dashCooldownTimer: 0
-  _dashDir: {x: 0, y: 0}
-  _beforeDashSpeed: {x: 0, y: 0}
-  _climb: 0
-  _isClimbing: 0
-  _canClimb: 0
-  _canClimbUpdate: 0
-  _isClimbCooldown: 0
-  _climbTimer: 0
-  _climbHeldDownTimer: 0
-  _climbCooldownTimer: 0
-  _wallSlideTimer: 0
-  _climbNoMoveTimer: 0
-  _rigidbody: {fileID: 0}
-  _bodyDetection: {fileID: 0}
+  canMove: 0
+  speed: {x: 0, y: 0}
+  movement: {x: 0, y: 0}
+  canJump: 0
+  isRising: 0
+  isJumping: 0
+  isWallJumping: 0
+  isDoubleJumping: 0
+  isWallSliding: 0
+  jumpSteps: 0
+  jumpTimer: 0
+  canDash: 0
+  isDashing: 0
+  isDashRight: 0
+  dashSteps: 0
+  dashTimer: 0
 --- !u!114 &2125235275
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9164,23 +9140,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea81625ab3f93bf46b9750cddf7fa525, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Health: {fileID: 2125235276}
-  Movement: {fileID: 2125235274}
-  Animation: {fileID: 2125235273}
-  HairFlow: {fileID: 1514217284}
+  _input: {fileID: 2125235273}
+  _movement: {fileID: 2125235274}
   CameraFollow: {fileID: 519420030}
---- !u!114 &2125235276
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2125235272}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 73cf86e5ff9b46b4bb340852550c9c7d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!50 &2125235277
 Rigidbody2D:
   serializedVersion: 4
@@ -9258,7 +9220,6 @@ MonoBehaviour:
   rayCount: 8
   wallHit:
     isHit: 0
-    isValid: 0
     point: {x: 0, y: 0}
     normal: {x: 0, y: 0}
     distance: 0
@@ -9266,7 +9227,6 @@ MonoBehaviour:
     rigidbody: {fileID: 0}
   groundHit:
     isHit: 0
-    isValid: 0
     point: {x: 0, y: 0}
     normal: {x: 0, y: 0}
     distance: 0

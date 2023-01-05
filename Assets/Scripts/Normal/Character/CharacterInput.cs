@@ -9,7 +9,7 @@ public enum PressState
 }
 
 [System.Serializable]
-public class CharacterInput
+public class CharacterInput : MonoBehaviour
 {
     [SerializeField]
     private float _moveXPress;

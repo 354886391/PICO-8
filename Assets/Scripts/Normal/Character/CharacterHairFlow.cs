@@ -70,7 +70,7 @@ public class CharacterHairFlow : MonoBehaviour
     public void AutoHideHairFlow(float time)
     {
         SetVisable(false);
-        Utility.DelayCall(time, () => { SetVisable(true); ResetPlace(); });
+        //Utility.DelayCall(time, () => { SetVisable(true); ResetPlace(); });
     }
 
     private void SetHairColor(Color color)

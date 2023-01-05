@@ -129,13 +129,18 @@ public class CharacterMovement : MonoBehaviour
         detection = GetComponent<BodyDetection>();
     }
 
+    private void Start()
+    {
+        
+    }
+
     public void Move(CharacterInput input, float deltaTime)
     {
         // grounded
         ApplyGravity(deltaTime);
+        DashUpdate(input, deltaTime);
+        JumpUpdate(input, deltaTime);
         RunUpdate(input, deltaTime);
-
-
         // detect Ground/Wall
         DetectCollision(deltaTime);
         ApplyMovement();
@@ -341,6 +346,7 @@ public class CharacterMovement : MonoBehaviour
     {
         jumpSteps = 0;
         jumpTimer = 0;
+        canJump = true;
         isRising = false;
         isJumping = false;
         isWallJumping = false;
@@ -402,10 +408,6 @@ public class CharacterMovement : MonoBehaviour
                 dashDirection = new Vector2(MathEx.Sign(isFacingRight), 0);
 
                 speed.x = DashHBoost * input.move.x;
-                // todo 停顿 4 帧(模仿蓄力起跳效果)
-                //StartCoroutine(Game.FreezeHandle(0.03f));
-                //Game.Freeze(0.03f);
-                //Debug.Log("DashBegin: " + Player.state.grounded + " SpeedX: " + speed.x);
             }
         }
     }
@@ -413,10 +415,10 @@ public class CharacterMovement : MonoBehaviour
     private void DashEnd()
     {
         dashTimer = 0;
+        canDash = true;
         isDashing = false;
         dashBefore = Vector2.zero;
         dashDirection = Vector2.zero;
-        //Game.Freeze(0.02f);
         Debug.Log("DashEnd speedX: " + speed);
     }
     #endregion

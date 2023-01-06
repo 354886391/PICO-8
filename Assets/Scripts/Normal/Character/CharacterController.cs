@@ -9,7 +9,7 @@ public class CharacterController : MonoBehaviour
     [SerializeField]
     public CharacterMovement _movement;
     [SerializeField]
-    public CharacterCameraFollow CameraFollow;
+    public CharacterCameraFollow _cameraFollow;
 
     private void Awake()
     {
@@ -28,6 +28,6 @@ public class CharacterController : MonoBehaviour
 
     private void LateUpdate()
     {
-
+        _cameraFollow.UpdateFollow(Time.deltaTime);
     }
 }

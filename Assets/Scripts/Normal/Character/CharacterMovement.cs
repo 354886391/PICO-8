@@ -151,8 +151,6 @@ public class CharacterMovement : MonoBehaviour
         movement = speed * deltaTime;
         detection.DetectRaycast(ref movement);
         speed = movement / deltaTime;
-        //Player.state.grounded = isOnGround;
-        //Player.state.touchingWall = isGraspWall;
     }
 
     private void ApplyMovement()
@@ -161,7 +159,6 @@ public class CharacterMovement : MonoBehaviour
         {
             rigid2d.MovePosition(rigid2d.position + movement);
         }
-        //Player.state.moving = movement != Vector2.zero;
     }
 
     private void ApplyGravity(float deltaTime)
@@ -171,7 +168,6 @@ public class CharacterMovement : MonoBehaviour
             var mult = (Mathf.Abs(speed.y) < GravThreshold) && (isJumping || isDoubleJumping) ? 0.5f : 1f;
             speed.y = MathEx.Approach(speed.y, MaxFall, Gravity * mult * deltaTime);
         }
-        //Player.state.airborne = isAirborne;
     }
 
     public void RunUpdate(CharacterInput input, float deltaTime)

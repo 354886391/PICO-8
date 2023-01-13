@@ -76,24 +76,24 @@ public class CharacterController : MonoBehaviour
     public bool isFacingRight => false;
 
     #region JUMP
-    
+
     [TitleGroup("JUMP")]
     public bool canJump;    // 是否可以跳跃, 检测后立即置否   
     public bool isRising;   // 跳跃的上升阶段(不包括滞空的前半段)  
     public bool isJumping;  // 包括上升, 滞空和下降阶段      
-    public bool isWallJumping; 
-    public bool isDoubleJumping;   
-    public bool isWallSliding;    
-    public int jumpSteps; 
+    public bool isWallJumping;
+    public bool isDoubleJumping;
+    public bool isWallSliding;
+    public int jumpSteps;
     public float jumpTimer;
     #endregion
 
     #region DASH
     [TitleGroup("DASH")]
-    public bool canDash;   
-    public bool isDashing; 
-    public bool isDashRight;  
-    public int dashSteps;  
+    public bool canDash;
+    public bool isDashing;
+    public bool isDashRight;
+    public int dashSteps;
     public float dashTimer;
     private Vector2 dashBefore;      // 闪避前速度
     private Vector2 dashDirection;   // dashing 时的方向
@@ -144,6 +144,11 @@ public class CharacterController : MonoBehaviour
 
     }
 
+    private void Update()
+    {
+
+    }
+
     private void NormalBegin()
     {
 
@@ -160,6 +165,10 @@ public class CharacterController : MonoBehaviour
         // StClimb;
         // 竖直速度 >= 0 && 水平速度方向 == facing
         // StDash;
+        if (canDash && _input.dashPressed)
+        {
+            return StDash;
+        }
         // Ducking
         // Running and Friction
         // Fast Fall
@@ -248,7 +257,7 @@ public class CharacterController : MonoBehaviour
     {
         // 仅在地面起跳
         if (isAirborne) return;
-        if (canJump && input.jumpPress)
+        if (canJump && input.jumpPressed)
         {
             if (input.jumpPressTimer < JumpToleranceTime)
             {
@@ -277,7 +286,7 @@ public class CharacterController : MonoBehaviour
         // 仅在空中起跳
         if (!isAirborne) return;
         if (!isGrapWall) return;
-        if (canJump && input.jumpPress)
+        if (canJump && input.jumpPressed)
         {
             if (input.jumpPressTimer < JumpToleranceTime)
             {
@@ -303,7 +312,7 @@ public class CharacterController : MonoBehaviour
         if (!isAirborne) return;
         if (isGrapWall) return;
         if (jumpSteps >= JumpCount) return;
-        if (canJump && input.jumpPress)
+        if (canJump && input.jumpPressed)
         {
             if (input.jumpPressTimer < JumpToleranceTime)
             {
@@ -325,7 +334,7 @@ public class CharacterController : MonoBehaviour
 
     private void JumpRising(CharacterInput input, float deltaTime)
     {
-        if (input.jumpPress && jumpTimer < JumpTime)
+        if (input.jumpPressed && jumpTimer < JumpTime)
         {
             speed.y = MaxJump;
             speed.x = isWallJumping ? MaxRun * -input.move.x : speed.x;
@@ -408,7 +417,7 @@ public class CharacterController : MonoBehaviour
 
     private void DashBegin(CharacterInput input)
     {
-        if (canDash && input.dashPress)
+        if (canDash && input.dashPressed)
         {
             if (input.dashPressTimer < DashToleranceTime)
             {

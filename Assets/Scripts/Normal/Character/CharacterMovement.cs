@@ -226,7 +226,7 @@ public class CharacterMovement : MonoBehaviour
     {
         // 仅在地面起跳
         if (isAirborne) return;
-        if (canJump && input.jumpPress)
+        if (canJump && input.jumpPressed)
         {
             if (input.jumpPressTimer < JumpToleranceTime)
             {
@@ -255,7 +255,7 @@ public class CharacterMovement : MonoBehaviour
         // 仅在空中起跳
         if (!isAirborne) return;
         if (!isGraspWall) return;
-        if (canJump && input.jumpPress)
+        if (canJump && input.jumpPressed)
         {
             if (input.jumpPressTimer < JumpToleranceTime)
             {
@@ -281,7 +281,7 @@ public class CharacterMovement : MonoBehaviour
         if (!isAirborne) return;
         if (isGraspWall) return;
         if (jumpSteps >= JumpCount) return;
-        if (canJump && input.jumpPress)
+        if (canJump && input.jumpPressed)
         {
             if (input.jumpPressTimer < JumpToleranceTime)
             {
@@ -303,7 +303,7 @@ public class CharacterMovement : MonoBehaviour
 
     private void JumpRising(CharacterInput input, float deltaTime)
     {
-        if (input.jumpPress && jumpTimer < JumpTime)
+        if (input.jumpPressed && jumpTimer < JumpTime)
         {
             speed.y = MaxJump;
             speed.x = isWallJumping ? MaxRun * -input.move.x : speed.x;
@@ -386,7 +386,7 @@ public class CharacterMovement : MonoBehaviour
 
     private void DashBegin(CharacterInput input)
     {
-        if (canDash && input.dashPress)
+        if (canDash && input.dashPressed)
         {
             if (input.dashPressTimer < DashToleranceTime)
             {

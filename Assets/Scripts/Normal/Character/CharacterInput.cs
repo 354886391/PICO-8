@@ -12,130 +12,130 @@ public enum PressState
 public class CharacterInput : MonoBehaviour
 {
     [SerializeField]
-    private float _moveXPress;
-    private float _moveXPressTimer;
+    private float _moveX;
+    private float _moveXTimer;
     public System.Action<PressState> OnMoveXPressed;
 
     [SerializeField]
-    private float _moveYPress;
-    private float _moveYPressTimer;
+    private float _moveY;
+    private float _moveYTimer;
     public System.Action<PressState> OnMoveYPressed;
 
     #region JUMP_PRESS
     [SerializeField]
-    private bool _jumpPress;
-    private float _jumpPressTimer;
+    private bool _jumpPressed;
+    private float _jumpTimer;
     public System.Action<PressState> OnJumpPressed;
     #endregion
 
     #region DASH_PRESS
     [SerializeField]
-    private bool _dashPress;
-    private float _dashPressTimer;
+    private bool _dashPressed;
+    private float _dashTimer;
     public System.Action<PressState> OnDashPressed;
     #endregion
 
     [ShowInInspector]
     public Vector2 move
     {
-        get { return new Vector2(_moveXPress, _moveYPress); }
+        get { return new Vector2(_moveX, _moveY); }
     }
 
-    public float moveXPress
+    public float moveX
     {
-        get { return _moveXPress; }
+        get { return _moveX; }
         private set
         {
-            if (_moveXPress != 0 && value == 0)
+            if (_moveX != 0 && value == 0)
             {
-                _moveXPressTimer = 0;
+                _moveXTimer = 0;
                 OnMoveXPressed?.Invoke(PressState.Exit);
             }
-            else if (_moveXPress == 0 && value != 0)
+            else if (_moveX == 0 && value != 0)
             {
-                _moveXPressTimer = 0;
+                _moveXTimer = 0;
                 OnMoveXPressed?.Invoke(PressState.Enter);
             }
-            _moveXPress = value;
-            if (_moveXPress != 0)
+            _moveX = value;
+            if (_moveX != 0)
             {
-                _moveXPressTimer += Time.deltaTime;
+                _moveXTimer += Time.deltaTime;
                 OnMoveXPressed?.Invoke(PressState.Stay);
             }
         }
     }
 
-    public float moveYPress
+    public float moveY
     {
-        get { return _moveYPress; }
+        get { return _moveY; }
         private set
         {
-            if (_moveYPress != 0 && value == 0)
+            if (_moveY != 0 && value == 0)
             {
-                _moveYPressTimer = 0;
+                _moveYTimer = 0;
                 OnMoveYPressed?.Invoke(PressState.Exit);
             }
-            else if (_moveYPress == 0 && value != 0)
+            else if (_moveY == 0 && value != 0)
             {
-                _moveYPressTimer = 0;
+                _moveYTimer = 0;
                 OnMoveYPressed?.Invoke(PressState.Enter);
             }
-            _moveYPress = value;
-            if (_moveYPress != 0)
+            _moveY = value;
+            if (_moveY != 0)
             {
-                _moveYPressTimer += Time.deltaTime;
+                _moveYTimer += Time.deltaTime;
                 OnMoveYPressed?.Invoke(PressState.Stay);
             }
         }
     }
 
-    public bool jumpPress
+    public bool jumpPressed
     {
-        get { return _jumpPress; }
+        get { return _jumpPressed; }
         private set
         {
-            if (_jumpPress && !value)
+            if (_jumpPressed && !value)
             {
-                _jumpPressTimer = 0;
+                _jumpTimer = 0;
                 OnJumpPressed?.Invoke(PressState.Exit);
             }
-            else if (!_jumpPress && value)
+            else if (!_jumpPressed && value)
             {
-                _jumpPressTimer = 0;
+                _jumpTimer = 0;
                 OnJumpPressed?.Invoke(PressState.Enter);
             }
-            _jumpPress = value;
-            if (_jumpPress)
+            _jumpPressed = value;
+            if (_jumpPressed)
             {
-                _jumpPressTimer += Time.deltaTime;
+                _jumpTimer += Time.deltaTime;
                 OnJumpPressed?.Invoke(PressState.Stay);
             }
         }
     }
     public float jumpPressTimer
     {
-        get { return _jumpPressTimer; }
+        get { return _jumpTimer; }
     }
 
-    public bool dashPress
+    public bool dashPressed
     {
-        get { return _dashPress; }
+        get { return _dashPressed; }
         private set
         {
-            if (_dashPress && !value)
+            if (_dashPressed && !value)
             {
-                _dashPressTimer = 0;
+                _dashTimer = 0;
                 OnDashPressed?.Invoke(PressState.Exit);
             }
-            else if (!_dashPress && value)
+            else if (!_dashPressed && value)
             {
-                _dashPressTimer = 0;
+                _dashTimer = 0;
                 OnDashPressed?.Invoke(PressState.Enter);
             }
-            _dashPress = value;
-            if (_dashPress)
+            _dashPressed = value;
+            if (_dashPressed)
             {
-                _dashPressTimer += Time.deltaTime;
+                _dashTimer += Time.deltaTime;
                 OnDashPressed?.Invoke(PressState.Stay);
             }
         }
@@ -143,14 +143,14 @@ public class CharacterInput : MonoBehaviour
 
     public float dashPressTimer
     {
-        get { return _dashPressTimer; }
+        get { return _dashTimer; }
     }
 
     public void Update()
     {
-        moveXPress = Input.GetAxisRaw("Horizontal");
-        moveYPress = Input.GetAxisRaw("Vertical");
-        jumpPress = Input.GetKey(KeyCode.C);
-        dashPress = Input.GetKey(KeyCode.X);
+        moveX = Input.GetAxisRaw("Horizontal");
+        moveY = Input.GetAxisRaw("Vertical");
+        jumpPressed = Input.GetKey(KeyCode.C);
+        dashPressed = Input.GetKey(KeyCode.X);
     }
 }

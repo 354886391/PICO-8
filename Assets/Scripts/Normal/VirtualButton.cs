@@ -7,7 +7,7 @@ public class VirtualButton : MonoBehaviour
 
     [SerializeField]
     private bool _pressed;
-    private float _pressedtimer;
+    private float _pressedCounter;
     public System.Action<PressState> OnPressed;
 
     private bool canRepeat;
@@ -22,18 +22,18 @@ public class VirtualButton : MonoBehaviour
         {
             if (_pressed && !value)
             {
-                _pressedtimer = 0;
+                _pressedCounter = 0;
                 OnPressed?.Invoke(PressState.Exit);
             }
             else if (!_pressed && value)
             {
-                _pressedtimer = 0;
+                _pressedCounter = 0;
                 OnPressed?.Invoke(PressState.Enter);
             }
             _pressed = value;
             if (_pressed)
             {
-                _pressedtimer += Time.deltaTime;
+                _pressedCounter += Time.deltaTime;
                 OnPressed?.Invoke(PressState.Stay);
             }
         }
@@ -41,7 +41,7 @@ public class VirtualButton : MonoBehaviour
 
     public float jumpPressTimer
     {
-        get { return _pressedtimer; }
+        get { return _pressedCounter; }
     }
 
     public VirtualButton(KeyCode key, float bufferTime)

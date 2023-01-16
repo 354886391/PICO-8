@@ -1,52 +1,95 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
+public enum ButtonState
+{
+    None,
+    /// <summary>
+    /// Pressed
+    /// </summary>
+    Enter,
+    /// <summary>
+    /// Check
+    /// </summary>
+    Stay,
+    /// <summary>
+    /// Released
+    /// </summary>
+    Exit,
+}
 
 public class VirtualButton : MonoBehaviour
 {
 
     [SerializeField]
-    private bool _pressed;
-    private float _pressedCounter;
-    public System.Action<PressState> OnPressed;
+    private bool _previous;
+    private ButtonState _state;
 
-    private bool canRepeat;
-    private bool consumed;
+    private float _bufferTime;
     private float _bufferCounter;
-    private float _repeatCounter;
-    
-    public bool Pressed
+
+    /// <summary>
+    /// True / False
+    /// </summary>
+    public bool Value
     {
-        get { return _pressed; }
+        get { return _previous; }
         private set
         {
-            if (_pressed && !value)
+            // 进入条件 true : false
+            if (_previous && !value)         // release
             {
-                _pressedCounter = 0;
-                OnPressed?.Invoke(PressState.Exit);
+                _state = ButtonState.Exit;
             }
-            else if (!_pressed && value)
+            // 进入条件 false : true
+            if (!_previous && value)        // pressed
             {
-                _pressedCounter = 0;
-                OnPressed?.Invoke(PressState.Enter);
+                _bufferCounter = _bufferTime;
+                _state = ButtonState.Enter;
             }
-            _pressed = value;
-            if (_pressed)
+            // 进入条件 true : true
+            else if (_previous && value)    // check
             {
-                _pressedCounter += Time.deltaTime;
-                OnPressed?.Invoke(PressState.Stay);
+                _bufferCounter -= Time.deltaTime;
+                _state = ButtonState.Stay;
             }
+            // 进入条件 false : false
+            else
+            {
+                _bufferCounter = 0;
+                _state = ButtonState.None;
+            }
+            _previous = value;            
         }
     }
 
-    public float jumpPressTimer
+    public bool Check
     {
-        get { return _pressedCounter; }
+        get
+        {
+            return _state == ButtonState.Stay;
+        }
     }
 
-    public VirtualButton(KeyCode key, float bufferTime)
+    public bool Pressed
     {
+        get
+        {
+            return _bufferCounter > 0 || _state == ButtonState.Enter;
+        }
+    }
 
+    public bool Released
+    {
+        get
+        {
+            return _state == ButtonState.Exit;
+        }
+    }
+
+    public VirtualButton(KeyCode keyCode, float bufferTime)
+    {
+        _keyCode = keyCode;
+        _bufferTime = bufferTime;
     }
 
 }

@@ -3,8 +3,17 @@ using UnityEngine;
 
 public enum PressState
 {
+    /// <summary>
+    /// Pressed
+    /// </summary>
     Enter,
+    /// <summary>
+    /// Check
+    /// </summary>
     Stay,
+    /// <summary>
+    /// Released
+    /// </summary>
     Exit,
 }
 

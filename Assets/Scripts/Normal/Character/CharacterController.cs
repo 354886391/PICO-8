@@ -109,7 +109,7 @@ public class CharacterController : MonoBehaviour
     [SerializeField]
     public CharacterMovement _movement;
     [SerializeField]
-    public CharacterCameraFollow _cameraFollow;
+    public CharacterCamera _cameraFollow;
     [SerializeField]
     public StateMachine _machine;
 
@@ -280,7 +280,6 @@ public class CharacterController : MonoBehaviour
     /// 当第一次跳跃过程中,在空中撞到墙壁角色会粘到墙上并缓慢下落
     /// 按住方向键, 按下跳跃键向反方向踢墙跳跃
     /// </summary>
-    /// <param name="input"></param>
     private void WallJumpBegin(CharacterInput input)
     {
         // 仅在空中起跳

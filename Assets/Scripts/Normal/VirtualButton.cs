@@ -1,95 +1,91 @@
 using UnityEngine;
 
-public enum ButtonState
-{
-    None,
-    /// <summary>
-    /// Pressed
-    /// </summary>
-    Enter,
-    /// <summary>
-    /// Check
-    /// </summary>
-    Stay,
-    /// <summary>
-    /// Released
-    /// </summary>
-    Exit,
-}
+
 
 public class VirtualButton : MonoBehaviour
 {
 
+    private enum state
+    {
+        None,
+        /// <summary>
+        /// Pressed
+        /// </summary>
+        Enter,
+        /// <summary>
+        /// Check
+        /// </summary>
+        Stay,
+        /// <summary>
+        /// Released
+        /// </summary>
+        Exit,
+    }
+
     [SerializeField]
     private bool _previous;
-    private ButtonState _state;
+    private state _state;
 
     private float _bufferTime;
     private float _bufferCounter;
 
-    /// <summary>
-    /// True / False
-    /// </summary>
     public bool Value
     {
-        get { return _previous; }
-        private set
+        private get { return _previous; }
+        set
         {
             // 进入条件 true : false
             if (_previous && !value)         // release
             {
-                _state = ButtonState.Exit;
+                _state = state.Exit;
             }
             // 进入条件 false : true
             if (!_previous && value)        // pressed
             {
                 _bufferCounter = _bufferTime;
-                _state = ButtonState.Enter;
+                _state = state.Enter;
             }
             // 进入条件 true : true
             else if (_previous && value)    // check
             {
                 _bufferCounter -= Time.deltaTime;
-                _state = ButtonState.Stay;
+                _state = state.Stay;
             }
             // 进入条件 false : false
             else
             {
                 _bufferCounter = 0;
-                _state = ButtonState.None;
+                _state = state.None;
             }
-            _previous = value;            
+            _previous = value;
         }
     }
 
-    public bool Check
-    {
-        get
-        {
-            return _state == ButtonState.Stay;
-        }
-    }
+    /// <summary>
+    /// 持续按下
+    /// </summary>
+    public bool Check => _state == state.Stay;
 
-    public bool Pressed
-    {
-        get
-        {
-            return _bufferCounter > 0 || _state == ButtonState.Enter;
-        }
-    }
+    /// <summary>
+    /// 按钮按下
+    /// </summary>
+    public bool Pressed => _bufferCounter > 0 || _state == state.Enter;
 
-    public bool Released
-    {
-        get
-        {
-            return _state == ButtonState.Exit;
-        }
-    }
+    /// <summary>
+    /// 按钮抬起
+    /// </summary>
+    public bool Released => _state == state.Exit;
 
-    public VirtualButton(KeyCode keyCode, float bufferTime)
+    public VirtualButton(float bufferTime)
     {
-        _keyCode = keyCode;
         _bufferTime = bufferTime;
     }
 
+    /// <summary>
+    /// 按钮按下后清空buffer
+    /// </summary>
+    public void ConsumeBuffer()
+    {
+        _bufferCounter = 0.0f;
+    }
 }

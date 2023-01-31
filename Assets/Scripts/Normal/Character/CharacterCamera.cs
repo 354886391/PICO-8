@@ -1,7 +1,7 @@
 ﻿#define NO_ENABLE_DEBUG
 using UnityEngine;
 
-public class CharacterCameraFollow : MonoBehaviour
+public class CharacterCamera : MonoBehaviour
 {
     public Transform PlayerTrans;
     [SerializeField]

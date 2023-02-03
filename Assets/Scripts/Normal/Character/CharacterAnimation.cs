@@ -25,7 +25,7 @@
 //    {
 //        dead = Animator.StringToHash("Dead");
 //        idle = Animator.StringToHash("Idle");
-//        run = Animator.StringToHash("Run");
+//        run = Animator.StringToHash("RunUpdate");
 //        climb = Animator.StringToHash("Climb");
 //        jump = Animator.StringToHash("Jump");
 //        lookUp = Animator.StringToHash("LookUp");

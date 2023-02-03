@@ -1,12 +1,7 @@
 using Assets.Scripts.Normal.Character;
 using Sirenix.OdinInspector;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.Analytics;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public class Player : MonoBehaviour
 {
@@ -44,7 +39,8 @@ public class Player : MonoBehaviour
 
     #region JUMP    // 跳跃
     private const float JumpHBoost = 4;
-    private const float JumpSpeed = 16.65f;
+    private const float JumpMax = 10.5f;
+
     private const float JumpTime = 0.2f;
     private const float JumpToleranceTime = 0.15f;
     private const float JumpCount = 2;
@@ -92,6 +88,7 @@ public class Player : MonoBehaviour
     public bool isWallSliding;
     public int jumpSteps;
     public float jumpTimer;
+    public float jumpSpeed;
     #endregion
 
     #region DASH
@@ -101,8 +98,9 @@ public class Player : MonoBehaviour
     public bool isDashRight;
     public int dashSteps;
     public float dashTimer;
-    private Vector2 dashBefore;      // 闪避前速度
-    private Vector2 dashDirection;   // dashing 时的方向
+    public float dashCooldownTimer;
+    private Vector2 dashBeforeSpeed;      // 闪避前速度
+    private Vector2 dashDir;   // dashing 时的方向
     #endregion
 
     #region OTHER
@@ -118,6 +116,41 @@ public class Player : MonoBehaviour
     public CharacterCamera _cameraFollow;
     [SerializeField]
     public StateMachine _machine;
+
+
+    private float liftSpeedTimer;
+    private float LiftSpeedGraceTime = 0.16f;
+    private Vector2 lastLiftSpeed;
+    private Vector2 currentLiftSpeed;
+
+
+    public Vector2 LiftSpeed
+    {
+        set
+        {
+            currentLiftSpeed = value;
+            if (!(value != Vector2.zero) || LiftSpeedGraceTime <= 0.0)
+                return;
+            lastLiftSpeed = value;
+            liftSpeedTimer = LiftSpeedGraceTime;
+        }
+        get => currentLiftSpeed == Vector2.zero ? lastLiftSpeed : currentLiftSpeed;
+    }
+
+    private Vector2 LiftBoost
+    {
+        get
+        {
+            Vector2 liftSpeed = LiftSpeed;
+            if ((double)Math.Abs(liftSpeed.x) > 250.0)
+                liftSpeed.x = 250f * Math.Sign(liftSpeed.x);
+            if (liftSpeed.y > 0.0)
+                liftSpeed.y = 0.0f;
+            else if (liftSpeed.y < -130.0)
+                liftSpeed.y = -130f;
+            return liftSpeed;
+        }
+    }
 
     private void Awake()
     {
@@ -158,34 +191,84 @@ public class Player : MonoBehaviour
         }
     }
 
+    private void GravityUpdate(float deltaTime)
+    {
+        if (!isOnGround)
+        {
+            var mult = Math.Abs(speed.y) > GravThreshold || !MInput.Jump.Check ? 1f : 0.5f;
+            speed.y = MathEx.Approach(speed.y, MaxFall, Gravity * mult * deltaTime);
+        }
+    }
+
+    private void RunUpdate(float deltaTime)
+    {
+        var mult = isOnGround ? 1f : AirMult;
+        if ((Mathf.Abs(speed.x) > MaxRun && Mathf.Sign(speed.x) == MInput.Move.x))
+        {
+            speed.x = MathEx.Approach(speed.x, MaxRun * MInput.Move.x, RunReduce * mult * deltaTime);
+        }
+        else
+        {
+            speed.x = MathEx.Approach(speed.x, MaxRun * MInput.Move.x, RunAccel * mult * deltaTime);
+        }
+    }
+
 
     private void JumpBegin()
     {
         if (canJump && MInput.Jump.Pressed)
         {
+            MInput.Jump.ConsumeBuffer();
             jumpTimer = JumpTime;
+            speed.x += JumpHBoost * moveX;
+            speed.y = JumpMax;
+            speed += LiftBoost;
+            jumpSpeed = speed.y;
+            // LaunchedBoostCheck();
         }
     }
 
     private void JumpEnd()
     {
-
+        jumpTimer = 0f;
+        jumpSpeed = 0f;
     }
 
     private int JumpUpdate()
     {
 
-        if (jumpTimer > 0)
+        if (jumpTimer > 0f)
         {
             if (MInput.Jump.Check)
             {
-\                speed.y = Math.Min(speed.y, JumpSpeed);
+                speed.y = Math.Min(speed.y, jumpSpeed);
             }
             else
             {
-                jumpTimer = 0;
+                jumpTimer = 0f;
             }
         }
+        return 0;
+    }
+
+    private void DashBegin()
+    {
+        // Freeze(0.05f);
+        dashCooldownTimer = 0.2f;
+
+        dashBeforeSpeed = speed;
+        dashDir = Vector2.zero;
+        speed = Vector2.zero;
+       
+    }
+
+    private void DashEnd()
+    {
+
+    }
+
+    private int DashUpdate()
+    {
         return 0;
     }
 

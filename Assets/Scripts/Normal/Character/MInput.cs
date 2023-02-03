@@ -10,6 +10,8 @@ namespace Assets.Scripts.Normal.Character
     internal class MInput : MonoBehaviour
     {
 
+        public static Vector2 Move;
+
         public static VirtualButton Jump;
         public static VirtualButton Dash;
         public static VirtualButton Grab;

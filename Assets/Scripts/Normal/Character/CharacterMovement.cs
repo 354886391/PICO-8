@@ -131,16 +131,17 @@ public class CharacterMovement : MonoBehaviour
 
     private void Start()
     {
-        
+
     }
 
     public void Move(CharacterInput input, float deltaTime)
     {
         // grounded
-        ApplyGravity(deltaTime);
+        GravityUpdate(deltaTime);
         DashUpdate(input, deltaTime);
         JumpUpdate(input, deltaTime);
         RunUpdate(input, deltaTime);
+
         // detect Ground/Wall
         DetectCollision(deltaTime);
         ApplyMovement();
@@ -161,11 +162,11 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
-    private void ApplyGravity(float deltaTime)
+    private void GravityUpdate(CharacterInput input, float deltaTime)
     {
         if (!isOnGround)
         {
-            var mult = (Mathf.Abs(speed.y) < GravThreshold) && (isJumping || isDoubleJumping) ? 0.5f : 1f;
+            var mult = (Mathf.Abs(speed.y) < GravThreshold) && (input.jumpPressed) ? 0.5f : 1f;
             speed.y = MathEx.Approach(speed.y, MaxFall, Gravity * mult * deltaTime);
         }
     }

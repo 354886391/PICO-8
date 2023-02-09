@@ -5,14 +5,14 @@ using UnityEngine;
 [Serializable]
 public class StateMachine
 {
+    private int curState;
+    private int prevState;
+
     private Action[] ends;
     private Action[] begins;
     private Func<int>[] updates;
     private Func<IEnumerator>[] coroutines;
-    private StateCoroutine currentCoroutine;
-
-    private int currentState;
-    private int previousState;
+    private StateCoroutine curCoroutine;
 
     public bool Locked;
     public bool ChangedStates;
@@ -21,44 +21,44 @@ public class StateMachine
     {
         get
         {
-            return currentState;
+            return curState;
         }
         set
         {
-            if (Locked || currentState == value)
+            if (Locked || curState == value)
             {
                 return;
             }
             ChangedStates = true;
-            previousState = currentState;
-            currentState = value;
-            if (previousState != -1 && ends[previousState] != null)
+            prevState = curState;
+            curState = value;
+            if (prevState != -1 && ends[prevState] != null)
             {
-                ends[previousState]();
+                ends[prevState]();
             }
-            if (currentState != -1 && begins[currentState] != null)
+            if (begins[curState] != null)
             {
-                begins[currentState]();
+                begins[curState]();
             }
-            if (currentState != -1 && coroutines[currentState] != null)
+            if (coroutines[curState] != null)
             {
-                currentCoroutine.Replace(coroutines[currentState]());
+                curCoroutine.Replace(coroutines[curState]());
             }
             else
             {
-                currentCoroutine.Cancel();
+                curCoroutine.Cancel();
             }
         }
     }
 
     public StateMachine(int maxStates)
     {
-        previousState = currentState = -1;
+        prevState = curState = -1;
         ends = new Action[maxStates];
         begins = new Action[maxStates];
         updates = new Func<int>[maxStates];
         coroutines = new Func<IEnumerator>[maxStates];
-        currentCoroutine = new StateCoroutine(false);
+        curCoroutine = new StateCoroutine(false);
     }
 
     public void SetCallbacks(int state, Func<int> update, Func<IEnumerator> coroutine = null, Action begin = null, Action end = null)
@@ -72,18 +72,19 @@ public class StateMachine
     public void Update()
     {
         ChangedStates = false;
-        if (currentState != -1 && updates[currentState] != null)
+        if (updates[curState] != null)
         {
-            State = updates[currentState]();
+            State = updates[curState]();
         }
-        if (currentCoroutine.Active)
+        if (curCoroutine.Active)
         {
-            currentCoroutine.Update();
+            curCoroutine.Update();
         }
+
     }
 
     public static implicit operator int(StateMachine state)
     {
-        return state.currentState;
+        return state.curState;
     }
 }

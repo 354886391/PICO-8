@@ -8,7 +8,7 @@ using Object = UnityEngine.Object;
 public class StateCoroutine
 {
 
-    public bool RemoveOnComplete;
+    public bool RemoveOnComplete = true;
     public bool UseFixedDeltaTime;
 
     private bool ended;
@@ -27,10 +27,10 @@ public class StateCoroutine
 
     public StateCoroutine(IEnumerator functionCall, bool removeOnComplete = true)
     {
-        RemoveOnComplete = removeOnComplete;
-        enumerators = new Stack<IEnumerator>();
 
+        enumerators = new Stack<IEnumerator>();
         enumerators.Push(functionCall);
+        RemoveOnComplete = removeOnComplete;
     }
 
     public StateCoroutine(bool removeOnComplete = true)
@@ -85,7 +85,7 @@ public class StateCoroutine
                             Active = false;
                             Finished = true;
                             if (RemoveOnComplete)
-                            {                         
+                            {
                                 RemoveSelf();
                             }
                         }

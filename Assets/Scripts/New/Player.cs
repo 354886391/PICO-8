@@ -1,7 +1,10 @@
 using Assets.Scripts.Normal.Character;
 using Sirenix.OdinInspector;
 using System;
+using System.Collections;
+using System.Runtime.InteropServices.ComTypes;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Player : MonoBehaviour
 {
@@ -67,6 +70,7 @@ public class Player : MonoBehaviour
     #endregion
 
     public bool canMove;
+    public int moveX;
     public Vector2 speed;           // 期望速度
     public Vector2 movement;        // 实际位移
 
@@ -185,34 +189,54 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        
+
+    }
+
+    private void NormalBegin()
+    {
+
+    }
+
+    private void NormalEnd()
+    {
+
+    }
+
+    private int NormalUpdate()
+    {
         if (jumpTimer > 0)
         {
             jumpTimer = Math.Max(jumpTimer - Time.deltaTime, 0);
         }
-    }
+        // Vertical
+        {
 
-    private void GravityUpdate(float deltaTime)
-    {
+        }
+
+
+        // Gravity
         if (!isOnGround)
         {
             var mult = Math.Abs(speed.y) > GravThreshold || !MInput.Jump.Check ? 1f : 0.5f;
-            speed.y = MathEx.Approach(speed.y, MaxFall, Gravity * mult * deltaTime);
+            speed.y = MathEx.Approach(speed.y, MaxFall, Gravity * mult * Time.deltaTime);
         }
-    }
 
-    private void RunUpdate(float deltaTime)
-    {
-        var mult = isOnGround ? 1f : AirMult;
-        if ((Mathf.Abs(speed.x) > MaxRun && Mathf.Sign(speed.x) == MInput.Move.x))
+        // Running and Friction
         {
-            speed.x = MathEx.Approach(speed.x, MaxRun * MInput.Move.x, RunReduce * mult * deltaTime);
+            var mult = isOnGround ? 1f : AirMult;
+            if (Mathf.Abs(speed.x) > MaxRun && Mathf.Sign(speed.x) == moveX)
+            {
+                speed.x = MathEx.Approach(speed.x, MaxRun * MInput.Move.x, RunReduce * mult * Time.deltaTime);
+            }
+            else
+            {
+                speed.x = MathEx.Approach(speed.x, MaxRun * MInput.Move.x, RunAccel * mult * Time.deltaTime);
+            }
         }
-        else
-        {
-            speed.x = MathEx.Approach(speed.x, MaxRun * MInput.Move.x, RunAccel * mult * deltaTime);
-        }
-    }
 
+        return 0;
+    }
 
     private void JumpBegin()
     {
@@ -259,7 +283,7 @@ public class Player : MonoBehaviour
         dashBeforeSpeed = speed;
         dashDir = Vector2.zero;
         speed = Vector2.zero;
-       
+
     }
 
     private void DashEnd()
@@ -269,7 +293,104 @@ public class Player : MonoBehaviour
 
     private int DashUpdate()
     {
-        return 0;
+        if (MInput.Grab.Check)
+        {
+            return StPickup;
+        }
+
+        if (dashDir.y == 0)
+        {
+            if (MInput.Jump.Pressed)
+            {
+                //SuperJump();
+                return StNormal;
+            }
+        }
+        if (dashDir.x == 0 && dashDir.y == -1)
+        {
+            if (MInput.Jump.Pressed)
+            {
+                //if (WallJumpCheck(1))
+                //{
+                //    //SuperWallJump(-1);
+                //    return StNormal;
+                //}
+                //else if (WallJumpCheck(-1))
+                //{
+                //    SuperWallJump(1);
+                //    return StNormal;
+                //}
+            }
+        }
+        else
+        {
+            if (MInput.Jump.Pressed)
+            {
+                //if (WallJumpCheck(1))
+                //{
+                //    WallJump(-1);
+                //    return StNormal;
+                //}
+                //else if (WallJumpCheck(-1))
+                //{
+                //    WallJump(1);
+                //    return StNormal;
+                //}
+            }
+        }
+        return StDash;
+    }
+
+    private IEnumerator DashCoroutine()
+    {
+        yield return null;
+
+        var dir = Vector3.zero;
+        var newSpeed = dir;
+        if (Math.Sign(dashBeforeSpeed.x) == Math.Sign(newSpeed.x) && Math.Abs(dashBeforeSpeed.x) > Math.Abs(newSpeed.x))
+        {
+            newSpeed.x = dashBeforeSpeed.x;
+        }
+        speed = newSpeed;
+
+        dashDir = dir;
+        if (dashDir.x != 0)
+        {
+            //isFacingRight = Math.Sign(dashDir.x);
+        }
+
+        if (isOnGround && dashDir.x != 0 && dashDir.y > 0 && speed.y > 0)
+        {
+            dashDir.x = Math.Sign(dashDir.x);
+            dashDir.y = 0;
+            speed.y = 0;
+            //speed.x *= DodgeSlideSpeedMult;
+            //Ducking = true;
+        }
+
+        if (dashDir.x != 0 && MInput.Grab.Check)
+        {
+            var swapBlock = CollideFirst<SwapBlock>(Position + Vector2.right * Math.Sign(dashDir.x));
+            if (swapBlock != null && swapBlock.Direction.X == Math.Sign(dashDir.x))
+            {
+                _machine.State = StClimb;
+                speed = Vector3.zero;
+                yield break;
+            }
+        }
+        yield return DashTime;
+
+        AutoJump = true;
+        AutoJumpTimer = 0;
+        if (DashDir.Y <= 0)
+        {
+            Speed = DashDir * EndDashSpeed;
+            Speed.X *= swapCancel.X;
+            Speed.Y *= swapCancel.Y;
+        }
+        if (Speed.Y < 0)
+            Speed.Y *= EndDashUpMult;
+        _machine.State = StNormal;
     }
 
 }

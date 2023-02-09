@@ -43,7 +43,7 @@ public class MoveSystem : MonoBehaviour
             //if (dash.IsFreezing) return;
             float mult = Mathf.Abs(state.Speed.y) < move.HalfGravThreshold && (state.IsRising || state.IsFalling) ? 0.5f : 1.0f;
             state.Speed.y = Mathf.MoveTowards(state.Speed.y, maxFall, move.Gravity * mult * deltaTime);
-            //if (Mathf.Abs(_speed.y) > MinOffset) Console.LogFormat("ApplyGravity after speed Y {0:F3} OnGround {1}", _speed.y, _onGround);
+            //if (Mathf.Abs(_speed.y) > MinOffset) Console.LogFormat("GravityUpdate after speed Y {0:F3} OnGround {1}", _speed.y, _onGround);
         }
     }
 

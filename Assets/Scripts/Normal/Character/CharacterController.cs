@@ -69,9 +69,9 @@ public class CharacterController : MonoBehaviour
     public Vector2 movement;        // 实际位移
 
     [TitleGroup("MOVE"), ShowInInspector]
-    public bool isOnGround => detection ? detection.groundHit.isHit : false;
+    public bool isOnGround => detection ? detection.vertical.isTouch : false;
     [TitleGroup("MOVE"), ShowInInspector]
-    public bool isGrapWall => detection ? detection.wallHit.isHit : false;
+    public bool isGrapWall => detection ? detection.horizontal.isTouch : false;
     public bool isAirborne => false;
     public bool isFacingRight => false;
 
@@ -101,7 +101,7 @@ public class CharacterController : MonoBehaviour
 
     #region OTHER
     private Rigidbody2D rigid2d;
-    private BodyDetection detection;
+    private BodyCollider2D detection;
     #endregion
 
     [SerializeField]
@@ -120,7 +120,7 @@ public class CharacterController : MonoBehaviour
         canDash = true;
         Application.targetFrameRate = 60;
         rigid2d = GetComponent<Rigidbody2D>();
-        detection = GetComponent<BodyDetection>();
+        detection = GetComponent<BodyCollider2D>();
     }
 
     private void Start()
@@ -237,7 +237,7 @@ public class CharacterController : MonoBehaviour
                 //Console.Log("Hover: ", new { color = "red", Speed = speed });
             }
             //Console.Log("JumpUpdate: ",
-            //    new { color = "red", OnGround = isOnGround },
+            //    new { color = "red", OnGround = onGround },
             //    new { color = "orange", _Jump = isJumping },
             //    new { color = "yellow", _WallJump = isWallJumping },
             //    new { color = "green", DoubleJumpState = jumpSteps > 1 },

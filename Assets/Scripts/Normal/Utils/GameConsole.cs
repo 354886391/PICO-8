@@ -48,7 +48,7 @@ public static class GameConsole
     /// <summary>
     /// 添加打印颜色, 第一项固定为颜色值, 后继内容为键值对
     /// Console.Log("Moving: ",
-    ///    new { color = "red", OnGround = isOnGround, HitWall = isHitWall },
+    ///    new { color = "red", OnGround = onGround, HitWall = isHitWall },
     ///    new { color = "green", Facing = facing},
     ///    new { color = "blue", Speed = speed });
     /// </summary>

@@ -63,11 +63,11 @@ public class CharacterMovement : MonoBehaviour
 
     // 在地面
     [TitleGroup("MOVE"), ShowInInspector]
-    public bool isOnGround => detection ? detection.groundHit.isHit : false;
+    public bool isOnGround => detection ? detection.vertical.isTouch : false;
 
     // 碰到墙
     [TitleGroup("MOVE"), ShowInInspector]
-    public bool isGraspWall => detection ? detection.wallHit.isHit : false;
+    public bool isGraspWall => detection ? detection.horizontal.isTouch : false;
 
     [TitleGroup("MOVE"), ShowInInspector]
     public bool isAirborne => false;
@@ -116,7 +116,7 @@ public class CharacterMovement : MonoBehaviour
 
     #region OTHER
     private Rigidbody2D rigid2d;
-    private BodyDetection detection;
+    private BodyCollider2D detection;
     #endregion
 
     private void Awake()
@@ -126,7 +126,7 @@ public class CharacterMovement : MonoBehaviour
         canDash = true;
 
         rigid2d = GetComponent<Rigidbody2D>();
-        detection = GetComponent<BodyDetection>();
+        detection = GetComponent<BodyCollider2D>();
     }
 
     private void Start()
@@ -137,7 +137,7 @@ public class CharacterMovement : MonoBehaviour
     public void Move(CharacterInput input, float deltaTime)
     {
         // grounded
-        GravityUpdate(deltaTime);
+        GravityUpdate(input, deltaTime);
         DashUpdate(input, deltaTime);
         JumpUpdate(input, deltaTime);
         RunUpdate(input, deltaTime);
@@ -207,7 +207,7 @@ public class CharacterMovement : MonoBehaviour
                 //Console.Log("Hover: ", new { color = "red", Speed = speed });
             }
             //Console.Log("JumpUpdate: ",
-            //    new { color = "red", OnGround = isOnGround },
+            //    new { color = "red", OnGround = onGround },
             //    new { color = "orange", _Jump = isJumping },
             //    new { color = "yellow", _WallJump = isWallJumping },
             //    new { color = "green", DoubleJumpState = jumpSteps > 1 },

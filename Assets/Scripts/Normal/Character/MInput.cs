@@ -10,7 +10,8 @@ namespace Assets.Scripts.Normal.Character
     internal class MInput : MonoBehaviour
     {
 
-        public static Vector2 Move;
+        public static float MoveX;
+        public static float MoveY;
 
         public static VirtualButton Jump;
         public static VirtualButton Dash;
@@ -26,7 +27,10 @@ namespace Assets.Scripts.Normal.Character
 
         private void Update()
         {
+            MoveX = Input.GetAxisRaw("horizontal");
+            MoveY = Input.GetAxisRaw("vertical");
             Jump.Value = Input.GetButton("C");
+
         }
     }
 }

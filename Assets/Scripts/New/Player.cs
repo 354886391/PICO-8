@@ -3,11 +3,125 @@ using Sirenix.OdinInspector;
 using System;
 using System.Collections;
 using System.Runtime.InteropServices.ComTypes;
+using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public class Player : MonoBehaviour
 {
+    //public const float MaxFall = 160f;
+    //private const float Gravity = 900f;
+    //private const float HalfGravThreshold = 40f;
+    //private const float FastMaxFall = 240f;
+    //private const float FastMaxAccel = 300f;
+    //public const float MaxRun = 90f;
+    //public const float RunAccel = 1000f;
+    //private const float RunReduce = 400f;
+    //private const float AirMult = 0.65f;
+    //private const float HoldingMaxRun = 70f;
+    //private const float HoldMinTime = 0.35f;
+    //private const float BounceAutoJumpTime = 0.1f;
+    //private const float DuckFriction = 500f;
+    //private const int DuckCorrectCheck = 4;
+    //private const float DuckCorrectSlide = 50f;
+    //private const float DodgeSlideSpeedMult = 1.2f;
+    //private const float DuckSuperJumpXMult = 1.25f;
+    //private const float DuckSuperJumpYMult = 0.5f;
+    //private const float JumpGraceTime = 0.1f;
+    //private const float JumpSpeed = -105f;
+    //private const float JumpHBoost = 40f;
+    //private const float VarJumpTime = 0.2f;
+    //private const float CeilingVarJumpGrace = 0.05f;
+    //private const int UpwardCornerCorrection = 4;
+    //private const int DashingUpwardCornerCorrection = 5;
+    //private const float WallSpeedRetentionTime = 0.06f;
+    //private const int WallJumpCheckDist = 3;
+    //private const int SuperWallJumpCheckDist = 5;
+    //private const float WallJumpForceTime = 0.16f;
+    //private const float WallJumpHSpeed = 130f;
+    //public const float WallSlideStartMax = 20f;
+    //private const float WallSlideTime = 1.2f;
+    //private const float BounceVarJumpTime = 0.2f;
+    //private const float BounceSpeed = -140f;
+    //private const float SuperBounceVarJumpTime = 0.2f;
+    //private const float SuperBounceSpeed = -185f;
+    //private const float SuperJumpSpeed = -105f;
+    //private const float SuperJumpH = 260f;
+    //private const float SuperWallJumpSpeed = -160f;
+    //private const float SuperWallJumpVarTime = 0.25f;
+    //private const float SuperWallJumpForceTime = 0.2f;
+    //private const float SuperWallJumpH = 170f;
+    //private const float DashSpeed = 240f;
+    //private const float EndDashSpeed = 160f;
+    //private const float EndDashUpMult = 0.75f;
+    //private const float DashTime = 0.15f;
+    //private const float SuperDashTime = 0.3f;
+    //private const float DashCooldown = 0.2f;
+    //private const float DashRefillCooldown = 0.1f;
+    //private const int DashHJumpThruNudge = 6;
+    //private const int DashCornerCorrection = 4;
+    //private const int DashVFloorSnapDist = 3;
+    //private const float DashAttackTime = 0.3f;
+    //private const float BoostMoveSpeed = 80f;
+    //public const float BoostTime = 0.25f;
+    //private const float DuckWindMult = 0.0f;
+    //private const int WindWallDistance = 3;
+    //private const float ReboundSpeedX = 120f;
+    //private const float ReboundSpeedY = -120f;
+    //private const float ReboundVarJumpTime = 0.15f;
+    //private const float ReflectBoundSpeed = 220f;
+    //private const float DreamDashSpeed = 240f;
+    //private const int DreamDashEndWiggle = 5;
+    //private const float DreamDashMinTime = 0.1f;
+    //public const float ClimbMaxStamina = 110f;
+    //private const float ClimbUpCost = 45.4545441f;
+    //private const float ClimbStillCost = 10f;
+    //private const float ClimbJumpCost = 27.5f;
+    //private const int ClimbCheckDist = 2;
+    //private const int ClimbUpCheckDist = 2;
+    //private const float ClimbNoMoveTime = 0.1f;
+    //public const float ClimbTiredThreshold = 20f;
+    //private const float ClimbUpSpeed = -45f;
+    //private const float ClimbDownSpeed = 80f;
+    //private const float ClimbSlipSpeed = 30f;
+    //private const float ClimbAccel = 900f;
+    //private const float ClimbGrabYMult = 0.2f;
+    //private const float ClimbHopY = -120f;
+    //private const float ClimbHopX = 100f;
+    //private const float ClimbHopForceTime = 0.2f;
+    //private const float ClimbJumpBoostTime = 0.2f;
+    //private const float ClimbHopNoWindTime = 0.3f;
+    //private const float LaunchSpeed = 280f;
+    //private const float LaunchCancelThreshold = 220f;
+    //private const float LiftYCap = -130f;
+    //private const float LiftXCap = 250f;
+    //private const float JumpThruAssistSpeed = -40f;
+    //private const float FlyPowerFlashTime = 0.5f;
+    //private const float ThrowRecoil = 80f;
+    //private static readonly Vector2 CarryOffsetTarget = new Vector2(0.0f, -12f);
+    //private const float ChaserStateMaxTime = 4f;
+    //public const float WalkSpeed = 64f;
+    //private const float LowFrictionMult = 0.35f;
+    //private const float LowFrictionAirMult = 0.5f;
+    //private const float LowFrictionStopTime = 0.15f;
+    //private const float HiccupTimeMin = 1.2f;
+    //private const float HiccupTimeMax = 1.8f;
+    //private const float HiccupDuckMult = 0.5f;
+    //private const float HiccupAirBoost = -60f;
+    //private const float HiccupAirVarTime = 0.15f;
+    //private const float GliderMaxFall = 40f;
+    //private const float GliderWindMaxFall = 0.0f;
+    //private const float GliderWindUpFall = -32f;
+    //public const float GliderFastFall = 120f;
+    //private const float GliderSlowFall = 24f;
+    //private const float GliderGravMult = 0.5f;
+    //private const float GliderMaxRun = 108.000008f;
+    //private const float GliderRunMult = 0.5f;
+    //private const float GliderUpMinPickupSpeed = -105f;
+    //private const float GliderDashMinPickupSpeed = -240f;
+    //private const float GliderWallJumpForceTime = 0.26f;
+    //private const float DashGliderBoostTime = 0.55f;
+
 
     public const int StNormal = 0;
     public const int StClimb = 1;
@@ -27,28 +141,43 @@ public class Player : MonoBehaviour
 
     #region CONSTANT
     #region RUN
-    private const float MaxRun = 8.3f;
-    private const float MaxWalk = 6;
-    private const float RunAccel = 100;
-    private const float RunReduce = 40;
-    private const float AirMult = 0.65f;
+    private const float MaxRun = 9f;
+    private const float MaxWalk = 6f;
+    private const float RunAccel = 100f;
+    private const float RunReduce = 40f;
+
+    private const float DuckFriction = 50f;
+    private const float DuckCorrectSlide = 5f;
+
+    private const float HitSquashNoMoveTime = 0.1f;
+    private const float HitSquashFriction = 80f;
+
     #endregion
 
     #region GRAVITY
-    private const float MaxFall = -16;
-    private const float Gravity = 79;
-    private const float GravThreshold = 4;
+
+    private const float Gravity = 9f;
+    private const float GravThreshold = 4f;
+
+    private const float MaxFall = -16f;
+    private const float FastMaxFall = -24f;
+    private const float FastMaxAccel = 30f;
+
+    private const float AirMult = 0.65f;
     #endregion
 
     #region JUMP    // 跳跃
-    private const float JumpHBoost = 4;
+    private const float JumpHBoost = 4f;
     private const float JumpMax = 10.5f;
 
     private const float JumpTime = 0.2f;
     private const float JumpToleranceTime = 0.15f;
     private const float JumpCount = 2;
-    private const float JumpThreshold = 4;
+    private const float JumpThreshold = 4f;
     private const float JumpEndMult = 0.35f;
+
+    private const float WallSpeedRetentionTime = .06f;
+
     #endregion
 
     #region SLIDE   //滑落
@@ -69,17 +198,19 @@ public class Player : MonoBehaviour
     #endregion
     #endregion
 
-    public bool canMove;
     public int moveX;
+    public int moveY;
+    public float maxFall;
     public Vector2 speed;           // 期望速度
     public Vector2 movement;        // 实际位移
 
-    [TitleGroup("MOVE"), ShowInInspector]
-    public bool isOnGround => detection ? detection.groundHit.isHit : false;
-    [TitleGroup("MOVE"), ShowInInspector]
-    public bool isGrapWall => detection ? detection.wallHit.isHit : false;
-    public bool isAirborne => false;
-    public bool isFacingRight => false;
+    public bool onGround;
+    public bool wasOnGround;
+
+    public bool grabWall;
+    public bool facingRight;
+
+    private float hitSquashNoMoveTimer;
 
     #region JUMP
 
@@ -109,7 +240,7 @@ public class Player : MonoBehaviour
 
     #region OTHER
     private Rigidbody2D rigid2d;
-    private BodyDetection detection;
+    private BodyCollider2D detection;
     #endregion
 
     [SerializeField]
@@ -133,10 +264,11 @@ public class Player : MonoBehaviour
         set
         {
             currentLiftSpeed = value;
-            if (!(value != Vector2.zero) || LiftSpeedGraceTime <= 0.0)
-                return;
-            lastLiftSpeed = value;
-            liftSpeedTimer = LiftSpeedGraceTime;
+            if (value != Vector2.zero && LiftSpeedGraceTime > 0.0)
+            {
+                lastLiftSpeed = value;
+                liftSpeedTimer = LiftSpeedGraceTime;
+            }
         }
         get => currentLiftSpeed == Vector2.zero ? lastLiftSpeed : currentLiftSpeed;
     }
@@ -158,12 +290,11 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
-        canMove = true;
         canJump = true;
         canDash = true;
         Application.targetFrameRate = 60;
         rigid2d = GetComponent<Rigidbody2D>();
-        detection = GetComponent<BodyDetection>();
+        detection = GetComponent<BodyCollider2D>();
     }
 
     private void Start()
@@ -185,71 +316,185 @@ public class Player : MonoBehaviour
         _machine.SetCallbacks(StCassetteFly, update: null, coroutine: null, begin: null, end: null);
         _machine.SetCallbacks(StAttract, update: null, coroutine: null, begin: null, end: null);
 
+        detection.onCollideH = OnCollideH;
+        detection.onCollideV = OnCollideV;
     }
 
     private void Update()
     {
-        
 
+        //Wall Speed Retention
+        //if (wallSpeedRetentionTimer > 0)
+        //{
+        //    if (Math.Sign(speed.x) == -Math.Sign(wallSpeedRetained))
+        //    {
+        //        wallSpeedRetentionTimer = 0;
+        //    }               
+        //    else if (!CollideCheck<Solid>(Vector2.zero + Vector2.right * Math.Sign(wallSpeedRetained)))
+        //    {
+        //        speed.x = wallSpeedRetained;
+        //        wallSpeedRetentionTimer = 0;
+        //    }
+        //    else
+        //        wallSpeedRetentionTimer -= Time.deltaTime;
+        //}
+    }
+
+    private float wallSpeedRetentionTimer; // If you hit a wall, start this timer. If coast is clear within this timer, retain h-speed
+    private float wallSpeedRetained;
+
+    private void OnCollideH(CollisionData data)
+    {
+
+        //Speed retention
+        //if (wallSpeedRetentionTimer <= 0)
+        //{
+        //    wallSpeedRetained = speed.x;
+        //    wallSpeedRetentionTimer = WallSpeedRetentionTime;
+        //}
+        speed.x = 0;
+        if (_machine.State == StRedDash)
+        {
+            _machine.State = StHitSquash;
+        }
+    }
+
+    private void OnCollideV(CollisionData data)
+    {
+        speed.y = 0;
+        if (_machine.State == StRedDash)
+        {
+            _machine.State = StHitSquash;
+        }
     }
 
     private void NormalBegin()
     {
-
+        maxFall = MaxFall;
     }
 
     private void NormalEnd()
     {
-
+        wallSpeedRetentionTimer = 0;
     }
 
+    // idle / fall / gravity / run
     private int NormalUpdate()
     {
         if (jumpTimer > 0)
         {
             jumpTimer = Math.Max(jumpTimer - Time.deltaTime, 0);
         }
+
         // Vertical
         {
+            float mf = MaxFall;
+            float fmf = FastMaxFall;
+            //Fast Fall
+            if (moveY == -1 && speed.y < mf)
+            {
+                maxFall = MathEx.Approach(maxFall, fmf, FastMaxAccel * Time.deltaTime);
+            }
+            else
+            {
+                maxFall = MathEx.Approach(maxFall, mf, FastMaxAccel * Time.deltaTime);
+            }
 
         }
 
 
         // Gravity
-        if (!isOnGround)
+        if (!onGround)
         {
-            var mult = Math.Abs(speed.y) > GravThreshold || !MInput.Jump.Check ? 1f : 0.5f;
-            speed.y = MathEx.Approach(speed.y, MaxFall, Gravity * mult * Time.deltaTime);
+            var max = maxFall;
+            // 在空中 y轴速度在[-4, 4]之间时, 且处于冲刺结束状态或按住跳跃键时以0.5倍的加速度下落
+            var mult = (Math.Abs(speed.y) < GravThreshold && (MInput.Jump.Check /*|| autoJump*/)) ? 0.5f : 1f;
+            speed.y = MathEx.Approach(speed.y, max, Gravity * mult * Time.deltaTime);
         }
 
         // Running and Friction
         {
-            var mult = isOnGround ? 1f : AirMult;
-            if (Mathf.Abs(speed.x) > MaxRun && Mathf.Sign(speed.x) == moveX)
+            // 在地面 按下下键以50的加速的减速
+            if (onGround && moveY == -1)
             {
-                speed.x = MathEx.Approach(speed.x, MaxRun * MInput.Move.x, RunReduce * mult * Time.deltaTime);
+                speed.x = MathEx.Approach(speed.x, 0, DuckFriction * Time.deltaTime);
             }
             else
             {
-                speed.x = MathEx.Approach(speed.x, MaxRun * MInput.Move.x, RunAccel * mult * Time.deltaTime);
+                var mult = onGround ? 1f : AirMult;
+                if (Mathf.Abs(speed.x) > MaxRun && Mathf.Sign(speed.x) == moveX)
+                {
+                    // 速度大于MaxRun, 按住同向方向键以RunReduce的加速度减速到MaxRun
+                    speed.x = MathEx.Approach(speed.x, MaxRun * moveX, RunReduce * mult * Time.deltaTime);
+                }
+                else
+                {
+                    // 速度小于MaxRun或速度大于MaxRun时, 按住异向键速度以RunReduce的加速度加速到MaxRun
+                    speed.x = MathEx.Approach(speed.x, MaxRun * moveX, RunAccel * mult * Time.deltaTime);
+                }
             }
+
         }
 
-        return 0;
+        return StNormal;
     }
 
+    // 平地跳跃
     private void JumpBegin()
     {
         if (canJump && MInput.Jump.Pressed)
         {
             MInput.Jump.ConsumeBuffer();
             jumpTimer = JumpTime;
+            // 平地跳跃 D+4, 10.5的初速度
             speed.x += JumpHBoost * moveX;
             speed.y = JumpMax;
             speed += LiftBoost;
             jumpSpeed = speed.y;
             // LaunchedBoostCheck();
         }
+    }
+
+    // 落地起跳 仅当前状态为StRedDash 且 发生碰撞时进入
+    private void HitSquashBegin()
+    {
+        hitSquashNoMoveTimer = HitSquashNoMoveTime;
+    }
+
+    private int HitSquashUpdate()
+    {
+        // 以80的加速度减速到0
+        speed.x = MathEx.Approach(speed.x, 0, HitSquashFriction * Time.deltaTime);
+        speed.y = MathEx.Approach(speed.y, 0, HitSquashFriction * Time.deltaTime);
+
+        if (MInput.Jump.Pressed)
+        {
+            if (onGround)
+            {
+                //Jump(); WallJump(); 
+
+                return StNormal;
+            }
+        }
+
+        if (canDash)
+        {
+            //return startDash();
+        }
+        if (MInput.Grab.Check)
+        {
+            return StClimb;
+        }
+        if (hitSquashNoMoveTimer > 0)
+        {
+            hitSquashNoMoveTimer -= Time.deltaTime;            
+        }
+        else
+        {
+            return StNormal;
+        }
+        
+        return StHitSquash;
     }
 
     private void JumpEnd()
@@ -356,10 +601,10 @@ public class Player : MonoBehaviour
         dashDir = dir;
         if (dashDir.x != 0)
         {
-            //isFacingRight = Math.Sign(dashDir.x);
+            //facingRight = Math.Sign(dashDir.x);
         }
 
-        if (isOnGround && dashDir.x != 0 && dashDir.y > 0 && speed.y > 0)
+        if (onGround && dashDir.x != 0 && dashDir.y > 0 && speed.y > 0)
         {
             dashDir.x = Math.Sign(dashDir.x);
             dashDir.y = 0;
@@ -368,28 +613,28 @@ public class Player : MonoBehaviour
             //Ducking = true;
         }
 
-        if (dashDir.x != 0 && MInput.Grab.Check)
-        {
-            var swapBlock = CollideFirst<SwapBlock>(Position + Vector2.right * Math.Sign(dashDir.x));
-            if (swapBlock != null && swapBlock.Direction.X == Math.Sign(dashDir.x))
-            {
-                _machine.State = StClimb;
-                speed = Vector3.zero;
-                yield break;
-            }
-        }
-        yield return DashTime;
+        //if (dashDir.x != 0 && MInput.Grab.Check)
+        //{
+        //    var swapBlock = CollideFirst<SwapBlock>(Position + Vector2.right * Math.Sign(dashDir.x));
+        //    if (swapBlock != null && swapBlock.Direction.X == Math.Sign(dashDir.x))
+        //    {
+        //        _machine.State = StClimb;
+        //        speed = Vector3.zero;
+        //        yield break;
+        //    }
+        //}
+        //yield return DashTime;
 
-        AutoJump = true;
-        AutoJumpTimer = 0;
-        if (DashDir.Y <= 0)
-        {
-            Speed = DashDir * EndDashSpeed;
-            Speed.X *= swapCancel.X;
-            Speed.Y *= swapCancel.Y;
-        }
-        if (Speed.Y < 0)
-            Speed.Y *= EndDashUpMult;
+        //AutoJump = true;
+        //AutoJumpTimer = 0;
+        //if (DashDir.Y <= 0)
+        //{
+        //    Speed = DashDir * EndDashSpeed;
+        //    Speed.X *= swapCancel.X;
+        //    Speed.Y *= swapCancel.Y;
+        //}
+        //if (Speed.Y < 0)
+        //    Speed.Y *= EndDashUpMult;
         _machine.State = StNormal;
     }
 

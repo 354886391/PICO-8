@@ -126,6 +126,7 @@ public class Player : MonoBehaviour
     public const int StNormal = 0;
     public const int StClimb = 1;
     public const int StDash = 2;
+    public const int StJump = 3;
     public const int StSwim = 3;
     public const int StBoost = 4;
     public const int StRedDash = 5;
@@ -368,6 +369,30 @@ public class Player : MonoBehaviour
         }
     }
 
+    private void Running(float deltaTime)
+    {
+        // Running and Friction
+        // 在地面 按下下键以50的加速的减速
+        if (onGround && moveY == -1)
+        {
+            speed.x = MathEx.Approach(speed.x, 0, DuckFriction * deltaTime);
+        }
+        else
+        {
+            var mult = onGround ? 1f : AirMult;
+            if (Mathf.Abs(speed.x) > MaxRun && Mathf.Sign(speed.x) == moveX)
+            {
+                // 速度大于MaxRun, 按住同向方向键以RunReduce的加速度减速到MaxRun
+                speed.x = MathEx.Approach(speed.x, MaxRun * moveX, RunReduce * mult * deltaTime);
+            }
+            else
+            {
+                // 速度小于MaxRun或速度大于MaxRun时, 按住异向键速度以RunReduce的加速度加速到MaxRun
+                speed.x = MathEx.Approach(speed.x, MaxRun * moveX, RunAccel * mult * deltaTime);
+            }
+        }
+    }
+
     private void NormalBegin()
     {
         maxFall = MaxFall;
@@ -383,7 +408,7 @@ public class Player : MonoBehaviour
     {
         if (jumpTimer > 0)
         {
-            jumpTimer = Math.Max(jumpTimer - Time.deltaTime, 0);
+
         }
 
         // Vertical
@@ -412,48 +437,17 @@ public class Player : MonoBehaviour
             speed.y = MathEx.Approach(speed.y, max, Gravity * mult * Time.deltaTime);
         }
 
-        // Running and Friction
-        {
-            // 在地面 按下下键以50的加速的减速
-            if (onGround && moveY == -1)
-            {
-                speed.x = MathEx.Approach(speed.x, 0, DuckFriction * Time.deltaTime);
-            }
-            else
-            {
-                var mult = onGround ? 1f : AirMult;
-                if (Mathf.Abs(speed.x) > MaxRun && Mathf.Sign(speed.x) == moveX)
-                {
-                    // 速度大于MaxRun, 按住同向方向键以RunReduce的加速度减速到MaxRun
-                    speed.x = MathEx.Approach(speed.x, MaxRun * moveX, RunReduce * mult * Time.deltaTime);
-                }
-                else
-                {
-                    // 速度小于MaxRun或速度大于MaxRun时, 按住异向键速度以RunReduce的加速度加速到MaxRun
-                    speed.x = MathEx.Approach(speed.x, MaxRun * moveX, RunAccel * mult * Time.deltaTime);
-                }
-            }
+        Running(Time.deltaTime);
 
+        if (canJump && MInput.Jump.Pressed)
+        {
+            return StJump;
         }
 
         return StNormal;
     }
 
-    // 平地跳跃
-    private void JumpBegin()
-    {
-        if (canJump && MInput.Jump.Pressed)
-        {
-            MInput.Jump.ConsumeBuffer();
-            jumpTimer = JumpTime;
-            // 平地跳跃 D+4, 10.5的初速度
-            speed.x += JumpHBoost * moveX;
-            speed.y = JumpMax;
-            speed += LiftBoost;
-            jumpSpeed = speed.y;
-            // LaunchedBoostCheck();
-        }
-    }
+
 
     // 落地起跳 仅当前状态为StRedDash 且 发生碰撞时进入
     private void HitSquashBegin()
@@ -487,15 +481,29 @@ public class Player : MonoBehaviour
         }
         if (hitSquashNoMoveTimer > 0)
         {
-            hitSquashNoMoveTimer -= Time.deltaTime;            
+            hitSquashNoMoveTimer -= Time.deltaTime;
         }
         else
         {
             return StNormal;
         }
-        
+
         return StHitSquash;
     }
+
+    // 平地跳跃
+    private void JumpBegin()
+    {
+        MInput.Jump.ConsumeBuffer();
+        jumpTimer = JumpTime;
+        // 平地跳跃 D+4, 10.5的初速度
+        speed.x += JumpHBoost * moveX;
+        speed.y = JumpMax;
+        speed += LiftBoost;
+        jumpSpeed = speed.y;
+        // LaunchedBoostCheck();
+    }
+
 
     private void JumpEnd()
     {
@@ -505,19 +513,18 @@ public class Player : MonoBehaviour
 
     private int JumpUpdate()
     {
-
-        if (jumpTimer > 0f)
+        if (jumpTimer > 0f && MInput.Jump.Check)
         {
-            if (MInput.Jump.Check)
-            {
-                speed.y = Math.Min(speed.y, jumpSpeed);
-            }
-            else
-            {
-                jumpTimer = 0f;
-            }
+            Running(Time.deltaTime);
+            speed.y = Math.Min(speed.y, jumpSpeed);
+            jumpTimer -= Time.deltaTime;
+            return StJump;
         }
-        return 0;
+        else
+        {
+            jumpTimer = 0f;
+        }
+        return StNormal;
     }
 
     private void DashBegin()

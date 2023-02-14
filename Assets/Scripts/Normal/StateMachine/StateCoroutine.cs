@@ -27,7 +27,6 @@ public class StateCoroutine
 
     public StateCoroutine(IEnumerator functionCall, bool removeOnComplete = true)
     {
-
         enumerators = new Stack<IEnumerator>();
         enumerators.Push(functionCall);
         RemoveOnComplete = removeOnComplete;

@@ -149,6 +149,8 @@ public class Player : MonoBehaviour
 
     private const float DuckFriction = 50f;
     private const float DuckCorrectSlide = 5f;
+    private const float DodgeSlideSpeedMult = 1.2f;
+
 
     private const float HitSquashNoMoveTime = 0.1f;
     private const float HitSquashFriction = 80f;
@@ -212,6 +214,9 @@ public class Player : MonoBehaviour
     public bool facingRight;
 
     private float hitSquashNoMoveTimer;
+
+
+    public bool Ducking;
 
     #region JUMP
 
@@ -324,21 +329,6 @@ public class Player : MonoBehaviour
     private void Update()
     {
 
-        //Wall Speed Retention
-        //if (wallSpeedRetentionTimer > 0)
-        //{
-        //    if (Math.Sign(speed.x) == -Math.Sign(wallSpeedRetained))
-        //    {
-        //        wallSpeedRetentionTimer = 0;
-        //    }               
-        //    else if (!CollideCheck<Solid>(Vector2.zero + Vector2.right * Math.Sign(wallSpeedRetained)))
-        //    {
-        //        speed.x = wallSpeedRetained;
-        //        wallSpeedRetentionTimer = 0;
-        //    }
-        //    else
-        //        wallSpeedRetentionTimer -= Time.deltaTime;
-        //}
     }
 
     private float wallSpeedRetentionTimer; // If you hit a wall, start this timer. If coast is clear within this timer, retain h-speed
@@ -346,13 +336,6 @@ public class Player : MonoBehaviour
 
     private void OnCollideH(CollisionData data)
     {
-
-        //Speed retention
-        //if (wallSpeedRetentionTimer <= 0)
-        //{
-        //    wallSpeedRetained = speed.x;
-        //    wallSpeedRetentionTimer = WallSpeedRetentionTime;
-        //}
         speed.x = 0;
         if (_machine.State == StRedDash)
         {
@@ -369,11 +352,36 @@ public class Player : MonoBehaviour
         }
     }
 
+    private void Falling(float deltaTime)
+    {
+        float mf = MaxFall;
+        float fmf = FastMaxFall;
+        //Fast Fall
+        if (moveY == -1 && speed.y < mf)
+        {
+            maxFall = MathEx.Approach(maxFall, fmf, FastMaxAccel * deltaTime);
+        }
+        else
+        {
+            maxFall = MathEx.Approach(maxFall, mf, FastMaxAccel * deltaTime);
+        }
+    }
+
+    private void Graviting(float deltaTime)
+    {
+        // Gravity
+        if (!onGround)
+        {
+            // 在空中 y轴速度在[-4, 4]之间时, 且处于冲刺结束状态或按住跳跃键时以0.5倍的加速度下落
+            var mult = (Math.Abs(speed.y) < GravThreshold && (MInput.Jump.Check /*|| autoJump*/)) ? 0.5f : 1f;
+            speed.y = MathEx.Approach(speed.y, maxFall, Gravity * mult * deltaTime);
+        }
+    }
+
     private void Running(float deltaTime)
     {
-        // Running and Friction
         // 在地面 按下下键以50的加速的减速
-        if (onGround && moveY == -1)
+        if (Ducking && onGround)
         {
             speed.x = MathEx.Approach(speed.x, 0, DuckFriction * deltaTime);
         }
@@ -406,37 +414,9 @@ public class Player : MonoBehaviour
     // idle / fall / gravity / run
     private int NormalUpdate()
     {
-        if (jumpTimer > 0)
-        {
-
-        }
-
         // Vertical
-        {
-            float mf = MaxFall;
-            float fmf = FastMaxFall;
-            //Fast Fall
-            if (moveY == -1 && speed.y < mf)
-            {
-                maxFall = MathEx.Approach(maxFall, fmf, FastMaxAccel * Time.deltaTime);
-            }
-            else
-            {
-                maxFall = MathEx.Approach(maxFall, mf, FastMaxAccel * Time.deltaTime);
-            }
-
-        }
-
-
-        // Gravity
-        if (!onGround)
-        {
-            var max = maxFall;
-            // 在空中 y轴速度在[-4, 4]之间时, 且处于冲刺结束状态或按住跳跃键时以0.5倍的加速度下落
-            var mult = (Math.Abs(speed.y) < GravThreshold && (MInput.Jump.Check /*|| autoJump*/)) ? 0.5f : 1f;
-            speed.y = MathEx.Approach(speed.y, max, Gravity * mult * Time.deltaTime);
-        }
-
+        Falling(Time.deltaTime);
+        Graviting(Time.deltaTime);
         Running(Time.deltaTime);
 
         if (canJump && MInput.Jump.Pressed)
@@ -444,10 +424,13 @@ public class Player : MonoBehaviour
             return StJump;
         }
 
+        if (canDash && MInput.Dash.Pressed)
+        {
+            return StDash;
+        }
+
         return StNormal;
     }
-
-
 
     // 落地起跳 仅当前状态为StRedDash 且 发生碰撞时进入
     private void HitSquashBegin()
@@ -504,7 +487,6 @@ public class Player : MonoBehaviour
         // LaunchedBoostCheck();
     }
 
-
     private void JumpEnd()
     {
         jumpTimer = 0f;
@@ -543,6 +525,7 @@ public class Player : MonoBehaviour
 
     }
 
+    // Dash状态跳转
     private int DashUpdate()
     {
         if (MInput.Grab.Check)
@@ -593,31 +576,29 @@ public class Player : MonoBehaviour
         return StDash;
     }
 
+    // Dash位置更新
     private IEnumerator DashCoroutine()
     {
         yield return null;
 
-        var dir = Vector3.zero;
-        var newSpeed = dir;
+        var newSpeed = dashDir * DashSpeed;
         if (Math.Sign(dashBeforeSpeed.x) == Math.Sign(newSpeed.x) && Math.Abs(dashBeforeSpeed.x) > Math.Abs(newSpeed.x))
         {
             newSpeed.x = dashBeforeSpeed.x;
         }
         speed = newSpeed;
-
-        dashDir = dir;
         if (dashDir.x != 0)
         {
             //facingRight = Math.Sign(dashDir.x);
         }
-
-        if (onGround && dashDir.x != 0 && dashDir.y > 0 && speed.y > 0)
+        //Dash Slide
+        if (onGround && dashDir.x != 0 && dashDir.y < 0 && speed.y <= 0)
         {
             dashDir.x = Math.Sign(dashDir.x);
             dashDir.y = 0;
             speed.y = 0;
-            //speed.x *= DodgeSlideSpeedMult;
-            //Ducking = true;
+            speed.x *= DodgeSlideSpeedMult;
+            Ducking = true; // 急速的低头
         }
 
         //if (dashDir.x != 0 && MInput.Grab.Check)
@@ -630,7 +611,7 @@ public class Player : MonoBehaviour
         //        yield break;
         //    }
         //}
-        //yield return DashTime;
+        yield return DashTime;
 
         //AutoJump = true;
         //AutoJumpTimer = 0;
@@ -644,5 +625,21 @@ public class Player : MonoBehaviour
         //    Speed.Y *= EndDashUpMult;
         _machine.State = StNormal;
     }
+
+    private void RedDashBegin()
+    {
+
+    }
+
+    private void RedDashEnd()
+    {
+
+    }
+
+    private int RedDashUpdate()
+    {
+        return 0;
+    }
+
 
 }

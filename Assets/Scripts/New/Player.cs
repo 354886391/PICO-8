@@ -502,52 +502,223 @@ public class Player : MonoBehaviour
     }
 
     // 平地跳跃
-    private void JumpBegin()
+    //private void JumpBegin()
+    //{
+    //    jumpTimer = JumpTime;
+
+    //    // 平地跳跃 D+4, 10.5的初速度
+    //    speed.y = JumpMax;
+    //    speed.x += JumpHBoost * moveX;
+
+    //    //speed += LiftBoost;
+    //    //jumpSpeed = speed.y;
+    //    // LaunchedBoostCheck();
+    //}
+
+    //private void JumpEnd()
+    //{
+    //    jumpTimer = 0f;
+    //    jumpSpeed = 0f;
+    //}
+
+    //private int JumpUpdate()
+    //{
+    //    //Falling(Time.deltaTime);
+    //    //Gravity(Time.deltaTime);
+    //    //Running(Time.deltaTime);
+
+    //    if (jumpTimer > 0f && MInput.Jump.Check)    // && !touchCelling
+    //    {
+    //        speed.y = JumpMax;
+    //        jumpTimer -= Time.deltaTime;
+    //        airborne = AirborneType.Rising;
+    //    }
+    //    else if (!onGround)
+    //    {
+    //        airborne = AirborneType.Falling;
+    //    }
+    //    else
+    //    {
+    //        airborne = AirborneType.None;
+    //        return StNormal;
+    //    }
+    //    if (!onGround && Mathf.Abs(speed.y) < JumpThreshold)
+    //    {
+    //        airborne = AirborneType.Hovering;
+    //    }
+    //    return StJump;
+    //}
+
+    #region JUMP METHOD
+    public void JumpUpdate(CharacterInput input, float deltaTime)
     {
-        jumpTimer = JumpTime;
-
-        // 平地跳跃 D+4, 10.5的初速度
-        speed.y = JumpMax;
-        speed.x += JumpHBoost * moveX;
-
-        //speed += LiftBoost;
-        //jumpSpeed = speed.y;
-        // LaunchedBoostCheck();
-    }
-
-    private void JumpEnd()
-    {
-        jumpTimer = 0f;
-        jumpSpeed = 0f;
-    }
-
-    private int JumpUpdate()
-    {
-        //Falling(Time.deltaTime);
-        //Gravity(Time.deltaTime);
-        //Running(Time.deltaTime);
-
-        if (jumpTimer > 0f && MInput.Jump.Check)    // && !touchCelling
+        JumpBegin(input);
+        WallJumpBegin(input);
+        DoubleJumpBegin(input);
+        if (isJumping || isWallJumping || isDoubleJumping)
         {
-            speed.y = JumpMax;
-            jumpTimer -= Time.deltaTime;
-            airborne = AirborneType.Rising;
+            if (isRising)                       // Rise
+            {
+                JumpRising(input, deltaTime);
+            }
+            else if (isOnGround)                // Fall/Slide
+            {
+                JumpEnd(deltaTime);             // 起跳第一帧仍然在地面上(应当忽略)
+            }
+            else                                //Land
+            {
+                JumpFalling(deltaTime);
+            }
+
+            if (!isOnGround && !isWallSliding && Mathf.Abs(speed.y) < JumpThreshold)  // Hover [-4, 4] 滞空状态 ^                
+            {
+                //Console.Log("Hover: ", new { color = "red", Speed = speed });
+            }
+            //Console.Log("JumpUpdate: ",
+            //    new { color = "red", OnGround = onGround },
+            //    new { color = "orange", _Jump = isJumping },
+            //    new { color = "yellow", _WallJump = isWallJumping },
+            //    new { color = "green", DoubleJumpState = jumpSteps > 1 },
+            //    new { color = "blue", Speed = speed });
+
+            //Player.state.jumping = isJumping;
+            //Player.state.wallJumping = isWallJumping;
+            //Player.state.doubleJumping = isDoubleJumping;
         }
-        else if (!onGround)
+
+        //Player.state.rising = isRising && isAirborne;
+        //Player.state.falling = !isRising && isAirborne;
+        //Player.state.wallSliding = isWallSliding && isAirborne;
+    }
+
+    private void JumpBegin(CharacterInput input)
+    {
+        // 仅在地面起跳
+        if (isAirborne) return;
+        if (canJump && input.jumpPressed)
         {
-            airborne = AirborneType.Falling;
+            if (input.jumpPressTimer < JumpToleranceTime)
+            {
+                jumpSteps = 1;
+                canJump = false;
+                isRising = true;
+
+                isJumping = true;
+                isWallJumping = false;
+                isDoubleJumping = false;
+
+                speed.y = MaxJump;
+                speed.x += JumpHBoost * input.move.x;
+                GameConsole.Log("JumpBegin: ", new { color = "red", Speed = speed });
+            }
+        }
+    }
+
+    /// <summary>
+    /// 当第一次跳跃过程中,在空中撞到墙壁角色会粘到墙上并缓慢下落
+    /// 按住方向键, 按下跳跃键向反方向踢墙跳跃
+    /// </summary>
+    private void WallJumpBegin(CharacterInput input)
+    {
+        // 仅在空中起跳
+        if (canJump && input.jumpPressed)
+        {
+            if (input.jumpPressTimer < JumpToleranceTime)
+            {
+                jumpSteps = 1;
+                canJump = false;
+                isRising = true;
+
+                isJumping = false;
+                isDoubleJumping = false;
+                isWallJumping = true;
+                speed.y = MaxJump;
+                speed.x = JumpHBoost * -input.move.x;   // 踢墙跳方向与X轴输入方向相反
+                // todo 停顿 4 帧(优化踢墙跳手感)
+                //Game.Freeze(0.03f);
+                GameConsole.Log("WallJumpBegin: ", new { color = "red", Speed = speed });
+            }
+        }
+    }
+
+    private void DoubleJumpBegin(CharacterInput input)
+    {
+        // 仅在空中起跳
+        if (!isAirborne) return;
+        if (isGrapWall) return;
+        if (jumpSteps >= JumpCount) return;
+        if (canJump && input.jumpPressed)
+        {
+            if (input.jumpPressTimer < JumpToleranceTime)
+            {
+                jumpSteps += 1;
+                canJump = false;
+                isRising = true;
+
+                isJumping = false;
+                isDoubleJumping = true;
+                isWallJumping = false;
+                speed.y = MaxJump;
+                speed.x = JumpHBoost * input.move.x;
+                // todo 停顿 4 帧(模仿蓄力起跳效果)
+                //Game.Freeze(0.03f);
+                GameConsole.Log("DoubleJumpBegin: ", new { color = "red", Speed = speed });
+            }
+        }
+    }
+
+    private void JumpRising(CharacterInput input, float deltaTime)
+    {
+        if (input.jumpPressed && jumpTimer < JumpTime)
+        {
+            speed.y = MaxJump;
+            speed.x = isWallJumping ? MaxRun * -input.move.x : speed.x;
+            jumpTimer = Mathf.Min(jumpTimer + deltaTime, JumpTime);
+            //GameConsole.Log("Rise: ", new { color = "yellow", _WallJump = isWallJumping }, new { color = "red", Speed = speed });
         }
         else
         {
-            airborne = AirborneType.None;
-            return StNormal;
+            isRising = false;
         }
-        if (!onGround && Mathf.Abs(speed.y) < JumpThreshold)
-        {
-            airborne = AirborneType.Hovering;
-        }
-        return StJump;
     }
+
+    private void JumpFalling(float deltaTime)
+    {
+        if (isGrapWall && isAirborne) // WallSlide
+        {
+            //isJumping = false;
+            //isDoubleJumping = false;
+            //isWallJumping = false;
+            isWallSliding = true;
+            WallSlide(deltaTime);
+        }
+        else                //Fall
+        {
+            isWallSliding = false;
+        }
+    }
+
+    private void WallSlide(float deltaTime)
+    {
+        speed.y = MathEx.Approach(speed.y, MaxSlide, Gravity * deltaTime);
+        //Console.Log("WallSlide: ", new { color = "yellow", WallSliding = isWallSliding }, new { color = "red", SpeedY = speed.y });
+    }
+
+    private void JumpEnd(float deltaTime)
+    {
+        jumpSteps = 0;
+        jumpTimer = 0;
+        canJump = true;
+        isRising = false;
+        isJumping = false;
+        isWallJumping = false;
+        isDoubleJumping = false;
+        isWallSliding = false;
+        speed.x *= JumpEndMult; // 落地后速度
+        //Game.Freeze(0.02f);
+        Debug.Log("JumpEnd speedY: " + speed);
+    }
+    #endregion
 
     private void DashBegin()
     {

@@ -201,6 +201,14 @@ public class Player : MonoBehaviour
     #endregion
     #endregion
 
+    public enum AirborneType
+    {
+        None = 0,
+        Rising,
+        Hovering,
+        Falling,
+    }
+
     public int moveX;
     public int moveY;
     public float maxFall;
@@ -213,16 +221,16 @@ public class Player : MonoBehaviour
     public bool grabWall;
     public bool facingRight;
 
-    private float hitSquashNoMoveTimer;
+    public AirborneType airborne;
 
+    private float hitSquashNoMoveTimer;
 
     public bool Ducking;
 
     #region JUMP
-
     [TitleGroup("JUMP")]
     public bool canJump;    // 是否可以跳跃, 检测后立即置否   
-    public bool isRising;   // 跳跃的上升阶段(不包括滞空的前半段)  
+
     public bool isJumping;  // 包括上升, 滞空和下降阶段      
     public bool isWallJumping;
     public bool isDoubleJumping;
@@ -292,6 +300,23 @@ public class Player : MonoBehaviour
                 liftSpeed.y = -130f;
             return liftSpeed;
         }
+    }
+
+    private bool CanJump
+    {
+        get
+        {
+            if (canJump && onGround)
+            {
+                return true;
+            }
+            return false;
+        }
+    }
+
+    private bool CanDash
+    {
+        get;
     }
 
     private void Awake()
@@ -419,8 +444,10 @@ public class Player : MonoBehaviour
         Graviting(Time.deltaTime);
         Running(Time.deltaTime);
 
-        if (canJump && MInput.Jump.Pressed)
+        if (CanJump && MInput.Jump.Pressed)
         {
+            canJump = false;
+            MInput.Jump.ConsumeBuffer();
             return StJump;
         }
 
@@ -477,13 +504,14 @@ public class Player : MonoBehaviour
     // 平地跳跃
     private void JumpBegin()
     {
-        MInput.Jump.ConsumeBuffer();
         jumpTimer = JumpTime;
+
         // 平地跳跃 D+4, 10.5的初速度
-        speed.x += JumpHBoost * moveX;
         speed.y = JumpMax;
-        speed += LiftBoost;
-        jumpSpeed = speed.y;
+        speed.x += JumpHBoost * moveX;
+
+        //speed += LiftBoost;
+        //jumpSpeed = speed.y;
         // LaunchedBoostCheck();
     }
 
@@ -495,18 +523,30 @@ public class Player : MonoBehaviour
 
     private int JumpUpdate()
     {
-        if (jumpTimer > 0f && MInput.Jump.Check)
+        //Falling(Time.deltaTime);
+        //Gravity(Time.deltaTime);
+        //Running(Time.deltaTime);
+
+        if (jumpTimer > 0f && MInput.Jump.Check)    // && !touchCelling
         {
-            Running(Time.deltaTime);
-            speed.y = Math.Min(speed.y, jumpSpeed);
+            speed.y = JumpMax;
             jumpTimer -= Time.deltaTime;
-            return StJump;
+            airborne = AirborneType.Rising;
+        }
+        else if (!onGround)
+        {
+            airborne = AirborneType.Falling;
         }
         else
         {
-            jumpTimer = 0f;
+            airborne = AirborneType.None;
+            return StNormal;
         }
-        return StNormal;
+        if (!onGround && Mathf.Abs(speed.y) < JumpThreshold)
+        {
+            airborne = AirborneType.Hovering;
+        }
+        return StJump;
     }
 
     private void DashBegin()

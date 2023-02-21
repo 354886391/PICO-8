@@ -297,7 +297,7 @@ public class CharacterMovement : MonoBehaviour
                 speed.x = JumpHBoost * input.move.x;
                 // todo 停顿 4 帧(模仿蓄力起跳效果)
                 //Game.Freeze(0.03f);
-                GameConsole.Log("DoubleJumpBegin: ", new { color = "red", Speed = speed });
+                GameConsole.Log("Jump2Begin: ", new { color = "red", Speed = speed });
             }
         }
     }

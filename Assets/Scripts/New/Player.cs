@@ -187,11 +187,17 @@ public class Player : MonoBehaviour
     #region SLIDE   //滑落
     private const float GrabWall = 0;
     private const float MaxSlide = -8f;
+
+
+    public const float WallSlideStartMax = 20f;
+    private const float WallSlideTime = 1.2f;
     #endregion
 
     #region DASH   // 冲刺
     private const float DashHBoost = 4;
     private const float DashSpeed = 24;
+    private const float EndDashSpeed = 16;
+    private const float EndDashUpMult = .75f;
     private const float DashAccel = 160;
     private const float DashReduce = 120;
     private const float DashTime = 0.15f;
@@ -252,6 +258,8 @@ public class Player : MonoBehaviour
     public int dashSteps;
     public float dashTimer;
     public float dashCooldownTimer;
+    private float dashRefillCooldownTimer;
+    private float wallSlideTimer = WallSlideTime;
     private Vector2 dashBeforeSpeed;      // 闪避前速度
     private Vector2 dashDir;   // dashing 时的方向
     #endregion
@@ -335,9 +343,9 @@ public class Player : MonoBehaviour
     private void Start()
     {
         _machine = new StateMachine(15);
-        _machine.SetCallbacks(StNormal, update: null, coroutine: null, begin: null, end: null);
+        _machine.SetCallbacks(StNormal, update: NormalUpdate, coroutine: null, begin: NormalBegin, end: NormalEnd);
         _machine.SetCallbacks(StClimb, update: null, coroutine: null, begin: null, end: null);
-        _machine.SetCallbacks(StDash, update: null, coroutine: null, begin: null, end: null);
+        _machine.SetCallbacks(StDash, update: DashUpdate, coroutine: DashCoroutine, begin: DashBegin, end: DashEnd);
         _machine.SetCallbacks(StSwim, update: null, coroutine: null, begin: null, end: null);
         _machine.SetCallbacks(StBoost, update: null, coroutine: null, begin: null, end: null);
         _machine.SetCallbacks(StRedDash, update: null, coroutine: null, begin: null, end: null);
@@ -357,15 +365,27 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+
+        //Dashes
+        {
+            if (dashCooldownTimer > 0)
+                dashCooldownTimer -= Time.deltaTime;
+
+            if (dashRefillCooldownTimer > 0)
+                dashRefillCooldownTimer -= Time.deltaTime;
+        }
+
         //Facing
-        if (moveX != 0 )
+        if (moveX != 0)
         {
             facing = (Facings)moveX;
         }
 
         //Aiming
-        lastAim = GetAimVector(facing);
+        lastAim = GetAimVector();
     }
+
+
 
     private float wallSpeedRetentionTimer; // If you hit a wall, start this timer. If coast is clear within this timer, retain h-speed
     private float wallSpeedRetained;
@@ -507,54 +527,6 @@ public class Player : MonoBehaviour
         return StHitSquash;
     }
 
-    // 平地跳跃
-    //private void JumpBegin()
-    //{
-    //    jumpTimer = JumpTime;
-
-    //    // 平地跳跃 D+4, 10.5的初速度
-    //    speed.y = JumpSpeed;
-    //    speed.x += JumpHBoost * moveX;
-
-    //    //speed += LiftBoost;
-    //    //jumpSpeed = speed.y;
-    //    // LaunchedBoostCheck();
-    //}
-
-    //private void JumpEnd()
-    //{
-    //    jumpTimer = 0f;
-    //    jumpSpeed = 0f;
-    //}
-
-    //private int JumpUpdate()
-    //{
-    //    //Falling(Time.deltaTime);
-    //    //Gravity(Time.deltaTime);
-    //    //Running(Time.deltaTime);
-
-    //    if (jumpTimer > 0f && MInput.Jump.Check)    // && !touchCelling
-    //    {
-    //        speed.y = JumpSpeed;
-    //        jumpTimer -= Time.deltaTime;
-    //        jumpType = AirborneType.Rising;
-    //    }
-    //    else if (!onGround)
-    //    {
-    //        jumpType = AirborneType.Falling;
-    //    }
-    //    else
-    //    {
-    //        jumpType = AirborneType.None;
-    //        return StNormal;
-    //    }
-    //    if (!onGround && Mathf.Abs(speed.y) < JumpThreshold)
-    //    {
-    //        jumpType = AirborneType.Hovering;
-    //    }
-    //    return StJump;
-    //}
-
     #region JUMP METHOD
     private void JumpBegin()
     {
@@ -652,11 +624,19 @@ public class Player : MonoBehaviour
     {
         // Freeze(0.05f);
         dashCooldownTimer = 0.2f;
-
+        dashRefillCooldownTimer = 0.1f;
+        wallSlideTimer = 1.2f;
         dashBeforeSpeed = speed;
         dashDir = Vector2.zero;
         speed = Vector2.zero;
-
+        if (!onGround && Ducking)
+        {
+            Ducking = false;
+        }
+        else if (!Ducking && MInput.MoveY == -1)
+        {
+            Ducking = true;
+        }
     }
 
     private void DashEnd()
@@ -719,12 +699,12 @@ public class Player : MonoBehaviour
     private IEnumerator DashCoroutine()
     {
         yield return null;
-
         var newSpeed = lastAim * DashSpeed;
-        if (Math.Sign(dashBeforeSpeed.x) == Math.Sign(newSpeed.x) && Math.Abs(dashBeforeSpeed.x) > Math.Abs(newSpeed.x))
+        if (dashBeforeSpeed.x * newSpeed.x > 0f && Math.Abs(dashBeforeSpeed.x) > Math.Abs(newSpeed.x))
         {
             newSpeed.x = dashBeforeSpeed.x;
         }
+        //冲刺的速度计算: 以时针 12 点方向为 0 度, 顺时针定角度 radians, 那么速度是
         speed = newSpeed;
 
         dashDir = lastAim;
@@ -733,7 +713,8 @@ public class Player : MonoBehaviour
             facing = (Facings)Math.Sign(dashDir.x);
         }
         //Dash Slide
-        if (onGround && dashDir.x != 0 && dashDir.y < 0 && speed.y <= 0)
+        //如果斜下冲冲刺到地面则会变成蹲姿、然后横向速度变成 1.2 倍.
+        if (onGround && dashDir.x != 0 && dashDir.y < 0 && speed.y < 0)
         {
             dashDir.x = Math.Sign(dashDir.x);
             dashDir.y = 0;
@@ -742,28 +723,19 @@ public class Player : MonoBehaviour
             Ducking = true; // 急速的低头
         }
 
-        //if (dashDir.x != 0 && MInput.Grab.Check)
-        //{
-        //    var swapBlock = CollideFirst<SwapBlock>(Position + Vector2.right * Math.Sign(dashDir.x));
-        //    if (swapBlock != null && swapBlock.Direction.X == Math.Sign(dashDir.x))
-        //    {
-        //        _machine.State = StClimb;
-        //        speed = Vector3.zero;
-        //        yield break;
-        //    }
-        //}
         yield return DashTime;
 
         //AutoJump = true;
         //AutoJumpTimer = 0;
-        //if (DashDir.Y <= 0)
-        //{
-        //    Speed = DashDir * EndDashSpeed;
-        //    Speed.X *= swapCancel.X;
-        //    Speed.Y *= swapCancel.Y;
-        //}
-        //if (Speed.Y < 0)
-        //    Speed.Y *= EndDashUpMult;
+        //其它情况, 冲刺结束将纵向速度变成原先 1/2, 横向速度重置为 160*cos(radians/360*2*pi).
+        if (dashDir.y >= 0)
+        {
+            speed = dashDir * EndDashSpeed;
+        }
+        if (speed.y >= 0)
+        {
+            speed.y *= EndDashUpMult;
+        }
         _machine.State = StNormal;
     }
 
@@ -782,9 +754,34 @@ public class Player : MonoBehaviour
         return 0;
     }
 
-    public Vector2 GetAimVector(Facings defaultFacing = Facings.Right)
+    public Vector2 GetAimVector()
     {
-        
-        return Vector2.right;
+        if (MInput.Move == Vector2.zero)
+        {
+            return Vector2.right * (float)facing;
+        }
+        var radians = MInput.Move.Radians();
+        return new Vector2(Mathf.Cos(radians), -Mathf.Sin(radians));
+    }
+
+    /// <summary>
+    /// 冲刺的速度计算: 以时针 12 点方向为 0 度, 顺时针定角度 radians
+    /// </summary>
+    /// <param name="originalSpeed"></param>
+    /// <param name="angle"></param>
+    /// <returns></returns>
+    private Vector2 newDashSpeed(Vector2 originalSpeed, float angle)
+    {
+        var vec = DashSpeed * new Vector2((float)Math.Cos(getRadians(angle)), (float)-Math.Sin(getRadians(angle)));
+        if (originalSpeed.x * vec.x > 0f && Math.Abs(originalSpeed.x) > Math.Abs(vec.x))
+        {
+            vec.x = originalSpeed.x;
+        }
+        return vec;
+    }
+
+    private float getRadians(float angle)
+    {
+        return angle / 180 * Mathf.PI;
     }
 }

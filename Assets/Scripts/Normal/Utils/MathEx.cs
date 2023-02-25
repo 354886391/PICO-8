@@ -39,6 +39,11 @@ public static class MathEx
         return new Vector2(Math.Abs(v.x), Math.Abs(v.y));
     }
 
+    public static float Radians(this Vector2 vector)
+    {
+        return (float)Math.Atan2(vector.y, vector.x);
+    }
+
     public static float Clamp(float value, float a, float b)
     {
         return Math.Max(a, Math.Min(b, value));

@@ -235,7 +235,6 @@ public class Player : MonoBehaviour
     public bool Ducking;
 
     private Facings facing;
-    private Vector2 lastAim;
 
     #region JUMP
     [TitleGroup("JUMP")]
@@ -380,9 +379,6 @@ public class Player : MonoBehaviour
         {
             facing = (Facings)moveX;
         }
-
-        //Aiming
-        lastAim = GetAimVector();
     }
 
 
@@ -627,7 +623,7 @@ public class Player : MonoBehaviour
         dashRefillCooldownTimer = 0.1f;
         wallSlideTimer = 1.2f;
         dashBeforeSpeed = speed;
-        dashDir = Vector2.zero;
+        dashDir = GetAimVector(facing);
         speed = Vector2.zero;
         if (!onGround && Ducking)
         {
@@ -699,19 +695,8 @@ public class Player : MonoBehaviour
     private IEnumerator DashCoroutine()
     {
         yield return null;
-        var newSpeed = lastAim * DashSpeed;
-        if (dashBeforeSpeed.x * newSpeed.x > 0f && Math.Abs(dashBeforeSpeed.x) > Math.Abs(newSpeed.x))
-        {
-            newSpeed.x = dashBeforeSpeed.x;
-        }
-        //冲刺的速度计算: 以时针 12 点方向为 0 度, 顺时针定角度 radians, 那么速度是
-        speed = newSpeed;
-
-        dashDir = lastAim;
-        if (dashDir.x != 0)
-        {
-            facing = (Facings)Math.Sign(dashDir.x);
-        }
+        //
+        speed = NewDashSpeed(dashBeforeSpeed);
         //Dash Slide
         //如果斜下冲冲刺到地面则会变成蹲姿、然后横向速度变成 1.2 倍.
         if (onGround && dashDir.x != 0 && dashDir.y < 0 && speed.y < 0)
@@ -720,19 +705,15 @@ public class Player : MonoBehaviour
             dashDir.y = 0;
             speed.y = 0;
             speed.x *= DodgeSlideSpeedMult;
-            Ducking = true; // 急速的低头
+            Ducking = true; // 蹲姿
         }
-
         yield return DashTime;
 
-        //AutoJump = true;
-        //AutoJumpTimer = 0;
-        //其它情况, 冲刺结束将纵向速度变成原先 1/2, 横向速度重置为 160*cos(radians/360*2*pi).
         if (dashDir.y >= 0)
         {
             speed = dashDir * EndDashSpeed;
         }
-        if (speed.y >= 0)
+        if (speed.y > 0)
         {
             speed.y *= EndDashUpMult;
         }
@@ -754,14 +735,17 @@ public class Player : MonoBehaviour
         return 0;
     }
 
-    public Vector2 GetAimVector()
+    public Vector2 GetAimVector(Facings defaultFacing = Facings.Right)
     {
-        if (MInput.Move == Vector2.zero)
+        var dir = MInput.Move;
+        if (dir == Vector2.zero)
         {
-            return Vector2.right * (float)facing;
+            return Vector2.right * (float)defaultFacing;
         }
-        var radians = MInput.Move.Radians();
-        return new Vector2(Mathf.Cos(radians), -Mathf.Sin(radians));
+        else
+        {
+            return new Vector2(Math.Sign(dir.x), Math.Sign(dir.y)).normalized;
+        }
     }
 
     /// <summary>
@@ -770,14 +754,14 @@ public class Player : MonoBehaviour
     /// <param name="originalSpeed"></param>
     /// <param name="angle"></param>
     /// <returns></returns>
-    private Vector2 newDashSpeed(Vector2 originalSpeed, float angle)
+    private Vector2 NewDashSpeed(Vector2 originalSpeed)
     {
-        var vec = DashSpeed * new Vector2((float)Math.Cos(getRadians(angle)), (float)-Math.Sin(getRadians(angle)));
-        if (originalSpeed.x * vec.x > 0f && Math.Abs(originalSpeed.x) > Math.Abs(vec.x))
+        var newSpeed = dashDir * DashSpeed;
+        if (originalSpeed.x * newSpeed.x > 0f && Mathf.Abs(originalSpeed.x) > Mathf.Abs(newSpeed.x))
         {
-            vec.x = originalSpeed.x;
+            newSpeed.x = originalSpeed.x;
         }
-        return vec;
+        return newSpeed;
     }
 
     private float getRadians(float angle)

@@ -12,7 +12,6 @@ namespace Assets.Scripts.Normal.Character
 
         public static float MoveX;
         public static float MoveY;
-        public static Vector2 Move;
 
         public static VirtualButton Jump;
         public static VirtualButton Dash;
@@ -20,6 +19,7 @@ namespace Assets.Scripts.Normal.Character
         public static VirtualButton Talk;
         public static VirtualButton CrouchDash;
 
+        public static Vector2 Move => new Vector2(MoveX, MoveY);
 
         private void Awake()
         {

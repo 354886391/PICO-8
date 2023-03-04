@@ -180,6 +180,8 @@ public class Player : MonoBehaviour
     private const float JumpThreshold = 4f;
     private const float JumpEndMult = 0.35f;
 
+
+    private const float WallJumpTime = 0.2f;
     private const float WallSpeedRetentionTime = .06f;
 
     #endregion
@@ -379,13 +381,17 @@ public class Player : MonoBehaviour
         {
             facing = (Facings)moveX;
         }
+
+        _movement.Move()
     }
-
-
 
     private float wallSpeedRetentionTimer; // If you hit a wall, start this timer. If coast is clear within this timer, retain h-speed
     private float wallSpeedRetained;
 
+    /// <summary>
+    /// 水平方向碰撞
+    /// </summary>
+    /// <param name="data"></param>
     private void OnCollideH(CollisionData data)
     {
         speed.x = 0;
@@ -394,7 +400,10 @@ public class Player : MonoBehaviour
             _machine.State = StHitSquash;
         }
     }
-
+    /// <summary>
+    /// 垂直方向碰撞
+    /// </summary>
+    /// <param name="data"></param>
     private void OnCollideV(CollisionData data)
     {
         speed.y = 0;
@@ -549,7 +558,11 @@ public class Player : MonoBehaviour
     /// </summary>
     private void WallJumpBegin(CharacterInput input)
     {
-
+        if (!onGround) return;
+        if (canJump && MInput.Jump.Pressed)
+        {
+            jumpTimer = WallJumpTime;
+        }
     }
 
     private void Jump2Begin()
@@ -648,46 +661,12 @@ public class Player : MonoBehaviour
             return StPickup;
         }
 
-        if (dashDir.y == 0)
+        if (MInput.Jump.Pressed)
         {
-            if (MInput.Jump.Pressed)
-            {
-                //SuperJump();
-                return StNormal;
-            }
+            //SuperJump();
+            return StNormal;
         }
-        if (dashDir.x == 0 && dashDir.y == -1)
-        {
-            if (MInput.Jump.Pressed)
-            {
-                //if (WallJumpCheck(1))
-                //{
-                //    //SuperWallJump(-1);
-                //    return StNormal;
-                //}
-                //else if (WallJumpCheck(-1))
-                //{
-                //    SuperWallJump(1);
-                //    return StNormal;
-                //}
-            }
-        }
-        else
-        {
-            if (MInput.Jump.Pressed)
-            {
-                //if (WallJumpCheck(1))
-                //{
-                //    WallJump(-1);
-                //    return StNormal;
-                //}
-                //else if (WallJumpCheck(-1))
-                //{
-                //    WallJump(1);
-                //    return StNormal;
-                //}
-            }
-        }
+
         return StDash;
     }
 
@@ -695,9 +674,8 @@ public class Player : MonoBehaviour
     private IEnumerator DashCoroutine()
     {
         yield return null;
-        //
+        // dash速度
         speed = NewDashSpeed(dashBeforeSpeed);
-        //Dash Slide
         //如果斜下冲冲刺到地面则会变成蹲姿、然后横向速度变成 1.2 倍.
         if (onGround && dashDir.x != 0 && dashDir.y < 0 && speed.y < 0)
         {
@@ -708,7 +686,7 @@ public class Player : MonoBehaviour
             Ducking = true; // 蹲姿
         }
         yield return DashTime;
-
+        //向上或水平冲刺
         if (dashDir.y >= 0)
         {
             speed = dashDir * EndDashSpeed;
@@ -718,21 +696,6 @@ public class Player : MonoBehaviour
             speed.y *= EndDashUpMult;
         }
         _machine.State = StNormal;
-    }
-
-    private void RedDashBegin()
-    {
-
-    }
-
-    private void RedDashEnd()
-    {
-
-    }
-
-    private int RedDashUpdate()
-    {
-        return 0;
     }
 
     public Vector2 GetAimVector(Facings defaultFacing = Facings.Right)
@@ -764,8 +727,4 @@ public class Player : MonoBehaviour
         return newSpeed;
     }
 
-    private float getRadians(float angle)
-    {
-        return angle / 180 * Mathf.PI;
-    }
 }

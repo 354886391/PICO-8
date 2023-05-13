@@ -381,12 +381,7 @@ public class Player : MonoBehaviour
         {
             facing = (Facings)moveX;
         }
-
-        _movement.Move()
     }
-
-    private float wallSpeedRetentionTimer; // If you hit a wall, start this timer. If coast is clear within this timer, retain h-speed
-    private float wallSpeedRetained;
 
     /// <summary>
     /// 水平方向碰撞
@@ -469,7 +464,7 @@ public class Player : MonoBehaviour
 
     private void NormalEnd()
     {
-        wallSpeedRetentionTimer = 0;
+
     }
 
     // idle / fall / gravity / run
@@ -478,8 +473,9 @@ public class Player : MonoBehaviour
         // Vertical
         Falling(Time.deltaTime);
         Graviting(Time.deltaTime);
+        // horizontal
         Running(Time.deltaTime);
-
+        // 
         JumpUpdate(Time.deltaTime);
 
         if (canDash && MInput.Dash.Pressed)

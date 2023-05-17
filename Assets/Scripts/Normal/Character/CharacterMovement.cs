@@ -213,14 +213,14 @@ public class CharacterMovement : MonoBehaviour
             //    new { color = "green", DoubleJumpState = jumpSteps > 1 },
             //    new { color = "blue", Speed = speed });
 
-            //Player.state.jumping = isJumping;
-            //Player.state.wallJumping = isWallJumping;
-            //Player.state.doubleJumping = isDoubleJumping;
+            //Player.StButton.jumping = isJumping;
+            //Player.StButton.wallJumping = isWallJumping;
+            //Player.StButton.doubleJumping = isDoubleJumping;
         }
 
-        //Player.state.rising = isRising && isAirborne;
-        //Player.state.falling = !isRising && isAirborne;
-        //Player.state.wallSliding = isWallSliding && isAirborne;
+        //Player.StButton.rising = isRising && isAirborne;
+        //Player.StButton.falling = !isRising && isAirborne;
+        //Player.StButton.wallSliding = isWallSliding && isAirborne;
     }
 
     private void JumpBegin(CharacterInput input)

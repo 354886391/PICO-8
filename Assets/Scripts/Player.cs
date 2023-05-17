@@ -937,7 +937,7 @@ namespace Celeste
             //Swimming
             if (StateMachine.State == StSwim)
             {
-                //Stay at water surface
+                //Check at water surface
                 if (Speed.Y < 0 && Speed.Y >= SwimMaxRise)
                 {
                     while (!SwimCheck())
@@ -1060,7 +1060,7 @@ namespace Celeste
             UpdateChaserStates();
             UpdateHair(true);
 
-            //Sounds on ducking state change
+            //Sounds on ducking StButton change
             if (wasDucking != Ducking)
             {
                 wasDucking = Ducking;
@@ -4434,7 +4434,7 @@ namespace Celeste
                 else
                     return;
 
-                throw new Exception("Could not get out of solids when exiting Star Fly State!");
+                throw new Exception("Could not get out of solids when exiting Star Fly StButton!");
             }
         }
 

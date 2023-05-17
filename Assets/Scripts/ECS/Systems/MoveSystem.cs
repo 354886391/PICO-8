@@ -30,7 +30,7 @@ public class MoveSystem : MonoBehaviour
     private void GravityUpdate(StateComponent state, MoveComponent move, InputComponent input, float deltaTime)
     {
         var maxFall = move.MaxFall;
-        //if (state.HitWall && input.MoveX == (int)state.Facing)
+        //if (StButton.HitWall && input.MoveX == (int)StButton.Facing)
         //{
         //    maxFall = Mathf.MoveTowards(maxFall, climb.SlipSpeed, climb.SlideAccel * deltaTime);
         //}

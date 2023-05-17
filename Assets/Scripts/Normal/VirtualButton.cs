@@ -1,80 +1,70 @@
 using UnityEngine;
 
 
-
 public class VirtualButton : MonoBehaviour
 {
 
-    private enum state
+    private enum StButton
     {
         None,
-        /// <summary>
-        /// Pressed
-        /// </summary>
-        Enter,
-        /// <summary>
-        /// Check
-        /// </summary>
-        Stay,
-        /// <summary>
-        /// Released
-        /// </summary>
-        Exit,
+        Pressed,
+        Check,
+        Released,
     }
 
     [SerializeField]
-    private bool _previous;
-    private state _state;
+    private bool _lastValue;    
+    private float _bufferTime;      // 缓存时间
+    private float _bufferCounter;   // 缓存计时
 
-    private float _bufferTime;
-    private float _bufferCounter;
+    private StButton _state;
 
     public bool Value
     {
-        private get { return _previous; }
+        private get { return _lastValue; }
         set
         {
             // 进入条件 true : false
-            if (_previous && !value)         // release
+            if (_lastValue && !value)        // release(松开瞬间)
             {
-                _state = state.Exit;
-            }
-            // 进入条件 false : true
-            if (!_previous && value)        // pressed
-            {
-                _bufferCounter = _bufferTime;
-                _state = state.Enter;
+                _state = StButton.Released;
             }
             // 进入条件 true : true
-            else if (_previous && value)    // check
+            else if (_lastValue && value)    // check
             {
                 _bufferCounter -= Time.deltaTime;
-                _state = state.Stay;
+                _state = StButton.Check;
+            }
+            // 进入条件 false : true
+            else if (!_lastValue && value)   // pressed(按下瞬间)
+            {
+                _bufferCounter = _bufferTime;
+                _state = StButton.Pressed;
             }
             // 进入条件 false : false
             else
             {
                 _bufferCounter = 0;
-                _state = state.None;
+                _state = StButton.None;
             }
-            _previous = value;
+            _lastValue = value;
         }
     }
 
     /// <summary>
     /// 持续按下
     /// </summary>
-    public bool Check => _state == state.Stay;
+    public bool Check => _state == StButton.Check;
 
     /// <summary>
     /// 按钮按下
     /// </summary>
-    public bool Pressed => _bufferCounter > 0 || _state == state.Enter;
+    public bool Pressed => _bufferCounter > 0 || _state == StButton.Pressed;
 
     /// <summary>
     /// 按钮抬起
     /// </summary>
-    public bool Released => _state == state.Exit;
+    public bool Released => _state == StButton.Released;
 
     public VirtualButton(float bufferTime)
     {

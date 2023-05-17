@@ -39,7 +39,7 @@ public class CharacterManager : MonoBehaviour
         jump.OnUpdate(stateComponent, jumpComponent, inputComponent, Time.deltaTime);
         dash.OnUpdate(stateComponent, dashComponent, inputComponent, Time.deltaTime);
         climb.OnUpdate(stateComponent, climbComponent, inputComponent, Time.deltaTime);
-        //state.MoveToPosition(stateComponent, Time.deltaTime);
+        //StButton.MoveToPosition(stateComponent, Time.deltaTime);
     }
 
 }

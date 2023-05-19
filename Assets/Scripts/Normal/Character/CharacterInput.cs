@@ -4,15 +4,15 @@ using UnityEngine;
 public enum PressState
 {
     /// <summary>
-    /// Pressed
+    /// Press
     /// </summary>
     Enter,
     /// <summary>
-    /// Check
+    /// Stay
     /// </summary>
     Stay,
     /// <summary>
-    /// Released
+    /// Release
     /// </summary>
     Exit,
 }

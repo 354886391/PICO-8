@@ -937,7 +937,7 @@ namespace Celeste
             //Swimming
             if (StateMachine.State == StSwim)
             {
-                //Check at water surface
+                //Stay at water surface
                 if (Speed.Y < 0 && Speed.Y >= SwimMaxRise)
                 {
                     while (!SwimCheck())

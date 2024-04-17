@@ -975,7 +975,7 @@ TextureImporter:
       213: 21300646
     second: atlas_a_161
   externalObjects: {}
-  serializedVersion: 11
+  serializedVersion: 12
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -992,10 +992,12 @@ TextureImporter:
     externalNormalMap: 0
     heightScale: 0.25
     normalMapFilter: 0
+    flipGreenChannel: 0
   isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
+  ignoreMipmapLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -1005,8 +1007,8 @@ TextureImporter:
   textureSettings:
     serializedVersion: 2
     filterMode: 0
-    aniso: -1
-    mipBias: -100
+    aniso: 1
+    mipBias: 0
     wrapU: 1
     wrapV: 1
     wrapW: 1
@@ -1034,6 +1036,8 @@ TextureImporter:
   textureFormatSet: 0
   ignorePngGamma: 0
   applyGammaDecoding: 1
+  swizzle: 50462976
+  cookieLightType: 1
   platformSettings:
   - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
@@ -1045,6 +1049,7 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
+    ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 1
   - serializedVersion: 3
@@ -1057,6 +1062,7 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
+    ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 1
   - serializedVersion: 3
@@ -1069,6 +1075,33 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
+    buildTarget: Server
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 4
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 4
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 1
   spriteSheet:
@@ -4486,9 +4519,171 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-  spritePackingTag: 
+    nameFileIdTable:
+      atlas_a_0: 21300324
+      atlas_a_1: 21300326
+      atlas_a_10: 21300344
+      atlas_a_100: 21300524
+      atlas_a_101: 21300526
+      atlas_a_102: 21300528
+      atlas_a_103: 21300530
+      atlas_a_104: 21300532
+      atlas_a_105: 21300534
+      atlas_a_106: 21300536
+      atlas_a_107: 21300538
+      atlas_a_108: 21300540
+      atlas_a_109: 21300542
+      atlas_a_11: 21300346
+      atlas_a_110: 21300544
+      atlas_a_111: 21300546
+      atlas_a_112: 21300548
+      atlas_a_113: 21300550
+      atlas_a_114: 21300552
+      atlas_a_115: 21300554
+      atlas_a_116: 21300556
+      atlas_a_117: 21300558
+      atlas_a_118: 21300560
+      atlas_a_119: 21300562
+      atlas_a_12: 21300348
+      atlas_a_120: 21300564
+      atlas_a_121: 21300566
+      atlas_a_122: 21300568
+      atlas_a_123: 21300570
+      atlas_a_124: 21300572
+      atlas_a_125: 21300574
+      atlas_a_126: 21300576
+      atlas_a_127: 21300578
+      atlas_a_128: 21300580
+      atlas_a_129: 21300582
+      atlas_a_13: 21300350
+      atlas_a_130: 21300584
+      atlas_a_131: 21300586
+      atlas_a_132: 21300588
+      atlas_a_133: 21300590
+      atlas_a_134: 21300592
+      atlas_a_135: 21300594
+      atlas_a_136: 21300596
+      atlas_a_137: 21300598
+      atlas_a_138: 21300600
+      atlas_a_139: 21300602
+      atlas_a_14: 21300352
+      atlas_a_140: 21300604
+      atlas_a_141: 21300606
+      atlas_a_142: 21300608
+      atlas_a_143: 21300610
+      atlas_a_144: 21300612
+      atlas_a_145: 21300614
+      atlas_a_146: 21300616
+      atlas_a_147: 21300618
+      atlas_a_148: 21300620
+      atlas_a_149: 21300622
+      atlas_a_15: 21300354
+      atlas_a_150: 21300624
+      atlas_a_151: 21300626
+      atlas_a_152: 21300628
+      atlas_a_153: 21300630
+      atlas_a_154: 21300632
+      atlas_a_155: 21300634
+      atlas_a_156: 21300636
+      atlas_a_157: 21300638
+      atlas_a_158: 21300640
+      atlas_a_159: 21300642
+      atlas_a_16: 21300356
+      atlas_a_160: 21300644
+      atlas_a_161: 21300646
+      atlas_a_17: 21300358
+      atlas_a_18: 21300360
+      atlas_a_19: 21300362
+      atlas_a_2: 21300328
+      atlas_a_20: 21300364
+      atlas_a_21: 21300366
+      atlas_a_22: 21300368
+      atlas_a_23: 21300370
+      atlas_a_24: 21300372
+      atlas_a_25: 21300374
+      atlas_a_26: 21300376
+      atlas_a_27: 21300378
+      atlas_a_28: 21300380
+      atlas_a_29: 21300382
+      atlas_a_3: 21300330
+      atlas_a_30: 21300384
+      atlas_a_31: 21300386
+      atlas_a_32: 21300388
+      atlas_a_33: 21300390
+      atlas_a_34: 21300392
+      atlas_a_35: 21300394
+      atlas_a_36: 21300396
+      atlas_a_37: 21300398
+      atlas_a_38: 21300400
+      atlas_a_39: 21300402
+      atlas_a_4: 21300332
+      atlas_a_40: 21300404
+      atlas_a_41: 21300406
+      atlas_a_42: 21300408
+      atlas_a_43: 21300410
+      atlas_a_44: 21300412
+      atlas_a_45: 21300414
+      atlas_a_46: 21300416
+      atlas_a_47: 21300418
+      atlas_a_48: 21300420
+      atlas_a_49: 21300422
+      atlas_a_5: 21300334
+      atlas_a_50: 21300424
+      atlas_a_51: 21300426
+      atlas_a_52: 21300428
+      atlas_a_53: 21300430
+      atlas_a_54: 21300432
+      atlas_a_55: 21300434
+      atlas_a_56: 21300436
+      atlas_a_57: 21300438
+      atlas_a_58: 21300440
+      atlas_a_59: 21300442
+      atlas_a_6: 21300336
+      atlas_a_60: 21300444
+      atlas_a_61: 21300446
+      atlas_a_62: 21300448
+      atlas_a_63: 21300450
+      atlas_a_64: 21300452
+      atlas_a_65: 21300454
+      atlas_a_66: 21300456
+      atlas_a_67: 21300458
+      atlas_a_68: 21300460
+      atlas_a_69: 21300462
+      atlas_a_7: 21300338
+      atlas_a_70: 21300464
+      atlas_a_71: 21300466
+      atlas_a_72: 21300468
+      atlas_a_73: 21300470
+      atlas_a_74: 21300472
+      atlas_a_75: 21300474
+      atlas_a_76: 21300476
+      atlas_a_77: 21300478
+      atlas_a_78: 21300480
+      atlas_a_79: 21300482
+      atlas_a_8: 21300340
+      atlas_a_80: 21300484
+      atlas_a_81: 21300486
+      atlas_a_82: 21300488
+      atlas_a_83: 21300490
+      atlas_a_84: 21300492
+      atlas_a_85: 21300494
+      atlas_a_86: 21300496
+      atlas_a_87: 21300498
+      atlas_a_88: 21300500
+      atlas_a_89: 21300502
+      atlas_a_9: 21300342
+      atlas_a_90: 21300504
+      atlas_a_91: 21300506
+      atlas_a_92: 21300508
+      atlas_a_93: 21300510
+      atlas_a_94: 21300512
+      atlas_a_95: 21300514
+      atlas_a_96: 21300516
+      atlas_a_97: 21300518
+      atlas_a_98: 21300520
+      atlas_a_99: 21300522
+  mipmapLimitGroupName: 
   pSDRemoveMatte: 0
-  pSDShowRemoveMatteOption: 1
   userData: 
   assetBundleName: 
   assetBundleVariant: 
